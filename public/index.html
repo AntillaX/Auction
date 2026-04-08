@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>AUCTION</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- Lobby Screen -->
+    <div id="lobby-screen" class="screen active">
+      <div class="lobby-container">
+        <h1 class="game-title">AUCTION</h1>
+        <p class="game-subtitle">Bid. Bluff. Win.</p>
+
+        <div class="lobby-form">
+          <input type="text" id="player-name" placeholder="Your name" maxlength="16" autocomplete="off" spellcheck="false">
+
+          <button id="create-btn" class="btn btn-primary">Create Game</button>
+
+          <div class="divider"><span>or join a game</span></div>
+
+          <div class="join-row">
+            <input type="text" id="room-code-input" placeholder="CODE" maxlength="4" autocomplete="off" spellcheck="false">
+            <button id="join-btn" class="btn btn-secondary">Join</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Room Screen -->
+    <div id="room-screen" class="screen">
+      <div class="room-container">
+        <h2 class="room-title">Room</h2>
+        <div id="room-code-display" class="room-code"></div>
+        <p class="room-hint">Share this code with other players</p>
+
+        <div id="players-list" class="players-list"></div>
+
+        <div class="room-actions">
+          <button id="start-btn" class="btn btn-primary hidden">Start Game</button>
+          <p id="waiting-msg" class="waiting-msg">Waiting for host to start...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen">
+      <!-- Study Phase Overlay -->
+      <div id="study-overlay" class="study-overlay hidden">
+        <div class="study-content">
+          <h2>Study the Deck</h2>
+          <p>All 25 cards revealed in order. Plan your strategy.</p>
+          <div id="study-deck" class="study-deck"></div>
+          <button id="begin-auctions-btn" class="btn btn-primary hidden">Begin Auctions</button>
+          <p id="study-waiting" class="waiting-msg">Waiting for host to begin...</p>
+        </div>
+      </div>
+
+      <!-- Opponents Bar -->
+      <div id="opponents-bar" class="opponents-bar"></div>
+
+      <!-- Auction Area -->
+      <div id="auction-area" class="auction-area">
+        <div id="round-info" class="round-info"></div>
+        <div id="current-card-container" class="current-card-container">
+          <div id="current-card" class="card card-large"></div>
+        </div>
+        <div id="bid-info" class="bid-info">
+          <div id="bid-status" class="bid-status">Waiting...</div>
+        </div>
+        <div id="timer-container" class="timer-container">
+          <div id="timer-bar" class="timer-bar"></div>
+          <span id="timer-text" class="timer-text"></span>
+        </div>
+      </div>
+
+      <!-- Remaining Deck -->
+      <div id="deck-area" class="deck-area">
+        <div class="deck-label">Upcoming</div>
+        <div id="deck-sequence" class="deck-sequence"></div>
+      </div>
+
+      <!-- Player Controls (sticky bottom) -->
+      <div id="player-controls" class="player-controls">
+        <div id="my-info" class="my-info">
+          <div class="my-stat">
+            <span class="stat-label">Budget</span>
+            <span id="my-budget" class="stat-value budget-value">$1,000</span>
+          </div>
+          <div class="my-stat">
+            <span class="stat-label">Score</span>
+            <span id="my-score" class="stat-value score-value">0 / 655</span>
+          </div>
+        </div>
+        <div id="bid-controls" class="bid-controls">
+          <div class="bid-buttons">
+            <button id="bid-min" class="btn btn-bid" data-action="min">Min $50</button>
+            <button id="bid-plus10" class="btn btn-bid" data-action="+10">+$10</button>
+            <button id="bid-plus50" class="btn btn-bid" data-action="+50">+$50</button>
+            <button id="bid-plus100" class="btn btn-bid" data-action="+100">+$100</button>
+          </div>
+          <div class="custom-bid-row">
+            <span class="custom-label">Custom:</span>
+            <input type="number" id="custom-bid-input" step="10" min="50" placeholder="Amount">
+            <button id="custom-bid-btn" class="btn btn-bid btn-custom-go">Bid</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameover-screen" class="screen">
+      <div class="gameover-container">
+        <h2 id="winner-announce" class="winner-title"></h2>
+        <p id="win-reason" class="win-reason"></p>
+        <div id="final-scores" class="final-scores"></div>
+        <button id="play-again-btn" class="btn btn-primary hidden">Play Again</button>
+        <button id="back-to-lobby-btn" class="btn btn-secondary">Leave</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- Reconnecting Overlay -->
+  <div id="reconnect-overlay" class="reconnect-overlay hidden">
+    <div class="reconnect-content">
+      <div class="spinner"></div>
+      <p>Reconnecting...</p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
