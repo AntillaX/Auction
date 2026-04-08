@@ -7,20 +7,21 @@ let ws = null;
 let myPlayerId = null;
 let roomCode = null;
 let isHost = false;
-let gameState = null;   // full state from server
+let gameState = null;
 let localTimerStart = 0;
 let localTimerDuration = 0;
 let timerRaf = null;
 let reconnectAttempts = 0;
 let reconnectTimeout = null;
 let toastTimeout = null;
+let resultBannerTimeout = null;
+let lastCardWonBy = null;
 
 // ── DOM refs ──
 const $ = (id) => document.getElementById(id);
 
 // ── Init ──
 document.addEventListener('DOMContentLoaded', () => {
-  // Lobby buttons
   $('create-btn').addEventListener('click', createRoom);
   $('join-btn').addEventListener('click', joinRoom);
   $('player-name').addEventListener('keydown', (e) => {
@@ -29,14 +30,9 @@ document.addEventListener('DOMContentLoaded', () => {
   $('room-code-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') joinRoom();
   });
-
-  // Room buttons
   $('start-btn').addEventListener('click', () => send({ type: 'start_game' }));
-
-  // Study phase
   $('begin-auctions-btn').addEventListener('click', () => send({ type: 'start_auctions' }));
 
-  // Bid buttons
   $('bid-min').addEventListener('click', () => placeBidAction('min'));
   $('bid-plus10').addEventListener('click', () => placeBidAction('+10'));
   $('bid-plus50').addEventListener('click', () => placeBidAction('+50'));
@@ -46,18 +42,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') placeCustomBid();
   });
 
-  // Game over
   $('play-again-btn').addEventListener('click', () => send({ type: 'play_again' }));
   $('back-to-lobby-btn').addEventListener('click', backToLobby);
 
-  // Room code copy
   $('room-code-display').addEventListener('click', () => {
     if (roomCode) {
       navigator.clipboard.writeText(roomCode).then(() => showToast('Code copied!', 'success'));
     }
   });
 
-  // Try reconnect from session
   const savedRoom = sessionStorage.getItem('auction_room');
   const savedPlayer = sessionStorage.getItem('auction_player');
   if (savedRoom && savedPlayer) {
@@ -82,18 +75,12 @@ function connect(onOpen) {
 
   ws.onmessage = (event) => {
     let msg;
-    try {
-      msg = JSON.parse(event.data);
-    } catch {
-      return;
-    }
+    try { msg = JSON.parse(event.data); } catch { return; }
     handleMessage(msg);
   };
 
   ws.onclose = () => {
-    if (roomCode && myPlayerId) {
-      attemptReconnect();
-    }
+    if (roomCode && myPlayerId) attemptReconnect();
   };
 
   ws.onerror = () => {};
@@ -145,7 +132,11 @@ function handleMessage(msg) {
 
     case 'reconnected':
       isHost = msg.hostId === myPlayerId;
-      if (msg.gameState && msg.gameState !== 'study') {
+      if (msg.gameState === 'finished') {
+        gameState = msg;
+        renderGameOver();
+        showScreen('gameover-screen');
+      } else if (msg.gameState && msg.gameState !== 'study') {
         gameState = msg;
         renderGame();
         showScreen('game-screen');
@@ -159,10 +150,6 @@ function handleMessage(msg) {
       } else if (msg.roomState === 'lobby') {
         renderRoom(msg);
         showScreen('room-screen');
-      } else if (msg.gameState === 'finished') {
-        gameState = msg;
-        renderGameOver();
-        showScreen('gameover-screen');
       }
       break;
 
@@ -174,6 +161,8 @@ function handleMessage(msg) {
 
     case 'new_auction':
       gameState = msg;
+      lastCardWonBy = null;
+      hideResultBanner();
       hideStudyOverlay();
       renderGame();
       startLocalTimer(msg.timerRemaining, msg.timerStartedAt);
@@ -183,27 +172,33 @@ function handleMessage(msg) {
       gameState = msg;
       renderGame();
       startLocalTimer(msg.timerRemaining, msg.timerStartedAt);
-      // Pulse the bidder's card
       highlightBidder(msg.playerId);
       break;
 
-    case 'card_won':
+    case 'card_won': {
       gameState = msg;
-      animateCardWon(msg.playerId);
-      renderGame();
+      lastCardWonBy = msg.playerId;
       stopTimer();
+      animateCardWon(msg.playerId);
+      showResultBanner('won', msg.playerName, msg.amount, msg.cardValue, msg.playerId === myPlayerId);
+      // Delay render so card animation plays first
+      setTimeout(() => renderGame(), 300);
       break;
+    }
 
     case 'card_passed':
       gameState = msg;
-      animateCardPassed();
-      renderGame();
+      lastCardWonBy = null;
       stopTimer();
+      animateCardPassed();
+      showResultBanner('passed', null, null, msg.cardValue, false);
+      setTimeout(() => renderGame(), 300);
       break;
 
     case 'game_over':
       gameState = msg;
       stopTimer();
+      hideResultBanner();
       renderGameOver();
       showScreen('gameover-screen');
       break;
@@ -220,37 +215,28 @@ function showScreen(id) {
   $(id).classList.add('active');
 }
 
-// ── Lobby Actions ──
+// ── Lobby ──
 function createRoom() {
   const name = $('player-name').value.trim() || 'Player';
-  connect(() => {
-    send({ type: 'create_room', playerName: name });
-  });
+  connect(() => { send({ type: 'create_room', playerName: name }); });
 }
 
 function joinRoom() {
   const name = $('player-name').value.trim() || 'Player';
   const code = $('room-code-input').value.trim().toUpperCase();
-  if (!code || code.length < 4) {
-    showToast('Enter a 4-letter room code');
-    return;
-  }
-  connect(() => {
-    send({ type: 'join_room', playerName: name, roomCode: code });
-  });
+  if (!code || code.length < 4) { showToast('Enter a 4-letter room code'); return; }
+  connect(() => { send({ type: 'join_room', playerName: name, roomCode: code }); });
 }
 
 function backToLobby() {
   sessionStorage.removeItem('auction_room');
   sessionStorage.removeItem('auction_player');
-  roomCode = null;
-  myPlayerId = null;
-  gameState = null;
+  roomCode = null; myPlayerId = null; gameState = null;
   if (ws) ws.close();
   showScreen('lobby-screen');
 }
 
-// ── Room Rendering ──
+// ── Room ──
 function renderRoom(state) {
   $('room-code-display').textContent = state.roomCode || roomCode;
   const list = $('players-list');
@@ -268,7 +254,6 @@ function renderRoom(state) {
     list.appendChild(slot);
   });
 
-  // Show/hide start button
   const startBtn = $('start-btn');
   const waitMsg = $('waiting-msg');
   if (state.hostId === myPlayerId) {
@@ -285,14 +270,13 @@ function renderRoom(state) {
 function showStudyPhase() {
   const overlay = $('study-overlay');
   overlay.classList.remove('hidden');
-
   const deckDiv = $('study-deck');
   deckDiv.innerHTML = '';
 
   const deck = gameState.originalDeck || gameState.deck || [];
   deck.forEach((val, i) => {
     const card = createCardElement(val, 'card-small');
-    card.style.animationDelay = `${i * 30}ms`;
+    card.style.animationDelay = `${i * 60}ms`;
     deckDiv.appendChild(card);
   });
 
@@ -309,10 +293,41 @@ function hideStudyOverlay() {
   $('study-overlay').classList.add('hidden');
 }
 
+// ── Result Banner ──
+function showResultBanner(type, playerName, amount, cardValue, isMe) {
+  hideResultBanner();
+  const banner = $('result-banner');
+  const inner = $('result-banner-inner');
+
+  if (type === 'won') {
+    const who = isMe ? 'You won' : `${esc(playerName)} won`;
+    inner.className = 'result-banner-inner won';
+    inner.innerHTML = `
+      <div class="result-title won">${who} the ${cardValue}!</div>
+      <div class="result-detail">for <span class="result-price">$${amount.toLocaleString()}</span></div>
+    `;
+  } else {
+    inner.className = 'result-banner-inner passed';
+    inner.innerHTML = `
+      <div class="result-title passed">No bids</div>
+      <div class="result-detail">The ${cardValue} goes to the discard pile</div>
+    `;
+  }
+
+  banner.classList.remove('hidden');
+
+  if (resultBannerTimeout) clearTimeout(resultBannerTimeout);
+  resultBannerTimeout = setTimeout(() => hideResultBanner(), 2200);
+}
+
+function hideResultBanner() {
+  $('result-banner').classList.add('hidden');
+  if (resultBannerTimeout) { clearTimeout(resultBannerTimeout); resultBannerTimeout = null; }
+}
+
 // ── Game Rendering ──
 function renderGame() {
   if (!gameState) return;
-
   renderOpponents();
   renderAuctionArea();
   renderDeckSequence();
@@ -330,20 +345,22 @@ function renderOpponents() {
 
     const card = document.createElement('div');
     let cls = 'opponent-card';
-    if (gameState.highestBidderId === p.id) cls += ' is-winning';
+    if (gameState.highestBidderId === p.id && gameState.gameState === 'auction') cls += ' is-winning';
     if (p.budget < 50) cls += ' is-broke';
     if (!p.connected) cls += ' disconnected';
+    if (lastCardWonBy === p.id) cls += ' just-won-card';
     card.className = cls;
     card.id = `opponent-${p.id}`;
 
-    const budgetPct = Math.round((p.budget / 1000) * 100);
+    const scorePct = Math.min(100, Math.round((p.score / 655) * 100));
+    const progressCls = scorePct >= 70 ? 'high' : scorePct >= 40 ? 'mid' : 'low';
     card.innerHTML = `
       <span class="opponent-name">${esc(p.name)}</span>
       <span class="opponent-budget">$${p.budget.toLocaleString()}</span>
       <span class="opponent-score">${p.score} pts</span>
-      <span class="opponent-cards-won">${p.cardsWon.length} cards</span>
-      <div class="opponent-budget-bar">
-        <div class="opponent-budget-fill" style="width:${budgetPct}%"></div>
+      <span class="opponent-cards-won">${p.cardsWon.length} card${p.cardsWon.length !== 1 ? 's' : ''}</span>
+      <div class="opponent-progress">
+        <div class="opponent-progress-fill ${progressCls}" style="width:${scorePct}%"></div>
       </div>
     `;
     bar.appendChild(card);
@@ -355,16 +372,24 @@ function renderAuctionArea() {
 
   // Round info
   $('round-info').textContent = gameState.roundNumber
-    ? `Round ${gameState.roundNumber}${gameState.inDiscardPhase ? ' (Discard)' : ''}`
+    ? `Round ${gameState.roundNumber}${gameState.inDiscardPhase ? ' \u2014 Discard' : ''}`
     : '';
 
   // Current card
   const container = $('current-card-container');
-  container.innerHTML = '';
   if (gameState.currentCard && (state === 'auction' || state === 'between_rounds')) {
-    const card = createCardElement(gameState.currentCard, 'card-large');
-    card.id = 'current-card';
-    container.appendChild(card);
+    // Only rebuild if card changed or doesn't exist
+    const existing = container.querySelector('.card-large');
+    const existingVal = existing ? existing.getAttribute('data-value') : null;
+    if (existingVal !== String(gameState.currentCard)) {
+      container.innerHTML = '';
+      const card = createCardElement(gameState.currentCard, 'card-large');
+      card.id = 'current-card';
+      card.classList.add('card-enter');
+      container.appendChild(card);
+    }
+  } else if (state !== 'between_rounds') {
+    container.innerHTML = '';
   }
 
   // Bid info
@@ -380,10 +405,10 @@ function renderAuctionArea() {
         </div>
       `;
     } else {
-      bidStatus.innerHTML = `<span style="color:var(--text-secondary)">No bids yet &mdash; minimum $50</span>`;
+      bidStatus.innerHTML = `<span class="no-bids-prompt">No bids yet &mdash; minimum $50</span>`;
     }
   } else if (state === 'between_rounds') {
-    // Keep showing last state
+    // Keep showing last bid state
   } else {
     bidStatus.innerHTML = '';
   }
@@ -394,15 +419,14 @@ function renderDeckSequence() {
   container.innerHTML = '';
 
   const remaining = gameState.remainingCards || [];
+  const label = $('deck-area').querySelector('.deck-label');
+
   if (remaining.length === 0 && gameState.discardPile && gameState.discardPile.length > 0) {
-    // Show discard pile if no more main cards
-    const label = $('deck-area').querySelector('.deck-label');
-    if (label) label.textContent = 'Discard Pile';
+    if (label) label.textContent = `Discard (${gameState.discardPile.length})`;
     gameState.discardPile.forEach((val) => {
       container.appendChild(createCardElement(val, 'card-small'));
     });
   } else {
-    const label = $('deck-area').querySelector('.deck-label');
     if (label) label.textContent = `Upcoming (${remaining.length})`;
     remaining.forEach((val) => {
       container.appendChild(createCardElement(val, 'card-small'));
@@ -414,8 +438,16 @@ function renderMyInfo() {
   const me = getMyPlayer();
   if (!me) return;
 
-  $('my-budget').textContent = `$${me.budget.toLocaleString()}`;
+  const budgetEl = $('my-budget');
+  budgetEl.textContent = `$${me.budget.toLocaleString()}`;
+  budgetEl.className = 'stat-value budget-value';
+  if (me.budget === 0) budgetEl.classList.add('broke');
+  else if (me.budget < 100) budgetEl.classList.add('low-budget');
+
   $('my-score').textContent = `${me.score} / 655`;
+
+  const scorePct = Math.min(100, Math.round((me.score / 655) * 100));
+  $('my-score-fill').style.width = `${scorePct}%`;
 }
 
 function updateBidControls() {
@@ -424,27 +456,37 @@ function updateBidControls() {
   const minBid = gameState.minimumBid || 50;
   const canBid = isAuction && me && me.budget >= minBid && gameState.highestBidderId !== myPlayerId;
 
-  // Update button labels and states
   const btnMin = $('bid-min');
   const btn10 = $('bid-plus10');
   const btn50 = $('bid-plus50');
   const btn100 = $('bid-plus100');
 
-  btnMin.textContent = `$${minBid}`;
-  btnMin.disabled = !canBid;
-
   const plus10 = gameState.highestBid > 0 ? gameState.highestBid + 10 : 50;
   const plus50 = gameState.highestBid > 0 ? gameState.highestBid + 50 : 100;
   const plus100 = gameState.highestBid > 0 ? gameState.highestBid + 100 : 150;
 
-  btn10.textContent = `$${plus10}`;
-  btn10.disabled = !canBid || !me || me.budget < plus10;
+  if (isAuction && gameState.highestBidderId === myPlayerId) {
+    btnMin.textContent = 'Winning!';
+    btnMin.disabled = true;
+    btn10.textContent = `$${plus10}`;
+    btn10.disabled = true;
+    btn50.textContent = `$${plus50}`;
+    btn50.disabled = true;
+    btn100.textContent = `$${plus100}`;
+    btn100.disabled = true;
+  } else {
+    btnMin.textContent = `$${minBid}`;
+    btnMin.disabled = !canBid;
 
-  btn50.textContent = `$${plus50}`;
-  btn50.disabled = !canBid || !me || me.budget < plus50;
+    btn10.textContent = `$${plus10}`;
+    btn10.disabled = !canBid || !me || me.budget < plus10;
 
-  btn100.textContent = `$${plus100}`;
-  btn100.disabled = !canBid || !me || me.budget < plus100;
+    btn50.textContent = `$${plus50}`;
+    btn50.disabled = !canBid || !me || me.budget < plus50;
+
+    btn100.textContent = `$${plus100}`;
+    btn100.disabled = !canBid || !me || me.budget < plus100;
+  }
 
   const customInput = $('custom-bid-input');
   const customBtn = $('custom-bid-btn');
@@ -452,12 +494,6 @@ function updateBidControls() {
   customInput.max = me ? me.budget : 0;
   customInput.disabled = !isAuction || !me || me.budget < minBid;
   customBtn.disabled = !isAuction || !me || me.budget < minBid;
-
-  // If we're the highest bidder, show that on the min button
-  if (isAuction && gameState.highestBidderId === myPlayerId) {
-    btnMin.textContent = 'Winning!';
-    btnMin.disabled = true;
-  }
 }
 
 // ── Bid Actions ──
@@ -465,24 +501,13 @@ function placeBidAction(action) {
   if (!gameState) return;
   const minBid = gameState.minimumBid || 50;
   let amount;
-
   switch (action) {
-    case 'min':
-      amount = minBid;
-      break;
-    case '+10':
-      amount = gameState.highestBid > 0 ? gameState.highestBid + 10 : 50;
-      break;
-    case '+50':
-      amount = gameState.highestBid > 0 ? gameState.highestBid + 50 : 100;
-      break;
-    case '+100':
-      amount = gameState.highestBid > 0 ? gameState.highestBid + 100 : 150;
-      break;
+    case 'min': amount = minBid; break;
+    case '+10': amount = gameState.highestBid > 0 ? gameState.highestBid + 10 : 50; break;
+    case '+50': amount = gameState.highestBid > 0 ? gameState.highestBid + 50 : 100; break;
+    case '+100': amount = gameState.highestBid > 0 ? gameState.highestBid + 100 : 150; break;
   }
-
   if (amount) {
-    // Round to nearest 10
     amount = Math.ceil(amount / 10) * 10;
     send({ type: 'place_bid', amount });
   }
@@ -491,11 +516,7 @@ function placeBidAction(action) {
 function placeCustomBid() {
   const input = $('custom-bid-input');
   let amount = parseInt(input.value, 10);
-  if (isNaN(amount) || amount <= 0) {
-    showToast('Enter a valid bid amount');
-    return;
-  }
-  // Round to nearest $10
+  if (isNaN(amount) || amount <= 0) { showToast('Enter a valid bid amount'); return; }
   amount = Math.round(amount / 10) * 10;
   if (amount < 50) amount = 50;
   send({ type: 'place_bid', amount });
@@ -505,13 +526,10 @@ function placeCustomBid() {
 // ── Timer ──
 function startLocalTimer(serverRemaining, serverStartedAt) {
   stopTimer();
-
-  // Calculate how much time has already elapsed since the server started the timer
   const elapsed = Date.now() - serverStartedAt;
   const remaining = Math.max(0, serverRemaining - elapsed);
   localTimerDuration = serverRemaining;
   localTimerStart = Date.now() - (serverRemaining - remaining);
-
   tickTimer();
 }
 
@@ -533,18 +551,26 @@ function tickTimer() {
   else color = 'var(--danger)';
   timerBar.style.setProperty('--timer-color', color);
 
+  // Critical pulse in last 3 seconds
+  if (remaining <= 3000 && remaining > 0) {
+    timerBar.classList.add('timer-critical');
+    timerText.classList.add('timer-critical-text');
+  } else {
+    timerBar.classList.remove('timer-critical');
+    timerText.classList.remove('timer-critical-text');
+  }
+
   if (remaining > 0) {
     timerRaf = requestAnimationFrame(tickTimer);
   } else {
     timerText.textContent = '0.0s';
+    timerBar.classList.remove('timer-critical');
+    timerText.classList.remove('timer-critical-text');
   }
 }
 
 function stopTimer() {
-  if (timerRaf) {
-    cancelAnimationFrame(timerRaf);
-    timerRaf = null;
-  }
+  if (timerRaf) { cancelAnimationFrame(timerRaf); timerRaf = null; }
 }
 
 // ── Animations ──
@@ -552,7 +578,7 @@ function highlightBidder(playerId) {
   const el = document.getElementById(`opponent-${playerId}`);
   if (el) {
     el.classList.remove('anim-bid-pulse');
-    void el.offsetWidth; // force reflow
+    void el.offsetWidth;
     el.classList.add('anim-bid-pulse');
   }
 }
@@ -562,7 +588,7 @@ function animateCardWon(playerId) {
   if (card) {
     card.classList.add('anim-card-awarded');
   }
-  // Pop the score
+  // Pop the winner's score
   const scoreEl = playerId === myPlayerId
     ? $('my-score')
     : document.querySelector(`#opponent-${playerId} .opponent-score`);
@@ -570,6 +596,15 @@ function animateCardWon(playerId) {
     scoreEl.classList.remove('anim-score-pop');
     void scoreEl.offsetWidth;
     scoreEl.classList.add('anim-score-pop');
+  }
+  // Flash the winner's budget
+  const budgetEl = playerId === myPlayerId
+    ? $('my-budget')
+    : document.querySelector(`#opponent-${playerId} .opponent-budget`);
+  if (budgetEl) {
+    budgetEl.classList.remove('anim-budget-flash');
+    void budgetEl.offsetWidth;
+    budgetEl.classList.add('anim-budget-flash');
   }
 }
 
@@ -584,7 +619,12 @@ function animateCardPassed() {
 function createCardElement(value, sizeClass) {
   const el = document.createElement('div');
   el.className = `card ${sizeClass} card-value-${value}`;
-  el.textContent = value;
+  el.setAttribute('data-value', value);
+  if (sizeClass === 'card-large') {
+    el.innerHTML = `<span>${value}</span><span class="card-pts-label">pts</span>`;
+  } else {
+    el.textContent = value;
+  }
   return el;
 }
 
@@ -593,28 +633,19 @@ function renderGameOver() {
   if (!gameState) return;
 
   const winnerName = gameState.winnerName || 'Unknown';
-  $('winner-announce').textContent = `${winnerName} wins!`;
+  const isMe = gameState.winnerId === myPlayerId;
+  $('winner-announce').textContent = isMe ? 'You win!' : `${winnerName} wins!`;
 
   let reasonText = '';
   switch (gameState.reason) {
-    case 'threshold':
-      reasonText = 'Reached 655 points!';
-      break;
-    case 'deck_exhausted':
-      reasonText = 'All cards auctioned — highest score wins';
-      break;
-    case 'stalemate':
-      reasonText = 'No bids in two passes — highest score wins';
-      break;
-    case 'all_broke':
-      reasonText = 'All players out of funds — highest score wins';
-      break;
-    default:
-      reasonText = 'Game over';
+    case 'threshold': reasonText = 'Reached 655 points!'; break;
+    case 'deck_exhausted': reasonText = 'All cards auctioned \u2014 highest score wins'; break;
+    case 'stalemate': reasonText = 'No bids in two passes \u2014 highest score wins'; break;
+    case 'all_broke': reasonText = 'All players out of funds \u2014 highest score wins'; break;
+    default: reasonText = 'Game over';
   }
   $('win-reason').textContent = reasonText;
 
-  // Sort players by score descending
   const players = [...(gameState.players || [])].sort((a, b) => b.score - a.score);
   const scoresDiv = $('final-scores');
   scoresDiv.innerHTML = '';
@@ -622,8 +653,9 @@ function renderGameOver() {
   players.forEach((p, i) => {
     const row = document.createElement('div');
     row.className = 'score-row' + (p.id === gameState.winnerId ? ' is-winner' : '');
+    const rankIcon = i === 0 ? '\u2654' : `${i + 1}`;
     row.innerHTML = `
-      <span class="score-rank">${i + 1}</span>
+      <span class="score-rank">${rankIcon}</span>
       <span class="score-name">${esc(p.name)}${p.id === myPlayerId ? ' (you)' : ''}</span>
       <span class="score-points">${p.score} pts</span>
       <span class="score-budget">$${p.budget.toLocaleString()} left</span>
@@ -631,11 +663,32 @@ function renderGameOver() {
     scoresDiv.appendChild(row);
   });
 
-  // Play again button for host
   if (isHost) {
     $('play-again-btn').classList.remove('hidden');
   } else {
     $('play-again-btn').classList.add('hidden');
+  }
+
+  // Confetti
+  spawnConfetti();
+}
+
+function spawnConfetti() {
+  const container = $('confetti-container');
+  container.innerHTML = '';
+  const colors = ['#d4a843', '#e0b54e', '#2ecc71', '#e74c3c', '#3498db', '#9b59b6', '#f39c12'];
+
+  for (let i = 0; i < 50; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDuration = `${2 + Math.random() * 3}s`;
+    piece.style.animationDelay = `${Math.random() * 1.5}s`;
+    piece.style.width = `${4 + Math.random() * 8}px`;
+    piece.style.height = `${4 + Math.random() * 8}px`;
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+    container.appendChild(piece);
   }
 }
 
@@ -647,7 +700,7 @@ function getMyPlayer() {
 
 function getBidderName(id) {
   if (!gameState || !gameState.players) return '???';
-  const p = gameState.players.find((p) => p.id === id);
+  const p = gameState.players.find((pl) => pl.id === id);
   return p ? p.name : '???';
 }
 
@@ -663,7 +716,6 @@ function showToast(message, type) {
   toast.style.background = type === 'success' ? 'var(--success)' : 'var(--danger)';
   toast.classList.remove('hidden');
   toast.classList.add('visible');
-
   if (toastTimeout) clearTimeout(toastTimeout);
   toastTimeout = setTimeout(() => {
     toast.classList.remove('visible');

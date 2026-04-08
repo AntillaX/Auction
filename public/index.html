@@ -59,6 +59,11 @@
         </div>
       </div>
 
+      <!-- Result Banner (card won / card passed) -->
+      <div id="result-banner" class="result-banner hidden">
+        <div id="result-banner-inner" class="result-banner-inner"></div>
+      </div>
+
       <!-- Opponents Bar -->
       <div id="opponents-bar" class="opponents-bar"></div>
 
@@ -90,9 +95,12 @@
             <span class="stat-label">Budget</span>
             <span id="my-budget" class="stat-value budget-value">$1,000</span>
           </div>
-          <div class="my-stat">
+          <div class="my-stat score-stat">
             <span class="stat-label">Score</span>
             <span id="my-score" class="stat-value score-value">0 / 655</span>
+            <div class="my-score-bar">
+              <div id="my-score-fill" class="my-score-fill"></div>
+            </div>
           </div>
         </div>
         <div id="bid-controls" class="bid-controls">
@@ -114,6 +122,7 @@
     <!-- Game Over Screen -->
     <div id="gameover-screen" class="screen">
       <div class="gameover-container">
+        <div id="confetti-container" class="confetti-container"></div>
         <h2 id="winner-announce" class="winner-title"></h2>
         <p id="win-reason" class="win-reason"></p>
         <div id="final-scores" class="final-scores"></div>

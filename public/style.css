@@ -20,12 +20,6 @@
   --danger: #e74c3c;
   --card-border: #8b7355;
   --bid-highlight: #d4a843;
-  --card-90: #4a6670;
-  --card-92: #4a7066;
-  --card-94: #5a7050;
-  --card-96: #7a6830;
-  --card-98: #8a5030;
-  --card-100: #b8860b;
   --radius: 8px;
   --radius-lg: 12px;
 }
@@ -200,11 +194,13 @@ input:focus {
   font-weight: 700;
   flex: 1;
   min-height: 44px;
+  transition: all 0.15s, box-shadow 0.2s;
 }
 
 .btn-bid:hover:not(:disabled) {
   background: #2a3a2a;
   border-color: var(--success);
+  box-shadow: 0 0 8px rgba(46, 204, 113, 0.2);
 }
 
 .btn-bid.active-bid {
@@ -274,6 +270,12 @@ input:focus {
   background: var(--bg-surface);
   border-radius: var(--radius);
   border: 1px solid #2a2a2a;
+  animation: slot-in 0.3s ease-out;
+}
+
+@keyframes slot-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .player-slot.is-host {
@@ -286,10 +288,12 @@ input:focus {
   border-radius: 50%;
   background: var(--success);
   flex-shrink: 0;
+  box-shadow: 0 0 6px rgba(46, 204, 113, 0.4);
 }
 
 .player-dot.disconnected {
   background: var(--danger);
+  box-shadow: 0 0 6px rgba(231, 76, 60, 0.4);
 }
 
 .player-slot-name {
@@ -328,6 +332,67 @@ input:focus {
   flex-direction: column;
 }
 
+/* ── Result Banner (card won / card passed) ── */
+.result-banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  padding-top: 50%;
+  pointer-events: none;
+  animation: banner-in 0.35s ease-out;
+}
+
+.result-banner.hidden {
+  display: none;
+}
+
+@keyframes banner-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.result-banner-inner {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.5rem;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 85%;
+}
+
+.result-banner-inner.won {
+  border-color: var(--accent);
+  box-shadow: 0 0 30px var(--accent-glow);
+}
+
+.result-banner-inner.passed {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.result-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+
+.result-title.won { color: var(--accent); }
+.result-title.passed { color: var(--text-secondary); }
+
+.result-detail {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.result-detail .result-price {
+  color: var(--accent);
+  font-weight: 700;
+}
+
 /* Opponents Bar */
 .opponents-bar {
   display: flex;
@@ -353,7 +418,7 @@ input:focus {
   border: 1px solid rgba(255, 255, 255, 0.08);
   min-width: 80px;
   flex-shrink: 0;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  transition: border-color 0.3s, box-shadow 0.3s, opacity 0.3s;
 }
 
 .opponent-card.is-winning {
@@ -367,6 +432,11 @@ input:focus {
 
 .opponent-card.disconnected {
   opacity: 0.3;
+}
+
+.opponent-card.just-won-card {
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow), 0 0 40px rgba(212, 168, 67, 0.15);
 }
 
 .opponent-name {
@@ -383,11 +453,13 @@ input:focus {
   font-size: 0.65rem;
   color: var(--success);
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .opponent-score {
   font-size: 0.65rem;
   color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
 }
 
 .opponent-cards-won {
@@ -395,21 +467,24 @@ input:focus {
   color: var(--text-dim);
 }
 
-.opponent-budget-bar {
+.opponent-progress {
   width: 100%;
   height: 3px;
-  background: #333;
+  background: #222;
   border-radius: 2px;
-  margin-top: 0.2rem;
+  margin-top: 0.25rem;
   overflow: hidden;
 }
 
-.opponent-budget-fill {
+.opponent-progress-fill {
   height: 100%;
-  background: var(--success);
-  transition: width 0.5s ease;
   border-radius: 2px;
+  transition: width 0.6s ease;
 }
+
+.opponent-progress-fill.low    { background: var(--success); }
+.opponent-progress-fill.mid    { background: var(--warning); }
+.opponent-progress-fill.high   { background: var(--danger); }
 
 /* Auction Area */
 .auction-area {
@@ -453,31 +528,89 @@ input:focus {
   font-size: 0.7rem;
   border-radius: 4px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .card-large {
   width: 100px;
   height: 140px;
   font-size: 2.2rem;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6), 0 0 40px var(--accent-glow);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.6),
+    0 0 40px var(--accent-glow),
+    inset 0 1px 0 rgba(255,255,255,0.1);
   border: 2px solid rgba(255, 255, 255, 0.15);
+  flex-direction: column;
+  gap: 0.15rem;
 }
 
-.card-value-90  { background: linear-gradient(135deg, #3a5660, #4a6670); color: #c8d8e0; }
-.card-value-92  { background: linear-gradient(135deg, #3a6056, #4a7066); color: #c8e0d8; }
-.card-value-94  { background: linear-gradient(135deg, #4a6040, #5a7050); color: #d0e0c8; }
-.card-value-96  { background: linear-gradient(135deg, #6a5820, #7a6830); color: #e0d8b0; }
-.card-value-98  { background: linear-gradient(135deg, #7a4020, #8a5030); color: #e0c8b0; }
-.card-value-100 { background: linear-gradient(135deg, #8a6a0b, #b8860b); color: #fff8e0; }
+.card-large .card-pts-label {
+  font-size: 0.6rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.7;
+}
+
+/* Card corner pips */
+.card-large::before,
+.card-large::after {
+  position: absolute;
+  font-size: 0.55rem;
+  font-weight: 600;
+  opacity: 0.5;
+}
+
+.card-large::before {
+  content: attr(data-value);
+  top: 6px;
+  left: 8px;
+}
+
+.card-large::after {
+  content: attr(data-value);
+  bottom: 6px;
+  right: 8px;
+  transform: rotate(180deg);
+}
+
+/* Card color tiers */
+.card-value-90  { background: linear-gradient(145deg, #3a5660, #4a6670); color: #c8d8e0; }
+.card-value-92  { background: linear-gradient(145deg, #3a6056, #4a7066); color: #c8e0d8; }
+.card-value-94  { background: linear-gradient(145deg, #4a6040, #5a7050); color: #d0e0c8; }
+.card-value-96  { background: linear-gradient(145deg, #6a5820, #7a6830); color: #e0d8b0; }
+.card-value-98  { background: linear-gradient(145deg, #7a4020, #8a5030); color: #e0c8b0; }
+.card-value-100 { background: linear-gradient(145deg, #8a6a0b, #b8860b); color: #fff8e0; }
 
 .card-large.card-value-100 {
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6), 0 0 60px rgba(184, 134, 11, 0.4);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.6),
+    0 0 60px rgba(184, 134, 11, 0.4),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+  border-color: rgba(184, 134, 11, 0.5);
+}
+
+/* Card entrance animation */
+.card-enter {
+  animation: card-enter 0.4s ease-out;
+}
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.6) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 /* Bid Info */
 .bid-info {
   text-align: center;
   margin-bottom: 0.5rem;
+  min-height: 3rem;
 }
 
 .bid-status {
@@ -489,6 +622,7 @@ input:focus {
 .bid-amount {
   font-weight: 700;
   color: var(--accent);
+  font-size: 1.3rem;
 }
 
 .bid-leader {
@@ -502,11 +636,23 @@ input:focus {
   font-weight: 600;
 }
 
+.no-bids-prompt {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  animation: pulse-dim 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dim {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
 /* Timer */
 .timer-container {
   width: 80%;
   max-width: 300px;
   position: relative;
+  transition: opacity 0.3s;
 }
 
 .timer-bar {
@@ -530,13 +676,29 @@ input:focus {
   transition: width 0.1s linear, background-color 0.5s;
 }
 
+.timer-bar.timer-critical::after {
+  animation: timer-pulse 0.6s ease-in-out infinite;
+}
+
+@keyframes timer-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--danger); }
+  50% { opacity: 0.6; box-shadow: 0 0 12px var(--danger); }
+}
+
 .timer-text {
   display: block;
   text-align: center;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: var(--text-secondary);
-  margin-top: 0.25rem;
+  margin-top: 0.3rem;
   font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+.timer-text.timer-critical-text {
+  color: var(--danger);
+  font-size: 0.9rem;
 }
 
 /* Deck Area */
@@ -606,10 +768,39 @@ input:focus {
 
 .budget-value {
   color: var(--success);
+  transition: color 0.3s;
+}
+
+.budget-value.low-budget {
+  color: var(--warning);
+}
+
+.budget-value.broke {
+  color: var(--danger);
 }
 
 .score-value {
   color: var(--accent);
+}
+
+.score-stat {
+  min-width: 90px;
+}
+
+.my-score-bar {
+  width: 100%;
+  height: 3px;
+  background: #222;
+  border-radius: 2px;
+  margin-top: 0.2rem;
+  overflow: hidden;
+}
+
+.my-score-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.6s ease;
 }
 
 .bid-controls {
@@ -652,6 +843,8 @@ input:focus {
   padding: 2rem;
   background: radial-gradient(ellipse at center, #1a1a1a 0%, #0a0a0a 70%);
   gap: 1rem;
+  position: relative;
+  overflow: hidden;
 }
 
 .winner-title {
@@ -659,11 +852,24 @@ input:focus {
   color: var(--accent);
   text-shadow: 0 0 40px var(--accent-glow);
   text-align: center;
+  animation: winner-entrance 0.8s ease-out;
+}
+
+@keyframes winner-entrance {
+  from { opacity: 0; transform: scale(0.5) translateY(20px); }
+  60% { transform: scale(1.08) translateY(-4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .win-reason {
   color: var(--text-secondary);
   font-size: 0.85rem;
+  animation: fade-in 0.6s 0.3s ease-out both;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .final-scores {
@@ -683,11 +889,24 @@ input:focus {
   border-radius: var(--radius);
   border: 1px solid #2a2a2a;
   gap: 0.75rem;
+  animation: score-row-in 0.4s ease-out both;
+}
+
+.score-row:nth-child(1) { animation-delay: 0.4s; }
+.score-row:nth-child(2) { animation-delay: 0.55s; }
+.score-row:nth-child(3) { animation-delay: 0.7s; }
+.score-row:nth-child(4) { animation-delay: 0.85s; }
+.score-row:nth-child(5) { animation-delay: 1.0s; }
+
+@keyframes score-row-in {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 .score-row.is-winner {
   border-color: var(--accent);
   background: rgba(212, 168, 67, 0.08);
+  box-shadow: 0 0 20px var(--accent-glow);
 }
 
 .score-rank {
@@ -699,6 +918,7 @@ input:focus {
 
 .score-row.is-winner .score-rank {
   color: var(--accent);
+  font-size: 1rem;
 }
 
 .score-name {
@@ -716,6 +936,29 @@ input:focus {
   font-size: 0.75rem;
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
+}
+
+/* ── Confetti ── */
+.confetti-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  top: -10px;
+  opacity: 0;
+  animation: confetti-fall linear forwards;
+}
+
+@keyframes confetti-fall {
+  0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+  100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
 }
 
 /* ── Study Overlay ── */
@@ -768,6 +1011,13 @@ input:focus {
   width: 44px;
   height: 62px;
   font-size: 0.8rem;
+  opacity: 0;
+  animation: study-card-in 0.3s ease-out forwards;
+}
+
+@keyframes study-card-in {
+  from { opacity: 0; transform: scale(0.5) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 /* ── Toast ── */
@@ -833,19 +1083,24 @@ input:focus {
 
 @keyframes card-awarded {
   0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(0.3); opacity: 0; }
+  30% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(0.2); opacity: 0; }
 }
 
 @keyframes card-passed {
   0% { transform: scale(1) translateY(0); opacity: 1; }
-  100% { transform: scale(0.8) translateY(30px); opacity: 0; }
+  100% { transform: scale(0.7) translateY(40px); opacity: 0; }
 }
 
 @keyframes score-pop {
   0% { transform: scale(1); }
-  50% { transform: scale(1.2); color: var(--accent); }
+  40% { transform: scale(1.3); color: var(--accent); }
   100% { transform: scale(1); }
+}
+
+@keyframes budget-flash {
+  0% { color: var(--danger); }
+  100% { }
 }
 
 .anim-bid-pulse {
@@ -853,7 +1108,7 @@ input:focus {
 }
 
 .anim-card-awarded {
-  animation: card-awarded 0.6s ease-in forwards;
+  animation: card-awarded 0.7s ease-in forwards;
 }
 
 .anim-card-passed {
@@ -861,7 +1116,11 @@ input:focus {
 }
 
 .anim-score-pop {
-  animation: score-pop 0.4s ease;
+  animation: score-pop 0.5s ease;
+}
+
+.anim-budget-flash {
+  animation: budget-flash 0.6s ease;
 }
 
 /* ── Responsive ── */
@@ -885,6 +1144,10 @@ input:focus {
 
   .game-title {
     font-size: 4rem;
+  }
+
+  .bid-amount {
+    font-size: 1.5rem;
   }
 }
 
@@ -919,5 +1182,9 @@ input:focus {
 
   .timer-container {
     max-width: 400px;
+  }
+
+  .result-banner {
+    padding-top: 30%;
   }
 }
