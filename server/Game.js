@@ -109,6 +109,10 @@ class Game {
     this.roundNumber++;
     this.state = 'auction';
 
+    // Set timer values BEFORE broadcast so clients get correct timing
+    this.timerRemaining = TIMER_DURATION;
+    this.timerStartedAt = Date.now();
+
     this.broadcast({
       type: 'new_auction',
       ...this.getFullState(),
