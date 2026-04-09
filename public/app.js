@@ -45,6 +45,9 @@ document.addEventListener('DOMContentLoaded', () => {
   $('play-again-btn').addEventListener('click', () => send({ type: 'play_again' }));
   $('back-to-lobby-btn').addEventListener('click', backToLobby);
 
+  $('how-to-play-btn').addEventListener('click', () => showScreen('instructions-screen'));
+  $('instructions-back-btn').addEventListener('click', () => showScreen('lobby-screen'));
+
   $('room-code-display').addEventListener('click', () => {
     if (roomCode) {
       navigator.clipboard.writeText(roomCode).then(() => showToast('Code copied!', 'success'));
@@ -378,13 +381,17 @@ function renderAuctionArea() {
   // Current card
   const container = $('current-card-container');
   if (gameState.currentCard && (state === 'auction' || state === 'between_rounds')) {
-    // Only rebuild if card changed or doesn't exist
+    // Check if we need to rebuild: no card exists, or it has an exit animation, or it's a new_auction
     const existing = container.querySelector('.card-large');
-    const existingVal = existing ? existing.getAttribute('data-value') : null;
-    if (existingVal !== String(gameState.currentCard)) {
+    const needsRebuild = !existing
+      || existing.classList.contains('anim-card-awarded')
+      || existing.classList.contains('anim-card-passed')
+      || existing.getAttribute('data-round') !== String(gameState.roundNumber);
+    if (needsRebuild) {
       container.innerHTML = '';
       const card = createCardElement(gameState.currentCard, 'card-large');
       card.id = 'current-card';
+      card.setAttribute('data-round', gameState.roundNumber);
       card.classList.add('card-enter');
       container.appendChild(card);
     }
@@ -441,8 +448,8 @@ function renderMyInfo() {
   const budgetEl = $('my-budget');
   budgetEl.textContent = `$${me.budget.toLocaleString()}`;
   budgetEl.className = 'stat-value budget-value';
-  if (me.budget === 0) budgetEl.classList.add('broke');
-  else if (me.budget < 100) budgetEl.classList.add('low-budget');
+  if (me.budget < 100) budgetEl.classList.add('broke');
+  else if (me.budget < 300) budgetEl.classList.add('low-budget');
 
   $('my-score').textContent = `${me.score} / 655`;
 

@@ -26,6 +26,68 @@
             <input type="text" id="room-code-input" placeholder="CODE" maxlength="4" autocomplete="off" spellcheck="false">
             <button id="join-btn" class="btn btn-secondary">Join</button>
           </div>
+
+          <button id="how-to-play-btn" class="btn btn-link">How to Play</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Instructions Screen -->
+    <div id="instructions-screen" class="screen">
+      <div class="instructions-container">
+        <button id="instructions-back-btn" class="btn-back">&larr; Back</button>
+        <h2 class="instructions-title">How to Play</h2>
+
+        <div class="instructions-body">
+          <div class="rule-section">
+            <h3>The Goal</h3>
+            <p>Be the first player to reach <strong>655 points</strong> by winning cards at auction.</p>
+          </div>
+
+          <div class="rule-section">
+            <h3>Setup</h3>
+            <p>Each player starts with <strong>$1,000</strong>. A deck of 25 cards is shuffled and the entire sequence is revealed face-up to everyone before play begins.</p>
+          </div>
+
+          <div class="rule-section">
+            <h3>The Cards</h3>
+            <div class="card-table">
+              <div class="card-table-row"><span class="ct-value">100 pts</span><span class="ct-count">&times;1</span></div>
+              <div class="card-table-row"><span class="ct-value">98 pts</span><span class="ct-count">&times;3</span></div>
+              <div class="card-table-row"><span class="ct-value">96 pts</span><span class="ct-count">&times;4</span></div>
+              <div class="card-table-row"><span class="ct-value">94 pts</span><span class="ct-count">&times;5</span></div>
+              <div class="card-table-row"><span class="ct-value">92 pts</span><span class="ct-count">&times;6</span></div>
+              <div class="card-table-row"><span class="ct-value">90 pts</span><span class="ct-count">&times;6</span></div>
+            </div>
+            <p class="rule-note">25 cards total &middot; 2,350 points in the deck</p>
+          </div>
+
+          <div class="rule-section">
+            <h3>How Auctions Work</h3>
+            <ol>
+              <li>Cards are auctioned one at a time in the revealed order</li>
+              <li>Anyone can open bidding at <strong>$50 minimum</strong></li>
+              <li>Bids must be in <strong>$10 increments</strong> and beat the current bid by at least $10</li>
+              <li>Each bid resets a <strong>10-second timer</strong></li>
+              <li>When the timer expires, the highest bidder wins the card and pays their bid</li>
+              <li>If nobody bids, the card is discarded</li>
+            </ol>
+          </div>
+
+          <div class="rule-section">
+            <h3>Winning</h3>
+            <p>The first player to reach <strong>655 points</strong> wins instantly. If the deck runs out, discarded cards are recycled. If two full passes through discards produce no bids, the highest score wins.</p>
+          </div>
+
+          <div class="rule-section">
+            <h3>Strategy Tips</h3>
+            <ul>
+              <li>Everyone sees the full card order &mdash; plan ahead</li>
+              <li>All budgets and scores are public &mdash; watch your opponents</li>
+              <li>Sometimes letting a card go is smarter than overbidding</li>
+              <li>Running out of money means you can't bid at all</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
