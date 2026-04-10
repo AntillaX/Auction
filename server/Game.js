@@ -25,17 +25,40 @@ class Game {
     this.cardsBoughtThisPass = 0;
     this.consecutiveEmptyPasses = 0;
     this.nextCardTimeout = null;
+    this.extendedBy = new Set();
   }
 
   generateDeck() {
-    const cards = [];
-    for (let i = 0; i < 6; i++) cards.push(90);
-    for (let i = 0; i < 6; i++) cards.push(92);
-    for (let i = 0; i < 5; i++) cards.push(94);
-    for (let i = 0; i < 4; i++) cards.push(96);
-    for (let i = 0; i < 3; i++) cards.push(98);
-    cards.push(100);
-    return cards;
+    return [
+      { name: 'Messi', value: 100 },
+      { name: 'Ronaldo', value: 98 },
+      { name: 'Mbappé', value: 98 },
+      { name: 'Zidane', value: 98 },
+      { name: 'Neymar', value: 96 },
+      { name: 'Ronaldinho', value: 96 },
+      { name: 'Maradona', value: 96 },
+      { name: 'Beckham', value: 96 },
+      { name: 'Haaland', value: 94 },
+      { name: 'De Bruyne', value: 94 },
+      { name: 'Modric', value: 94 },
+      { name: 'Iniesta', value: 94 },
+      { name: 'Casillas', value: 94 },
+      { name: 'Lamine Yamal', value: 94 },
+      { name: 'Ibrahimovic', value: 92 },
+      { name: 'Buffon', value: 92 },
+      { name: 'Lewandowski', value: 92 },
+      { name: 'Benzema', value: 92 },
+      { name: 'Rooney', value: 92 },
+      { name: 'Van Dijk', value: 92 },
+      { name: 'Neuer', value: 92 },
+      { name: 'Ramos', value: 90 },
+      { name: 'Lingard', value: 90 },
+      { name: 'Fred', value: 90 },
+      { name: 'Pedri', value: 90 },
+      { name: 'Marcelo', value: 90 },
+      { name: 'Jordi Alba', value: 90 },
+      { name: 'Dani Carvajal', value: 90 },
+    ];
   }
 
   shuffle(array) {
@@ -56,6 +79,7 @@ class Game {
     this.inDiscardPhase = false;
     this.cardsBoughtThisPass = 0;
     this.consecutiveEmptyPasses = 0;
+    this.extendedBy = new Set();
 
     this.broadcast({
       type: 'game_started',
@@ -103,6 +127,7 @@ class Game {
       return;
     }
 
+    this.extendedBy = new Set();
     this.currentCard = this.deck[this.currentIndex];
     this.highestBid = 0;
     this.highestBidderId = null;
@@ -201,6 +226,37 @@ class Game {
       playerId,
       playerName: player.name,
       amount,
+      ...this.getFullState(),
+    });
+
+    return { success: true };
+  }
+
+  extendTime(playerId) {
+    if (this.state !== 'auction') {
+      return { success: false, error: 'No auction in progress' };
+    }
+
+    const player = this.players.get(playerId);
+    if (!player) {
+      return { success: false, error: 'Player not found' };
+    }
+
+    if (!player.connected) {
+      return { success: false, error: 'Player is disconnected' };
+    }
+
+    if (this.extendedBy.has(playerId)) {
+      return { success: false, error: 'Already used your extension this round' };
+    }
+
+    this.extendedBy.add(playerId);
+    this.resetTimer();
+
+    this.broadcast({
+      type: 'time_extended',
+      playerId,
+      playerName: player.name,
       ...this.getFullState(),
     });
 
@@ -320,6 +376,7 @@ class Game {
       minimumBid: this.getMinimumBid(),
       remainingCards: this.getRemainingCards(),
       inDiscardPhase: this.inDiscardPhase,
+      extendedBy: Array.from(this.extendedBy),
     };
   }
 
@@ -350,6 +407,7 @@ class Game {
     this.inDiscardPhase = false;
     this.cardsBoughtThisPass = 0;
     this.consecutiveEmptyPasses = 0;
+    this.extendedBy = new Set();
   }
 
   destroy() {
