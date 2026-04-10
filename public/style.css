@@ -248,6 +248,32 @@ input:focus {
   color: var(--accent);
 }
 
+.btn-more-time {
+  margin-top: 0.4rem;
+  padding: 0.35rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 30px;
+  align-self: center;
+}
+
+.btn-more-time:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-more-time:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 .hidden {
   display: none !important;
 }
@@ -557,33 +583,73 @@ input:focus {
 }
 
 .card-small {
-  width: 36px;
-  height: 50px;
+  width: 46px;
+  height: 58px;
   font-size: 0.7rem;
   border-radius: 4px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.06);
+  flex-direction: column;
+  gap: 1px;
+  padding: 3px 2px;
+  overflow: hidden;
 }
 
 .card-large {
-  width: 100px;
-  height: 140px;
-  font-size: 2.2rem;
+  width: 104px;
+  height: 144px;
+  font-size: 1rem;
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.6),
     0 0 40px var(--accent-glow),
     inset 0 1px 0 rgba(255,255,255,0.1);
   border: 2px solid rgba(255, 255, 255, 0.15);
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.3rem;
+  padding: 0.5rem;
 }
 
 .card-large .card-pts-label {
-  font-size: 0.6rem;
+  font-size: 0.5rem;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   opacity: 0.7;
+  margin-left: 2px;
+}
+
+.card-player-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+  word-break: break-word;
+  max-width: 100%;
+  padding: 0 2px;
+}
+
+.card-player-value {
+  font-size: 0.7rem;
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+.card-sm-name {
+  font-size: 0.45rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  text-align: center;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+.card-sm-value {
+  font-size: 0.55rem;
+  font-weight: 700;
+  opacity: 0.75;
 }
 
 /* Card corner pips */
@@ -608,20 +674,36 @@ input:focus {
   transform: rotate(180deg);
 }
 
-/* Card color tiers */
-.card-value-90  { background: linear-gradient(145deg, #3a5660, #4a6670); color: #c8d8e0; }
-.card-value-92  { background: linear-gradient(145deg, #3a6056, #4a7066); color: #c8e0d8; }
-.card-value-94  { background: linear-gradient(145deg, #4a6040, #5a7050); color: #d0e0c8; }
-.card-value-96  { background: linear-gradient(145deg, #6a5820, #7a6830); color: #e0d8b0; }
-.card-value-98  { background: linear-gradient(145deg, #7a4020, #8a5030); color: #e0c8b0; }
-.card-value-100 { background: linear-gradient(145deg, #8a6a0b, #b8860b); color: #fff8e0; }
+/* Card color tiers — Football player cards */
+.card-tier-90  { background: linear-gradient(145deg, #2a3a42, #384850); color: #b8c8d0; }
+.card-tier-92  { background: linear-gradient(145deg, #2a4038, #385048); color: #b8d0c8; }
+.card-tier-94  { background: linear-gradient(145deg, #1e2e5a, #2c3e6e); color: #c0d0f0; }
+.card-tier-96  { background: linear-gradient(145deg, #3e1e5e, #502e72); color: #e0c0f0; }
+.card-tier-98  { background: linear-gradient(145deg, #5e1a1a, #742828); color: #f0b8b8; }
+.card-tier-100 { background: linear-gradient(145deg, #8a6a0b, #b8860b); color: #fff8e0; }
 
-.card-large.card-value-100 {
+.card-large.card-tier-96 {
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.6),
-    0 0 60px rgba(184, 134, 11, 0.4),
-    inset 0 1px 0 rgba(255,255,255,0.15);
-  border-color: rgba(184, 134, 11, 0.5);
+    0 0 40px rgba(140, 60, 180, 0.25),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+  border-color: rgba(140, 60, 180, 0.35);
+}
+
+.card-large.card-tier-98 {
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.6),
+    0 0 45px rgba(200, 50, 50, 0.3),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+  border-color: rgba(200, 50, 50, 0.4);
+}
+
+.card-large.card-tier-100 {
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.6),
+    0 0 60px rgba(184, 134, 11, 0.45),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+  border-color: rgba(212, 168, 67, 0.6);
 }
 
 /* Card entrance animation */
@@ -1042,11 +1124,18 @@ input:focus {
 }
 
 .study-deck .card-small {
-  width: 44px;
-  height: 62px;
-  font-size: 0.8rem;
+  width: 54px;
+  height: 70px;
   opacity: 0;
   animation: study-card-in 0.3s ease-out forwards;
+}
+
+.study-deck .card-sm-name {
+  font-size: 0.5rem;
+}
+
+.study-deck .card-sm-value {
+  font-size: 0.6rem;
 }
 
 @keyframes study-card-in {
@@ -1237,31 +1326,57 @@ input:focus {
 .card-table-row {
   display: flex;
   justify-content: space-between;
-  padding: 0.25rem 0.5rem;
+  align-items: baseline;
+  padding: 0.35rem 0.5rem;
   font-size: 0.85rem;
+  gap: 0.75rem;
 }
 
 .ct-value {
   color: var(--text-primary);
   font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .ct-count {
   color: var(--text-dim);
 }
 
+.ct-names {
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  text-align: right;
+  flex: 1;
+  line-height: 1.4;
+}
+
 /* ── Responsive ── */
 @media (min-width: 480px) {
   .card-large {
-    width: 120px;
-    height: 168px;
-    font-size: 2.8rem;
+    width: 124px;
+    height: 172px;
+  }
+
+  .card-player-name {
+    font-size: 1.1rem;
+  }
+
+  .card-player-value {
+    font-size: 0.8rem;
   }
 
   .card-small {
-    width: 40px;
-    height: 56px;
-    font-size: 0.75rem;
+    width: 50px;
+    height: 64px;
+  }
+
+  .card-sm-name {
+    font-size: 0.5rem;
+  }
+
+  .card-sm-value {
+    font-size: 0.6rem;
   }
 
   .opponent-card {
@@ -1280,9 +1395,16 @@ input:focus {
 
 @media (min-width: 768px) {
   .card-large {
-    width: 140px;
-    height: 196px;
-    font-size: 3.2rem;
+    width: 148px;
+    height: 200px;
+  }
+
+  .card-player-name {
+    font-size: 1.3rem;
+  }
+
+  .card-player-value {
+    font-size: 0.9rem;
   }
 
   .opponents-bar {

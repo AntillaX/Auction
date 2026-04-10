@@ -19,9 +19,9 @@ class Player {
     this.budget -= amount;
   }
 
-  addCard(cardValue) {
-    this.cardsWon.push(cardValue);
-    this.score += cardValue;
+  addCard(card) {
+    this.cardsWon.push(card);
+    this.score += card.value;
   }
 
   reset() {

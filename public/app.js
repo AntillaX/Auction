@@ -42,6 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') placeCustomBid();
   });
 
+  $('more-time-btn').addEventListener('click', () => send({ type: 'extend_time' }));
+
   $('play-again-btn').addEventListener('click', () => send({ type: 'play_again' }));
   $('back-to-lobby-btn').addEventListener('click', backToLobby);
 
@@ -178,6 +180,15 @@ function handleMessage(msg) {
       highlightBidder(msg.playerId);
       break;
 
+    case 'time_extended':
+      gameState = msg;
+      renderGame();
+      startLocalTimer(msg.timerRemaining, msg.timerStartedAt);
+      if (msg.playerId !== myPlayerId) {
+        showToast(`${msg.playerName} used More Time`, 'success');
+      }
+      break;
+
     case 'card_won': {
       gameState = msg;
       lastCardWonBy = msg.playerId;
@@ -277,10 +288,10 @@ function showStudyPhase() {
   deckDiv.innerHTML = '';
 
   const deck = gameState.originalDeck || gameState.deck || [];
-  deck.forEach((val, i) => {
-    const card = createCardElement(val, 'card-small');
-    card.style.animationDelay = `${i * 60}ms`;
-    deckDiv.appendChild(card);
+  deck.forEach((card, i) => {
+    const el = createCardElement(card, 'card-small');
+    el.style.animationDelay = `${i * 60}ms`;
+    deckDiv.appendChild(el);
   });
 
   if (isHost) {
@@ -297,23 +308,25 @@ function hideStudyOverlay() {
 }
 
 // ── Result Banner ──
-function showResultBanner(type, playerName, amount, cardValue, isMe) {
+function showResultBanner(type, playerName, amount, card, isMe) {
   hideResultBanner();
   const banner = $('result-banner');
   const inner = $('result-banner-inner');
+  const cardName = card && typeof card === 'object' ? card.name : String(card);
+  const cardPts = card && typeof card === 'object' ? card.value : card;
 
   if (type === 'won') {
     const who = isMe ? 'You won' : `${esc(playerName)} won`;
     inner.className = 'result-banner-inner won';
     inner.innerHTML = `
-      <div class="result-title won">${who} the ${cardValue}!</div>
-      <div class="result-detail">for <span class="result-price">$${amount.toLocaleString()}</span></div>
+      <div class="result-title won">${who} ${esc(cardName)}!</div>
+      <div class="result-detail">${cardPts}pts for <span class="result-price">$${amount.toLocaleString()}</span></div>
     `;
   } else {
     inner.className = 'result-banner-inner passed';
     inner.innerHTML = `
       <div class="result-title passed">No bids</div>
-      <div class="result-detail">The ${cardValue} goes to the discard pile</div>
+      <div class="result-detail">${esc(cardName)} (${cardPts}pts) &mdash; discarded</div>
     `;
   }
 
@@ -430,13 +443,13 @@ function renderDeckSequence() {
 
   if (remaining.length === 0 && gameState.discardPile && gameState.discardPile.length > 0) {
     if (label) label.textContent = `Discard (${gameState.discardPile.length})`;
-    gameState.discardPile.forEach((val) => {
-      container.appendChild(createCardElement(val, 'card-small'));
+    gameState.discardPile.forEach((card) => {
+      container.appendChild(createCardElement(card, 'card-small'));
     });
   } else {
     if (label) label.textContent = `Upcoming (${remaining.length})`;
-    remaining.forEach((val) => {
-      container.appendChild(createCardElement(val, 'card-small'));
+    remaining.forEach((card) => {
+      container.appendChild(createCardElement(card, 'card-small'));
     });
   }
 }
@@ -501,6 +514,17 @@ function updateBidControls() {
   customInput.max = me ? me.budget : 0;
   customInput.disabled = !isAuction || !me || me.budget < minBid;
   customBtn.disabled = !isAuction || !me || me.budget < minBid;
+
+  // More Time button
+  const moreTimeBtn = $('more-time-btn');
+  if (isAuction) {
+    moreTimeBtn.classList.remove('hidden');
+    const alreadyUsed = (gameState.extendedBy || []).includes(myPlayerId);
+    moreTimeBtn.disabled = alreadyUsed;
+    moreTimeBtn.textContent = alreadyUsed ? 'Time Used' : 'More Time';
+  } else {
+    moreTimeBtn.classList.add('hidden');
+  }
 }
 
 // ── Bid Actions ──
@@ -623,14 +647,15 @@ function animateCardPassed() {
 }
 
 // ── Card Element Builder ──
-function createCardElement(value, sizeClass) {
+function createCardElement(card, sizeClass) {
   const el = document.createElement('div');
-  el.className = `card ${sizeClass} card-value-${value}`;
-  el.setAttribute('data-value', value);
+  el.className = `card ${sizeClass} card-tier-${card.value}`;
+  el.setAttribute('data-value', card.value);
+  el.setAttribute('data-name', card.name);
   if (sizeClass === 'card-large') {
-    el.innerHTML = `<span>${value}</span><span class="card-pts-label">pts</span>`;
+    el.innerHTML = `<span class="card-player-name">${esc(card.name)}</span><span class="card-player-value">${card.value}<span class="card-pts-label">pts</span></span>`;
   } else {
-    el.textContent = value;
+    el.innerHTML = `<span class="card-sm-name">${esc(card.name)}</span><span class="card-sm-value">${card.value}</span>`;
   }
   return el;
 }

@@ -208,6 +208,16 @@ function handleMessage(ws, msg) {
       break;
     }
 
+    case 'extend_time': {
+      const room = rooms.get(ws.roomCode);
+      if (!room || !room.game) return;
+      const extResult = room.game.extendTime(ws.playerId);
+      if (!extResult.success) {
+        ws.send(JSON.stringify({ type: 'error', message: extResult.error }));
+      }
+      break;
+    }
+
     case 'play_again': {
       const room = rooms.get(ws.roomCode);
       if (!room) return;
