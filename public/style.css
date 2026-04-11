@@ -623,10 +623,18 @@ input:focus {
   font-weight: 700;
   line-height: 1.15;
   text-align: center;
-  word-break: break-word;
+  /* Break only at word boundaries so multi-word names stack instead of
+     mid-word wrapping. Long single-word names are shrunk via .name-shrink-* */
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: none;
   max-width: 100%;
   padding: 0 2px;
 }
+
+.card-player-name.name-shrink-sm { font-size: 0.82rem; letter-spacing: -0.01em; }
+.card-player-name.name-shrink-md { font-size: 0.72rem; letter-spacing: -0.02em; }
+.card-player-name.name-shrink-lg { font-size: 0.62rem; letter-spacing: -0.02em; }
 
 .card-player-value {
   font-size: 0.7rem;
@@ -870,8 +878,17 @@ input:focus {
   display: none;
 }
 
-.deck-overlay-content,
-.help-overlay-content {
+.help-overlay:not(.hidden) {
+  display: flex;
+  flex-direction: column;
+}
+
+.help-overlay .instructions-container {
+  background: transparent;
+  width: 100%;
+}
+
+.deck-overlay-content {
   min-height: 100%;
   padding: 3rem 1rem 2rem;
   max-width: 520px;
@@ -985,10 +1002,6 @@ input:focus {
   text-align: center;
   padding: 0.5rem;
   font-style: italic;
-}
-
-.help-overlay-content .instructions-title {
-  margin-top: 0.25rem;
 }
 
 /* Player Controls (sticky bottom) */
@@ -1506,6 +1519,10 @@ input:focus {
     font-size: 1.1rem;
   }
 
+  .card-player-name.name-shrink-sm { font-size: 0.95rem; }
+  .card-player-name.name-shrink-md { font-size: 0.82rem; }
+  .card-player-name.name-shrink-lg { font-size: 0.72rem; }
+
   .card-player-value {
     font-size: 0.8rem;
   }
@@ -1546,6 +1563,10 @@ input:focus {
   .card-player-name {
     font-size: 1.3rem;
   }
+
+  .card-player-name.name-shrink-sm { font-size: 1.1rem; }
+  .card-player-name.name-shrink-md { font-size: 0.95rem; }
+  .card-player-name.name-shrink-lg { font-size: 0.82rem; }
 
   .card-player-value {
     font-size: 0.9rem;

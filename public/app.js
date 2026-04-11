@@ -734,11 +734,23 @@ function createCardElement(card, sizeClass) {
   el.setAttribute('data-value', card.value);
   el.setAttribute('data-name', card.name);
   if (sizeClass === 'card-large') {
-    el.innerHTML = `<span class="card-player-name">${esc(card.name)}</span><span class="card-player-value">${card.value}<span class="card-pts-label">pts</span></span>`;
+    el.innerHTML = `<span class="card-player-name${nameShrinkClass(card.name)}">${esc(card.name)}</span><span class="card-player-value">${card.value}<span class="card-pts-label">pts</span></span>`;
   } else {
     el.innerHTML = `<span class="card-sm-name">${esc(card.name)}</span><span class="card-sm-value">${card.value}</span>`;
   }
   return el;
+}
+
+// Pick a shrink class for card-large names based on the longest single
+// word so long names (Lewandowski, Ibrahimovic) fit on one line while
+// multi-word names (Lamine Yamal, Dani Carvajal) wrap naturally at the space.
+function nameShrinkClass(name) {
+  if (!name) return '';
+  const longestWord = name.split(/\s+/).reduce((m, w) => Math.max(m, w.length), 0);
+  if (longestWord >= 11) return ' name-shrink-lg';
+  if (longestWord >= 10) return ' name-shrink-md';
+  if (longestWord >= 9) return ' name-shrink-sm';
+  return '';
 }
 
 // ── Game Over ──
