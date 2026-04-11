@@ -4,6 +4,7 @@ const MIN_BID_INCREMENT = 10;
 const TIMER_DURATION = 10000; // 10 seconds
 const DELAY_CARD_WON = 2500;
 const DELAY_CARD_PASSED = 1500;
+const STUDY_AUTOSTART_MS = 45000; // auto-start auctions if not all ready
 
 class Game {
   constructor(players, broadcast) {
@@ -26,6 +27,13 @@ class Game {
     this.consecutiveEmptyPasses = 0;
     this.nextCardTimeout = null;
     this.extendedBy = new Set();
+    // Ready system (shared between study phase and play-again).
+    // readyPlayers tracks who has pressed "Ready" in the current
+    // waiting phase. During study, a 45s auto-start fallback kicks
+    // in so one AFK player can't hold the game hostage.
+    this.readyPlayers = new Set();
+    this.studyAutoStartTimeout = null;
+    this.studyAutoStartAt = 0;
   }
 
   generateDeck() {
@@ -80,6 +88,15 @@ class Game {
     this.cardsBoughtThisPass = 0;
     this.consecutiveEmptyPasses = 0;
     this.extendedBy = new Set();
+    this.readyPlayers = new Set();
+
+    // Schedule the 45s auto-start fallback so the game can't get
+    // stuck on one AFK player in the study phase.
+    this.clearStudyAutoStart();
+    this.studyAutoStartAt = Date.now() + STUDY_AUTOSTART_MS;
+    this.studyAutoStartTimeout = setTimeout(() => {
+      if (this.state === 'study') this.startAuctionsNow();
+    }, STUDY_AUTOSTART_MS);
 
     this.broadcast({
       type: 'game_started',
@@ -87,8 +104,87 @@ class Game {
     });
   }
 
-  startAuctions() {
+  clearStudyAutoStart() {
+    if (this.studyAutoStartTimeout) {
+      clearTimeout(this.studyAutoStartTimeout);
+      this.studyAutoStartTimeout = null;
+    }
+  }
+
+  getConnectedIds() {
+    const ids = [];
+    for (const [id, p] of this.players) {
+      if (p.connected) ids.push(id);
+    }
+    return ids;
+  }
+
+  // Called when a player presses the "Ready" button. Routed based on
+  // current state — study phase triggers auctions, finished state
+  // triggers a play-again reset.
+  markReady(playerId) {
+    const player = this.players.get(playerId);
+    if (!player || !player.connected) return;
+
+    if (this.state !== 'study' && this.state !== 'finished') return;
+    if (this.readyPlayers.has(playerId)) return;
+
+    this.readyPlayers.add(playerId);
+    this.broadcastReadyState();
+
+    if (this.state === 'study') {
+      this.maybeStartAuctions();
+    } else if (this.state === 'finished') {
+      this.maybePlayAgain();
+    }
+  }
+
+  // Re-check the ready condition without marking anyone new — used
+  // when a player disconnects (their absence can itself satisfy
+  // "all remaining players ready").
+  reconsiderReady() {
+    if (this.state === 'study') this.maybeStartAuctions();
+    else if (this.state === 'finished') this.maybePlayAgain();
+    if (this.state === 'study' || this.state === 'finished') {
+      this.broadcastReadyState();
+    }
+  }
+
+  broadcastReadyState() {
+    this.broadcast({
+      type: 'ready_update',
+      phase: this.state === 'finished' ? 'play_again' : 'study',
+      readyIds: Array.from(this.readyPlayers),
+      connectedIds: this.getConnectedIds(),
+      studyAutoStartAt: this.state === 'study' ? this.studyAutoStartAt : 0,
+    });
+  }
+
+  allConnectedReady() {
+    const connected = this.getConnectedIds();
+    if (connected.length === 0) return false;
+    return connected.every((id) => this.readyPlayers.has(id));
+  }
+
+  maybeStartAuctions() {
     if (this.state !== 'study') return;
+    if (!this.allConnectedReady()) return;
+    this.startAuctionsNow();
+  }
+
+  maybePlayAgain() {
+    if (this.state !== 'finished') return;
+    if (!this.allConnectedReady()) return;
+    this.reset();
+    this.start();
+  }
+
+  // Actually begin the first auction. Used by both the auto-start
+  // timer and the "all ready" path.
+  startAuctionsNow() {
+    if (this.state !== 'study') return;
+    this.clearStudyAutoStart();
+    this.readyPlayers = new Set();
     this.presentNextCard();
   }
 
@@ -329,6 +425,9 @@ class Game {
   endGame(reason, winnerId = null) {
     this.state = 'finished';
     this.clearTimer();
+    this.clearStudyAutoStart();
+    // New phase, new ready set — everyone has to press Play Again.
+    this.readyPlayers = new Set();
 
     if (!winnerId) {
       let maxScore = -1;
@@ -377,6 +476,9 @@ class Game {
       remainingCards: this.getRemainingCards(),
       inDiscardPhase: this.inDiscardPhase,
       extendedBy: Array.from(this.extendedBy),
+      readyIds: Array.from(this.readyPlayers),
+      connectedIds: this.getConnectedIds(),
+      studyAutoStartAt: this.state === 'study' ? this.studyAutoStartAt : 0,
     };
   }
 
@@ -390,6 +492,7 @@ class Game {
 
   reset() {
     this.clearTimer();
+    this.clearStudyAutoStart();
     for (const [, player] of this.players) {
       player.reset();
     }
@@ -408,10 +511,12 @@ class Game {
     this.cardsBoughtThisPass = 0;
     this.consecutiveEmptyPasses = 0;
     this.extendedBy = new Set();
+    this.readyPlayers = new Set();
   }
 
   destroy() {
     this.clearTimer();
+    this.clearStudyAutoStart();
   }
 }
 

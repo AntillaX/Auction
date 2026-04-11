@@ -88,6 +88,12 @@ class Room {
       ...this.getState(),
     });
 
+    // If we were waiting on ready signals, a disconnect may itself
+    // satisfy "all remaining connected players ready".
+    if (this.game && (this.game.state === 'study' || this.game.state === 'finished')) {
+      this.game.reconsiderReady();
+    }
+
     // If the game is still in progress and only one player remains
     // connected, start a grace timer. If nobody rejoins within the
     // window, end the game with the lone survivor as the winner.
@@ -129,6 +135,10 @@ class Room {
         ...this.getState(),
       });
     }
+    // Rebroadcast ready state so the newcomer sees the current counts.
+    if (this.game && (this.game.state === 'study' || this.game.state === 'finished')) {
+      this.game.broadcastReadyState();
+    }
     return { success: true };
   }
 
@@ -149,15 +159,12 @@ class Room {
     this.game.start();
   }
 
-  startAuctions() {
+  // "Ready" button pressed by a player — routes through the game,
+  // which decides whether it's a study-phase ready or a play-again
+  // ready based on its current state.
+  markReady(playerId) {
     if (!this.game) return;
-    this.game.startAuctions();
-  }
-
-  playAgain() {
-    if (!this.game) return;
-    this.game.reset();
-    this.game.start();
+    this.game.markReady(playerId);
   }
 
   broadcast(msg) {

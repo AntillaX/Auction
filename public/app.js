@@ -31,20 +31,42 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') joinRoom();
   });
   $('start-btn').addEventListener('click', () => send({ type: 'start_game' }));
-  $('begin-auctions-btn').addEventListener('click', () => send({ type: 'start_auctions' }));
+  // Single "Ready" button in the study overlay — server decides
+  // whether it's a study-phase or play-again ready based on state.
+  $('ready-btn').addEventListener('click', () => {
+    send({ type: 'ready' });
+    const btn = $('ready-btn');
+    btn.disabled = true;
+    btn.textContent = 'Ready \u2713';
+  });
 
-  $('bid-min').addEventListener('click', () => placeBidAction('min'));
-  $('bid-plus10').addEventListener('click', () => placeBidAction('+10'));
-  $('bid-plus50').addEventListener('click', () => placeBidAction('+50'));
-  $('bid-plus100').addEventListener('click', () => placeBidAction('+100'));
-  $('custom-bid-btn').addEventListener('click', placeCustomBid);
+  // Bid buttons — we blur the tapped button right after firing so the
+  // mobile :focus ring doesn't linger on the "last bid I pressed"
+  // button between auctions (it otherwise looks pre-selected).
+  const bidTap = (action) => (e) => {
+    placeBidAction(action);
+    if (e.currentTarget && e.currentTarget.blur) e.currentTarget.blur();
+  };
+  $('bid-min').addEventListener('click', bidTap('min'));
+  $('bid-plus10').addEventListener('click', bidTap('+10'));
+  $('bid-plus50').addEventListener('click', bidTap('+50'));
+  $('bid-plus100').addEventListener('click', bidTap('+100'));
+  $('custom-bid-btn').addEventListener('click', (e) => {
+    placeCustomBid();
+    if (e.currentTarget && e.currentTarget.blur) e.currentTarget.blur();
+  });
   $('custom-bid-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') placeCustomBid();
   });
 
   $('more-time-btn').addEventListener('click', () => send({ type: 'extend_time' }));
 
-  $('play-again-btn').addEventListener('click', () => send({ type: 'play_again' }));
+  $('play-again-btn').addEventListener('click', () => {
+    send({ type: 'ready' });
+    const btn = $('play-again-btn');
+    btn.disabled = true;
+    btn.textContent = 'Ready \u2713';
+  });
   $('back-to-lobby-btn').addEventListener('click', backToLobby);
 
   // Top-left "← Home" button on the Room screen — no confirm needed
@@ -215,6 +237,19 @@ function handleMessage(msg) {
       if (gameState) { gameState.players = msg.players; renderGame(); }
       break;
 
+    case 'ready_update':
+      if (gameState) {
+        gameState.readyIds = msg.readyIds;
+        gameState.connectedIds = msg.connectedIds;
+        if (msg.studyAutoStartAt) gameState.studyAutoStartAt = msg.studyAutoStartAt;
+      }
+      if (msg.phase === 'study') {
+        renderStudyReady(msg);
+      } else if (msg.phase === 'play_again') {
+        renderPlayAgainReady(msg);
+      }
+      break;
+
     case 'reconnected':
       isHost = msg.hostId === myPlayerId;
       if (msg.gameState === 'finished') {
@@ -365,6 +400,8 @@ function renderRoom(state) {
 }
 
 // ── Study Phase ──
+let studyCountdownInterval = null;
+
 function showStudyPhase() {
   const overlay = $('study-overlay');
   overlay.classList.remove('hidden');
@@ -378,17 +415,68 @@ function showStudyPhase() {
     deckDiv.appendChild(el);
   });
 
-  if (isHost) {
-    $('begin-auctions-btn').classList.remove('hidden');
-    $('study-waiting').classList.add('hidden');
-  } else {
-    $('begin-auctions-btn').classList.add('hidden');
-    $('study-waiting').classList.remove('hidden');
+  // Reset the Ready button state for this phase
+  const btn = $('ready-btn');
+  btn.disabled = false;
+  btn.textContent = "I'm Ready";
+
+  renderStudyReady({
+    readyIds: gameState.readyIds || [],
+    connectedIds: gameState.connectedIds || [],
+    studyAutoStartAt: gameState.studyAutoStartAt || 0,
+  });
+  startStudyCountdown(gameState.studyAutoStartAt || 0);
+}
+
+function renderStudyReady(msg) {
+  const ready = (msg.readyIds || []).length;
+  const total = (msg.connectedIds || []).length;
+  $('ready-count').textContent = `Ready ${ready}/${total}`;
+
+  // If I'm already in the ready set (e.g. reconnected), lock the btn.
+  if (msg.readyIds && msg.readyIds.includes(myPlayerId)) {
+    const btn = $('ready-btn');
+    btn.disabled = true;
+    btn.textContent = 'Ready \u2713';
+  }
+}
+
+function startStudyCountdown(autoStartAt) {
+  stopStudyCountdown();
+  if (!autoStartAt) {
+    $('ready-countdown').textContent = '';
+    return;
+  }
+  const tick = () => {
+    const remaining = Math.max(0, Math.ceil((autoStartAt - Date.now()) / 1000));
+    $('ready-countdown').textContent = `Auto-start ${remaining}s`;
+    if (remaining <= 0) stopStudyCountdown();
+  };
+  tick();
+  studyCountdownInterval = setInterval(tick, 250);
+}
+
+function stopStudyCountdown() {
+  if (studyCountdownInterval) {
+    clearInterval(studyCountdownInterval);
+    studyCountdownInterval = null;
   }
 }
 
 function hideStudyOverlay() {
   $('study-overlay').classList.add('hidden');
+  stopStudyCountdown();
+}
+
+function renderPlayAgainReady(msg) {
+  const ready = (msg.readyIds || []).length;
+  const total = (msg.connectedIds || []).length;
+  $('play-again-count').textContent = `Ready ${ready}/${total}`;
+  if (msg.readyIds && msg.readyIds.includes(myPlayerId)) {
+    const btn = $('play-again-btn');
+    btn.disabled = true;
+    btn.textContent = 'Ready \u2713';
+  }
 }
 
 // ── Result Banner ──
@@ -856,11 +944,17 @@ function renderGameOver() {
     scoresDiv.appendChild(row);
   });
 
-  if (isHost) {
-    $('play-again-btn').classList.remove('hidden');
-  } else {
-    $('play-again-btn').classList.add('hidden');
-  }
+  // Play Again is now a ready button that every player presses.
+  // Reset it each time the game-over screen is rendered so stale
+  // "Ready ✓" state from the previous round doesn't bleed through.
+  const playAgainBtn = $('play-again-btn');
+  playAgainBtn.classList.remove('hidden');
+  playAgainBtn.disabled = false;
+  playAgainBtn.textContent = 'Play Again';
+  renderPlayAgainReady({
+    readyIds: gameState.readyIds || [],
+    connectedIds: gameState.connectedIds || [],
+  });
 
   // Confetti
   spawnConfetti();

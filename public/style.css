@@ -124,16 +124,25 @@ input:focus {
   letter-spacing: 0.3em;
   text-align: center;
   font-weight: 600;
-  flex: 1;
+  /* flex: 1 1 0 + min-width: 0 so the input shrinks freely inside
+     the row; without min-width: 0 flex items default to min-content,
+     which for an <input> is the `size` attribute width — that's what
+     was pushing the Join button past the viewport edge. */
+  flex: 1 1 0;
+  min-width: 0;
+  width: 100%;
 }
 
 .join-row {
   display: flex;
   gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
 }
 
 .join-row .btn {
   flex-shrink: 0;
+  padding: 0.75rem 1.1rem;
 }
 
 .divider {
@@ -205,12 +214,25 @@ input:focus {
   flex: 1;
   min-height: 44px;
   transition: all 0.15s, box-shadow 0.2s;
+  /* Kill the sticky outline left behind after a tap on mobile;
+     keyboard focus still gets a visible ring via :focus-visible. */
+  -webkit-tap-highlight-color: transparent;
 }
 
-.btn-bid:hover:not(:disabled) {
-  background: #2a3a2a;
-  border-color: var(--success);
-  box-shadow: 0 0 8px rgba(46, 204, 113, 0.2);
+.btn-bid:focus { outline: none; }
+.btn-bid:focus-visible {
+  outline: 2px solid var(--success);
+  outline-offset: 2px;
+}
+
+/* Hover styling only applies on devices that truly hover (mouse /
+   trackpad) — touch devices leave :hover stuck on tapped elements. */
+@media (hover: hover) {
+  .btn-bid:hover:not(:disabled) {
+    background: #2a3a2a;
+    border-color: var(--success);
+    box-shadow: 0 0 8px rgba(46, 204, 113, 0.2);
+  }
 }
 
 .btn-bid.active-bid {
@@ -1381,6 +1403,40 @@ input:focus {
   color: var(--text-secondary);
   margin-bottom: 1.5rem;
   font-size: 0.85rem;
+}
+
+/* Ready bar (used in both study overlay and game-over screen) */
+.ready-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem auto 0;
+}
+
+.ready-bar .btn {
+  min-width: 180px;
+}
+
+.ready-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+}
+
+.ready-count {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ready-dot { color: var(--text-dim); }
+
+.ready-countdown {
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
 }
 
 .study-deck {
