@@ -198,14 +198,14 @@ function handleMessage(ws, msg) {
       break;
     }
 
-    case 'start_auctions': {
+    case 'ready': {
+      // Unified "Ready" handler covering both the study phase and
+      // the play-again lobby. Game.markReady dispatches based on
+      // the current game state (study vs finished) and triggers
+      // startAuctions / reset+start once everyone has clicked.
       const room = rooms.get(ws.roomCode);
-      if (!room) return;
-      if (room.hostId !== ws.playerId) {
-        ws.send(JSON.stringify({ type: 'error', message: 'Only the host can start auctions' }));
-        return;
-      }
-      room.startAuctions();
+      if (!room || !room.game) return;
+      room.markReady(ws.playerId);
       break;
     }
 
@@ -226,17 +226,6 @@ function handleMessage(ws, msg) {
       if (!extResult.success) {
         ws.send(JSON.stringify({ type: 'error', message: extResult.error }));
       }
-      break;
-    }
-
-    case 'play_again': {
-      const room = rooms.get(ws.roomCode);
-      if (!room) return;
-      if (room.hostId !== ws.playerId) {
-        ws.send(JSON.stringify({ type: 'error', message: 'Only the host can restart' }));
-        return;
-      }
-      room.playAgain();
       break;
     }
 

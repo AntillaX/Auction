@@ -138,6 +138,29 @@
       .tile-desc { font-size: 0.85rem; }
       .tile-cta { font-size: 0.72rem; }
     }
+
+    /* Landscape / wide viewports — lay the two game tiles out
+       side-by-side so the hub doesn't look like a lonely column
+       stranded in the middle of a wide screen. Kicks in once the
+       viewport is wide enough to host two tiles + breathing room. */
+    @media (min-width: 720px) {
+      body { padding: 2rem; }
+      .hub { max-width: 880px; }
+      .hub-title { font-size: 1.65rem; margin-bottom: 0.5rem; }
+      .hub-subtitle { margin-bottom: 2.25rem; }
+      .tiles {
+        flex-direction: row;
+        align-items: stretch;
+        gap: 1.5rem;
+      }
+      .tile {
+        flex: 1 1 0;
+        display: flex;
+        flex-direction: column;
+        padding: 1.5rem 1.5rem 1.6rem;
+      }
+      .tile-desc { flex: 1 1 auto; margin-bottom: 1rem; }
+    }
   </style>
 </head>
 <body>
