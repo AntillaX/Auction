@@ -20,6 +20,34 @@ let lastCardWonBy = null;
 // ── DOM refs ──
 const $ = (id) => document.getElementById(id);
 
+// ── Analytics ──
+// Thin wrapper around gtag so calls are safe even if GA hasn't
+// loaded yet (ad blocker, offline, script still fetching). All
+// events funnel through here so we have one place to tweak or
+// disable tracking.
+function track(eventName, params) {
+  try {
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', eventName, params || {});
+    }
+  } catch (_) { /* never let analytics break the game */ }
+}
+
+// Virtual page view for the SPA — fired whenever the active screen
+// changes so GA's Realtime + Funnel reports see each screen as its
+// own "page".
+function trackScreen(screenId) {
+  try {
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', 'page_view', {
+        page_title: `Auction — ${screenId}`,
+        page_location: `${location.origin}${location.pathname}#${screenId}`,
+        page_path: `${location.pathname}#${screenId}`,
+      });
+    }
+  } catch (_) {}
+}
+
 // ── Init ──
 document.addEventListener('DOMContentLoaded', () => {
   $('create-btn').addEventListener('click', createRoom);
@@ -111,6 +139,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Fire the initial virtual page view. The lobby screen is marked
+  // .active in the HTML so showScreen() is never called for it on
+  // load — we emit the page_view manually here.
+  trackScreen('lobby-screen');
+
   const savedRoom = sessionStorage.getItem('auction_room');
   const savedPlayer = sessionStorage.getItem('auction_player');
   if (savedRoom && savedPlayer) {
@@ -189,6 +222,7 @@ function handleMessage(msg) {
       sessionStorage.setItem('auction_player', myPlayerId);
       renderRoom(msg);
       showScreen('room-screen');
+      track(msg.type, { player_count: (msg.players || []).length });
       break;
 
     case 'player_joined':
@@ -277,6 +311,7 @@ function handleMessage(msg) {
       gameState = msg;
       showScreen('game-screen');
       showStudyPhase();
+      track('game_started', { player_count: (msg.players || []).length });
       break;
 
     case 'new_auction':
@@ -293,6 +328,15 @@ function handleMessage(msg) {
       renderGame();
       startLocalTimer(msg.timerRemaining, msg.timerStartedAt);
       highlightBidder(msg.playerId);
+      // Only track bids that *I* placed — otherwise every player
+      // logs every other player's bid and the numbers double up.
+      if (msg.playerId === myPlayerId) {
+        track('auction_bid', {
+          amount: msg.amount,
+          card_name: msg.currentCard && msg.currentCard.name,
+          round: msg.roundNumber,
+        });
+      }
       break;
 
     case 'time_extended':
@@ -312,6 +356,15 @@ function handleMessage(msg) {
       showResultBanner('won', msg.playerName, msg.amount, msg.cardValue, msg.playerId === myPlayerId);
       // Delay render so card animation plays first
       setTimeout(() => renderGame(), 300);
+      // Only log when I'm the winner so one auction = one event
+      // per player perspective, not one per viewer.
+      if (msg.playerId === myPlayerId) {
+        track('card_won', {
+          card_name: msg.cardValue && msg.cardValue.name,
+          card_value: msg.cardValue && msg.cardValue.value,
+          amount: msg.amount,
+        });
+      }
       break;
     }
 
@@ -333,6 +386,12 @@ function handleMessage(msg) {
       $('help-overlay').classList.add('hidden');
       renderGameOver();
       showScreen('gameover-screen');
+      track('game_finished', {
+        reason: msg.reason,
+        won_by_me: msg.winnerId === myPlayerId,
+        player_count: (msg.players || []).length,
+        rounds: msg.roundNumber,
+      });
       break;
 
     case 'error':
@@ -345,6 +404,7 @@ function handleMessage(msg) {
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
   $(id).classList.add('active');
+  trackScreen(id);
 }
 
 // ── Lobby ──
@@ -361,6 +421,9 @@ function joinRoom() {
 }
 
 function backToLobby() {
+  // Log where the player was when they bailed so we can see the
+  // drop-off points in GA (lobby vs room vs mid-game vs game-over).
+  track('player_left', { from_state: (gameState && gameState.gameState) || 'lobby' });
   sessionStorage.removeItem('auction_room');
   sessionStorage.removeItem('auction_player');
   roomCode = null; myPlayerId = null; gameState = null;

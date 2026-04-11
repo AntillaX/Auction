@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#0a0a0a">
   <title>PLATFORMVV</title>
+
+  <!-- Google Analytics (GA4) — same measurement ID shared across
+       hub / Platform / Auction so we can see cross-game traffic in
+       one property. -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-S648R7WPGJ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-S648R7WPGJ');
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -179,13 +190,13 @@
     <p class="hub-subtitle">Multiplayer games &middot; pick your table</p>
 
     <div class="tiles">
-      <a class="tile" href="/platform/">
+      <a class="tile" href="/platform/" data-game="platform">
         <span class="tile-name">Platform</span>
         <span class="tile-desc">A 4-player game of reads and bluffs.</span>
         <span class="tile-cta">Play Platform</span>
       </a>
 
-      <a class="tile" href="/auction/">
+      <a class="tile" href="/auction/" data-game="auction">
         <span class="tile-name">Auction</span>
         <span class="tile-desc">Bid, bluff, and build the strongest squad of football legends. First to 655 points wins.</span>
         <span class="tile-cta">Play Auction</span>
@@ -194,5 +205,21 @@
 
     <footer>platformvv.com</footer>
   </main>
+
+  <script>
+    // Fire a GA event when a tile is clicked so we can see which
+    // game users pick from the hub. We don't preventDefault — the
+    // beacon transport in gtag makes the event survive the
+    // navigation away.
+    document.querySelectorAll('.tile[data-game]').forEach((el) => {
+      el.addEventListener('click', () => {
+        if (typeof gtag === 'function') {
+          gtag('event', 'hub_tile_click', {
+            game: el.dataset.game,
+          });
+        }
+      });
+    });
+  </script>
 </body>
 </html>
