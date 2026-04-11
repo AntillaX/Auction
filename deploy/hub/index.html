@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0a0a">
   <title>PLATFORMVV</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -21,16 +22,25 @@
 
     html, body { height: 100%; }
 
+    /* Explicit background on html so notch / safe-area / overscroll
+       regions don't flash the default white on iOS Safari and some
+       Android browsers. Belt-and-braces: body paints the gradient
+       on top. */
+    html { background: #0a0a0a; }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: radial-gradient(ellipse at center, #1a1a1a 0%, #0a0a0a 70%);
       color: var(--text-primary);
       min-height: 100%;
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 2rem 1rem;
+      padding-left: max(1rem, env(safe-area-inset-left));
+      padding-right: max(1rem, env(safe-area-inset-right));
       -webkit-font-smoothing: antialiased;
     }
 

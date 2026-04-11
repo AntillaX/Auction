@@ -366,6 +366,10 @@ function backToLobby() {
   roomCode = null; myPlayerId = null; gameState = null;
   stopLastPlayerCountdown();
   if (ws) ws.close();
+  // Clear the room code input so the last-used code doesn't linger
+  // in the field the next time the user hits the lobby.
+  const codeInput = $('room-code-input');
+  if (codeInput) codeInput.value = '';
   showScreen('lobby-screen');
 }
 
@@ -471,9 +475,21 @@ function hideStudyOverlay() {
 function renderPlayAgainReady(msg) {
   const ready = (msg.readyIds || []).length;
   const total = (msg.connectedIds || []).length;
-  $('play-again-count').textContent = `Ready ${ready}/${total}`;
+  const btn = $('play-again-btn');
+  const countEl = $('play-again-count');
+
+  // Rematches need at least 2 connected players. If someone's
+  // gone solo on the game-over screen, hide Play Again entirely
+  // and show a waiting message instead.
+  if (total < 2) {
+    btn.classList.add('hidden');
+    countEl.textContent = 'Need 2+ players for a rematch';
+    return;
+  }
+
+  btn.classList.remove('hidden');
+  countEl.textContent = `Ready ${ready}/${total}`;
   if (msg.readyIds && msg.readyIds.includes(myPlayerId)) {
-    const btn = $('play-again-btn');
     btn.disabled = true;
     btn.textContent = 'Ready \u2713';
   }
@@ -947,8 +963,9 @@ function renderGameOver() {
   // Play Again is now a ready button that every player presses.
   // Reset it each time the game-over screen is rendered so stale
   // "Ready ✓" state from the previous round doesn't bleed through.
+  // renderPlayAgainReady also hides the button entirely when there
+  // aren't enough connected players for a rematch.
   const playAgainBtn = $('play-again-btn');
-  playAgainBtn.classList.remove('hidden');
   playAgainBtn.disabled = false;
   playAgainBtn.textContent = 'Play Again';
   renderPlayAgainReady({
