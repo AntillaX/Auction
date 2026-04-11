@@ -2,6 +2,7 @@ const Game = require('./Game');
 const Player = require('./Player');
 
 const MAX_PLAYERS = 5;
+const LAST_PLAYER_GRACE_MS = 10000;
 
 class Room {
   constructor(code) {
@@ -10,6 +11,29 @@ class Room {
     this.hostId = null;
     this.game = null;
     this.state = 'lobby'; // lobby | playing | finished
+    this.lastPlayerTimer = null;
+  }
+
+  connectedCount() {
+    let n = 0;
+    for (const [, p] of this.players) {
+      if (p.connected) n++;
+    }
+    return n;
+  }
+
+  firstConnectedId() {
+    for (const [id, p] of this.players) {
+      if (p.connected) return id;
+    }
+    return null;
+  }
+
+  clearLastPlayerTimer() {
+    if (this.lastPlayerTimer) {
+      clearTimeout(this.lastPlayerTimer);
+      this.lastPlayerTimer = null;
+    }
   }
 
   addPlayer(playerId, name, ws) {
@@ -38,6 +62,7 @@ class Room {
     const player = this.players.get(playerId);
     if (!player) return;
 
+    const playerName = player.name;
     player.connected = false;
     player.ws = null;
 
@@ -50,14 +75,40 @@ class Room {
       this.broadcast({
         type: 'player_left',
         playerId,
+        playerName,
         ...this.getState(),
       });
-    } else {
-      this.broadcast({
-        type: 'player_disconnected',
-        playerId,
-        ...this.getState(),
-      });
+      return;
+    }
+
+    this.broadcast({
+      type: 'player_disconnected',
+      playerId,
+      playerName,
+      ...this.getState(),
+    });
+
+    // If the game is still in progress and only one player remains
+    // connected, start a grace timer. If nobody rejoins within the
+    // window, end the game with the lone survivor as the winner.
+    if (this.state === 'playing' && this.game && this.game.state !== 'finished') {
+      const connected = this.connectedCount();
+      if (connected <= 1 && !this.lastPlayerTimer) {
+        const survivorId = this.firstConnectedId();
+        this.broadcast({
+          type: 'last_player_warning',
+          survivorId,
+          graceMs: LAST_PLAYER_GRACE_MS,
+        });
+        this.lastPlayerTimer = setTimeout(() => {
+          this.lastPlayerTimer = null;
+          if (!this.game || this.game.state === 'finished') return;
+          if (this.connectedCount() > 1) return;
+          const winnerId = this.firstConnectedId();
+          this.state = 'finished';
+          this.game.endGame('last_player_standing', winnerId);
+        }, LAST_PLAYER_GRACE_MS);
+      }
     }
   }
 
@@ -68,6 +119,16 @@ class Room {
     }
     player.ws = ws;
     player.connected = true;
+
+    // Somebody came back before the grace timer fired — cancel the
+    // auto-win and let everyone know the countdown is off.
+    if (this.lastPlayerTimer && this.connectedCount() > 1) {
+      this.clearLastPlayerTimer();
+      this.broadcast({
+        type: 'last_player_cleared',
+        ...this.getState(),
+      });
+    }
     return { success: true };
   }
 
@@ -143,6 +204,7 @@ class Room {
   }
 
   destroy() {
+    this.clearLastPlayerTimer();
     if (this.game) {
       this.game.destroy();
     }

@@ -170,11 +170,49 @@ function handleMessage(msg) {
       break;
 
     case 'player_joined':
+      isHost = msg.hostId === myPlayerId;
+      if (msg.player && msg.player.id !== myPlayerId) {
+        showToast(`${msg.player.name} joined`, 'success');
+      }
+      renderRoom(msg);
+      if (gameState) { gameState.players = msg.players; renderGame(); }
+      break;
+
     case 'player_left':
+      isHost = msg.hostId === myPlayerId;
+      if (msg.playerName && msg.playerId !== myPlayerId) {
+        showToast(`${msg.playerName} left`);
+      }
+      renderRoom(msg);
+      if (gameState) { gameState.players = msg.players; renderGame(); }
+      break;
+
     case 'player_disconnected':
+      isHost = msg.hostId === myPlayerId;
+      if (msg.playerName && msg.playerId !== myPlayerId) {
+        showToast(`${msg.playerName} disconnected`);
+      }
+      renderRoom(msg);
+      if (gameState) { gameState.players = msg.players; renderGame(); }
+      break;
+
     case 'player_reconnected':
       isHost = msg.hostId === myPlayerId;
+      if (msg.playerId !== myPlayerId) {
+        const rp = (msg.players || []).find((p) => p.id === msg.playerId);
+        if (rp) showToast(`${rp.name} reconnected`, 'success');
+      }
       renderRoom(msg);
+      if (gameState) { gameState.players = msg.players; renderGame(); }
+      break;
+
+    case 'last_player_warning':
+      startLastPlayerCountdown(msg.graceMs || 10000);
+      break;
+
+    case 'last_player_cleared':
+      stopLastPlayerCountdown();
+      if (gameState) { gameState.players = msg.players; renderGame(); }
       break;
 
     case 'reconnected':
@@ -254,6 +292,7 @@ function handleMessage(msg) {
     case 'game_over':
       gameState = msg;
       stopTimer();
+      stopLastPlayerCountdown();
       hideResultBanner();
       $('deck-overlay').classList.add('hidden');
       $('help-overlay').classList.add('hidden');
@@ -290,6 +329,7 @@ function backToLobby() {
   sessionStorage.removeItem('auction_room');
   sessionStorage.removeItem('auction_player');
   roomCode = null; myPlayerId = null; gameState = null;
+  stopLastPlayerCountdown();
   if (ws) ws.close();
   showScreen('lobby-screen');
 }
@@ -794,6 +834,7 @@ function renderGameOver() {
     case 'deck_exhausted': reasonText = 'All cards auctioned \u2014 highest score wins'; break;
     case 'stalemate': reasonText = 'No bids in two passes \u2014 highest score wins'; break;
     case 'all_broke': reasonText = 'All players out of funds \u2014 highest score wins'; break;
+    case 'last_player_standing': reasonText = 'Last player standing \u2014 everyone else disconnected'; break;
     default: reasonText = 'Game over';
   }
   $('win-reason').textContent = reasonText;
@@ -873,4 +914,56 @@ function showToast(message, type) {
     toast.classList.remove('visible');
     setTimeout(() => toast.classList.add('hidden'), 300);
   }, 2500);
+}
+
+// ── Last-player-standing countdown ──
+// When everyone else has disconnected mid-game, the server starts a
+// grace timer. We overlay a live countdown so the lone survivor knows
+// they're about to win by default (unless somebody reconnects).
+let lastPlayerCountdownInterval = null;
+let lastPlayerCountdownEl = null;
+
+function startLastPlayerCountdown(graceMs) {
+  stopLastPlayerCountdown();
+  const endAt = Date.now() + graceMs;
+
+  let el = document.getElementById('last-player-overlay');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'last-player-overlay';
+    el.className = 'last-player-overlay';
+    el.innerHTML = `
+      <div class="last-player-card">
+        <div class="last-player-title">You're the last one standing</div>
+        <div class="last-player-sub">Waiting for others to reconnect&hellip;</div>
+        <div class="last-player-count"><span id="last-player-seconds">10</span>s</div>
+        <div class="last-player-hint">If nobody returns, you win by default.</div>
+      </div>
+    `;
+    document.body.appendChild(el);
+  }
+  el.classList.remove('hidden');
+  lastPlayerCountdownEl = el;
+
+  const tick = () => {
+    const remaining = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
+    const span = document.getElementById('last-player-seconds');
+    if (span) span.textContent = String(remaining);
+    if (remaining <= 0) {
+      clearInterval(lastPlayerCountdownInterval);
+      lastPlayerCountdownInterval = null;
+    }
+  };
+  tick();
+  lastPlayerCountdownInterval = setInterval(tick, 250);
+}
+
+function stopLastPlayerCountdown() {
+  if (lastPlayerCountdownInterval) {
+    clearInterval(lastPlayerCountdownInterval);
+    lastPlayerCountdownInterval = null;
+  }
+  if (lastPlayerCountdownEl) {
+    lastPlayerCountdownEl.classList.add('hidden');
+  }
 }
