@@ -175,6 +175,9 @@ class Game {
   maybePlayAgain() {
     if (this.state !== 'finished') return;
     if (!this.allConnectedReady()) return;
+    // Don't allow a solo rematch — at minimum 2 connected players
+    // must be around to press Ready before we reset the game.
+    if (this.getConnectedIds().length < 2) return;
     this.reset();
     this.start();
   }
