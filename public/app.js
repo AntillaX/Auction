@@ -47,11 +47,23 @@ document.addEventListener('DOMContentLoaded', () => {
   $('play-again-btn').addEventListener('click', () => send({ type: 'play_again' }));
   $('back-to-lobby-btn').addEventListener('click', backToLobby);
 
-  $('leave-game-btn').addEventListener('click', () => {
-    if (confirm('Leave this game? You will lose your seat at the table.')) {
-      backToLobby();
-    }
-  });
+  // Top-left "← Home" button on the Room screen — no confirm needed
+  // since nobody has sunk time into the match yet.
+  $('room-leave-btn').addEventListener('click', backToLobby);
+
+  // Top-left "←" button on the in-game screen. Uses confirm() so a
+  // mis-tap mid-auction doesn't nuke the player's seat. We explicitly
+  // check that the element exists before binding so a stale cached
+  // HTML without this button won't throw and kill the rest of init().
+  const leaveBtn = $('leave-game-btn');
+  if (leaveBtn) {
+    leaveBtn.addEventListener('click', () => {
+      const msg = 'Leave this game? You will lose your seat at the table.';
+      if (window.confirm(msg)) {
+        backToLobby();
+      }
+    });
+  }
 
   $('how-to-play-btn').addEventListener('click', () => showScreen('instructions-screen'));
   $('instructions-back-btn').addEventListener('click', () => showScreen('lobby-screen'));
