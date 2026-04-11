@@ -47,6 +47,12 @@ document.addEventListener('DOMContentLoaded', () => {
   $('play-again-btn').addEventListener('click', () => send({ type: 'play_again' }));
   $('back-to-lobby-btn').addEventListener('click', backToLobby);
 
+  $('leave-game-btn').addEventListener('click', () => {
+    if (confirm('Leave this game? You will lose your seat at the table.')) {
+      backToLobby();
+    }
+  });
+
   $('how-to-play-btn').addEventListener('click', () => showScreen('instructions-screen'));
   $('instructions-back-btn').addEventListener('click', () => showScreen('lobby-screen'));
 

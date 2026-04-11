@@ -250,22 +250,29 @@ input:focus {
 
 .btn-home {
   position: absolute;
-  top: 1rem;
-  left: 1rem;
-  color: var(--text-secondary);
+  top: 0.75rem;
+  left: 0.75rem;
+  padding: 0.45rem 0.75rem;
+  color: var(--text-primary);
+  background: rgba(10, 10, 10, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   text-decoration: none;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  padding: 0.5rem;
-  transition: color 0.2s;
+  transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
   z-index: 10;
 }
 
 .btn-home:hover,
 .btn-home:focus-visible {
   color: var(--accent);
+  border-color: var(--accent);
+  background: rgba(10, 10, 10, 0.9);
   outline: none;
 }
 
@@ -853,6 +860,13 @@ input:focus {
   right: 0.5rem;
   display: flex;
   gap: 0.4rem;
+  z-index: 15;
+}
+
+.btn-icon-leave {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
   z-index: 15;
 }
 
@@ -1621,5 +1635,98 @@ input:focus {
 
   .result-banner {
     padding-top: 30%;
+  }
+}
+
+/* ── Short viewports (landscape phones / small laptops) ──
+ * The game screen stacks opponents bar + auction area + player controls
+ * vertically. On short-height viewports (mobile landscape, roughly
+ * anything under ~560px tall) the default sizes push the current card
+ * and round-info above the visible area. Shrink the chrome and the
+ * centerpiece card so everything fits without scrolling. */
+@media (max-height: 560px) {
+  .opponents-bar {
+    padding: 0.3rem;
+    gap: 0.3rem;
+  }
+
+  .opponent-card {
+    min-width: 80px;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .auction-area {
+    padding: 0.25rem;
+  }
+
+  .round-info {
+    font-size: 0.65rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .card-large {
+    width: 86px;
+    height: 120px;
+    font-size: 0.85rem;
+  }
+
+  .card-player-name { font-size: 0.78rem; }
+  .card-player-name.name-shrink-sm { font-size: 0.7rem; }
+  .card-player-name.name-shrink-md { font-size: 0.62rem; }
+  .card-player-name.name-shrink-lg { font-size: 0.55rem; }
+
+  .current-card-container {
+    margin-bottom: 0.4rem;
+  }
+
+  .bid-info {
+    margin-bottom: 0.25rem;
+    min-height: 2rem;
+  }
+
+  .bid-status { font-size: 0.8rem; }
+  .bid-amount { font-size: 1rem; }
+
+  .timer-container { max-width: 240px; }
+
+  .player-controls {
+    padding: 0.35rem 0.5rem;
+  }
+
+  .btn-bid {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .game-top-actions { top: 0.35rem; right: 0.35rem; }
+  .btn-icon-leave { top: 0.35rem; left: 0.35rem; }
+
+  .btn-icon {
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem;
+  }
+}
+
+/* ── Narrow viewports (portrait phones under ~380px wide) ──
+ * Keep bid buttons from wrapping awkwardly by tightening their
+ * padding and font-size on the smallest phones. */
+@media (max-width: 380px) {
+  .btn-bid {
+    padding: 0.55rem 0.35rem;
+    font-size: 0.78rem;
+  }
+
+  .bid-buttons { gap: 0.25rem; }
+
+  .opponents-bar {
+    padding: 0.35rem;
+    gap: 0.3rem;
+  }
+
+  .opponent-card {
+    min-width: 82px;
+    padding: 0.35rem 0.5rem;
   }
 }
