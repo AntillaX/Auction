@@ -83,9 +83,18 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ── WebSocket ──
-function connect(onOpen) {
+function wsUrl() {
   const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-  ws = new WebSocket(`${protocol}//${location.host}`);
+  // Use the directory of the current page as the WS base path so the client
+  // works whether the app is served at `/` (local dev) or under a sub-path
+  // like `/auction/` (production behind nginx). location.pathname ends in
+  // either `/` or the name of the served file — strip the trailing filename.
+  const basePath = location.pathname.replace(/[^/]*$/, '');
+  return `${protocol}//${location.host}${basePath}`;
+}
+
+function connect(onOpen) {
+  ws = new WebSocket(wsUrl());
 
   ws.onopen = () => {
     reconnectAttempts = 0;
