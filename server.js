@@ -9,7 +9,18 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
-app.use(express.static(path.join(__dirname, 'public')));
+// During active UI iteration we serve the public/ assets with
+// Cache-Control: no-store so browsers always pick up the latest
+// HTML/CSS/JS without users needing a manual hard-refresh. This is
+// fine for a small multiplayer game — the assets are tiny and the
+// round-trip is cheap. Flip to normal caching once the UI settles.
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res, filePath) => {
+    if (/\.(html|js|css)$/.test(filePath)) {
+      res.setHeader('Cache-Control', 'no-store');
+    }
+  },
+}));
 
 const rooms = new Map();
 

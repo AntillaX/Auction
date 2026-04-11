@@ -26,6 +26,10 @@
 
 html, body {
   height: 100%;
+  /* Mobile browsers shrink the visible viewport when the URL bar
+     slides up / down; 100dvh tracks that live so fullscreen layouts
+     don't leave strips of empty page above or below the UI. */
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -65,17 +69,23 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 3.5rem 1rem 1.5rem;
   background: radial-gradient(ellipse at center, #1a1a1a 0%, #0a0a0a 70%);
+  width: 100%;
+  overflow-y: auto;
 }
 
 .game-title {
-  font-size: 3rem;
+  /* Scale title with the viewport so it doesn't dominate small
+     phones or look lost on big screens. Clamped at 2.25rem on the
+     small end and 4rem on the large end. */
+  font-size: clamp(2.25rem, 10vw, 4rem);
   font-weight: 700;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.25em;
   color: var(--accent);
   text-shadow: 0 0 40px var(--accent-glow);
   margin-bottom: 0.25rem;
+  text-align: center;
 }
 
 .game-subtitle {
@@ -260,10 +270,13 @@ input:focus {
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   text-decoration: none;
+  /* Works for both <a> and <button> uses of .btn-home. */
+  font-family: inherit;
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  cursor: pointer;
   transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
   z-index: 10;
 }
@@ -312,9 +325,10 @@ input:focus {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem;
-  padding-top: 3rem;
+  padding: 3.5rem 1rem 1.5rem;
   background: radial-gradient(ellipse at center, #1a1a1a 0%, #0a0a0a 70%);
+  width: 100%;
+  overflow-y: auto;
 }
 
 .room-title {
@@ -326,9 +340,9 @@ input:focus {
 }
 
 .room-code {
-  font-size: 3rem;
+  font-size: clamp(2.25rem, 10vw, 3.25rem);
   font-weight: 700;
-  letter-spacing: 0.4em;
+  letter-spacing: 0.35em;
   color: var(--accent);
   text-shadow: 0 0 30px var(--accent-glow);
   margin-bottom: 0.25rem;
@@ -410,8 +424,16 @@ input:focus {
 
 /* ── Game Screen ── */
 #game-screen {
+  /* Explicitly size the radial ellipse to 140% × 110% so it fully
+     covers the viewport in both landscape and portrait. With the
+     default `farthest-corner` sizing, wide landscape phones ended
+     up with pure-black strips at the left/right edges where the
+     gradient had already faded to #080f0b. */
   background:
-    radial-gradient(ellipse at 50% 40%, var(--table-felt-light) 0%, var(--table-felt) 50%, #080f0b 100%);
+    radial-gradient(ellipse 140% 110% at 50% 45%,
+      var(--table-felt-light) 0%,
+      var(--table-felt) 55%,
+      #080f0b 100%);
   overflow: hidden;
 }
 
@@ -485,11 +507,23 @@ input:focus {
 .opponents-bar {
   display: flex;
   gap: 0.4rem;
-  padding: 0.5rem;
+  /* Left/right padding leaves room for the absolutely-positioned
+     leave button and deck-peek/help icon cluster on either side so
+     the centered opponent cards never slide underneath them. */
+  padding: 0.4rem 3.25rem;
   overflow-x: auto;
   scrollbar-width: none;
-  flex-shrink: 0;
+  flex: 0 0 auto;
   justify-content: center;
+  width: 100%;
+  /* Hide the bar entirely when there are no opponent cards so we
+     don't reserve dead space on solo test games. The :empty selector
+     fires because renderOpponents() sets innerHTML = '' when nobody
+     else is at the table. */
+}
+
+.opponents-bar:empty {
+  display: none;
 }
 
 .opponents-bar::-webkit-scrollbar {
@@ -576,13 +610,28 @@ input:focus {
 
 /* Auction Area */
 .auction-area {
-  flex: 1;
+  flex: 1 1 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 0.5rem;
+  /* Pack content from the top so the card always sits above the
+     timer and more-time button instead of drifting into the
+     player-controls stack underneath. */
+  justify-content: flex-start;
+  /* Top padding reserves space for the absolutely-positioned leave
+     button and deck-peek/help icon cluster so round-info doesn't
+     slide underneath them when the opponents-bar is empty/hidden. */
+  padding: 3rem 0.75rem 0.5rem;
   min-height: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* When there are opponents the opponents-bar eats its own top gutter
+   and provides the icon clearance, so we can slim the auction-area
+   top padding back down. */
+.opponents-bar:not(:empty) + .auction-area {
+  padding-top: 0.75rem;
 }
 
 .round-info {
@@ -590,12 +639,23 @@ input:focus {
   color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
+  flex: 0 0 auto;
 }
 
 .current-card-container {
   position: relative;
-  margin-bottom: 0.75rem;
+  /* Take all of the leftover vertical space between round-info and
+     the bid-info/timer row, and center the card inside it. The card
+     itself scales with available height via clamp(), so this
+     container shrinks/grows with the viewport. */
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 0.5rem;
 }
 
 /* ── Cards ── */
@@ -624,8 +684,17 @@ input:focus {
 }
 
 .card-large {
-  width: 104px;
-  height: 144px;
+  /* Scale the card with the viewport instead of jumping between
+     fixed breakpoints. Width follows height via aspect-ratio so the
+     card keeps its playing-card proportions regardless of screen
+     size, and the clamp() upper bound prevents it from getting
+     absurdly large on desktop. max-height/max-width let the flex
+     parent shrink it if there's not enough room. */
+  aspect-ratio: 104 / 144;
+  height: clamp(128px, 32vh, 240px);
+  width: auto;
+  max-height: 100%;
+  max-width: 100%;
   font-size: 1rem;
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.6),
@@ -761,8 +830,10 @@ input:focus {
 /* Bid Info */
 .bid-info {
   text-align: center;
-  margin-bottom: 0.5rem;
-  min-height: 3rem;
+  margin-bottom: 0.4rem;
+  min-height: 2.25rem;
+  flex: 0 0 auto;
+  width: 100%;
 }
 
 .bid-status {
@@ -801,10 +872,16 @@ input:focus {
 
 /* Timer */
 .timer-container {
-  width: 80%;
-  max-width: 300px;
+  /* Match the width of the bid-buttons row below so it's visually
+     connected to the controls the player is about to hit, instead
+     of being a thin centered strip that looks unrelated. */
+  width: 100%;
+  max-width: 520px;
+  padding: 0 0.5rem;
   position: relative;
   transition: opacity 0.3s;
+  flex: 0 0 auto;
+  margin-bottom: 0.25rem;
 }
 
 .timer-bar {
@@ -1041,11 +1118,13 @@ input:focus {
 
 /* Player Controls (sticky bottom) */
 .player-controls {
-  flex-shrink: 0;
-  padding: 0.5rem;
+  flex: 0 0 auto;
+  padding: 0.5rem 0.75rem 0.6rem;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
 }
 
 .my-info {
@@ -1545,10 +1624,9 @@ input:focus {
 
 /* ── Responsive ── */
 @media (min-width: 480px) {
-  .card-large {
-    width: 124px;
-    height: 172px;
-  }
+  /* card-large width/height removed — now clamped by .card-large's
+     own aspect-ratio + height: clamp(), which handles all screen
+     sizes without stepped breakpoints. */
 
   .card-player-name {
     font-size: 1.1rem;
@@ -1580,9 +1658,8 @@ input:focus {
     padding: 0.5rem 0.8rem;
   }
 
-  .game-title {
-    font-size: 4rem;
-  }
+  /* .game-title size is now driven by clamp() in its base rule, so
+     the old fixed 4rem override here is gone. */
 
   .bid-amount {
     font-size: 1.5rem;
@@ -1590,11 +1667,6 @@ input:focus {
 }
 
 @media (min-width: 768px) {
-  .card-large {
-    width: 148px;
-    height: 200px;
-  }
-
   .card-player-name {
     font-size: 1.3rem;
   }
@@ -1629,21 +1701,17 @@ input:focus {
     padding: 0.75rem 1.5rem;
   }
 
-  .timer-container {
-    max-width: 400px;
-  }
-
   .result-banner {
     padding-top: 30%;
   }
 }
 
 /* ── Short viewports (landscape phones / small laptops) ──
- * The game screen stacks opponents bar + auction area + player controls
- * vertically. On short-height viewports (mobile landscape, roughly
- * anything under ~560px tall) the default sizes push the current card
- * and round-info above the visible area. Shrink the chrome and the
- * centerpiece card so everything fits without scrolling. */
+ * The card itself is already fluid via clamp()/aspect-ratio, so we
+ * only need to trim the surrounding chrome here — padding, font
+ * sizes, and the top-of-screen icon buttons — so it fits comfortably
+ * when the viewport is short (anything under ~560px tall, e.g. a
+ * phone in landscape). */
 @media (max-height: 560px) {
   .opponents-bar {
     padding: 0.3rem;
@@ -1657,46 +1725,33 @@ input:focus {
   }
 
   .auction-area {
-    padding: 0.25rem;
+    padding: 0.35rem 0.5rem 0.25rem;
   }
 
   .round-info {
     font-size: 0.65rem;
-    margin-bottom: 0.25rem;
-  }
-
-  .card-large {
-    width: 86px;
-    height: 120px;
-    font-size: 0.85rem;
-  }
-
-  .card-player-name { font-size: 0.78rem; }
-  .card-player-name.name-shrink-sm { font-size: 0.7rem; }
-  .card-player-name.name-shrink-md { font-size: 0.62rem; }
-  .card-player-name.name-shrink-lg { font-size: 0.55rem; }
-
-  .current-card-container {
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.2rem;
   }
 
   .bid-info {
     margin-bottom: 0.25rem;
-    min-height: 2rem;
+    min-height: 1.75rem;
   }
 
   .bid-status { font-size: 0.8rem; }
   .bid-amount { font-size: 1rem; }
 
-  .timer-container { max-width: 240px; }
-
   .player-controls {
-    padding: 0.35rem 0.5rem;
+    padding: 0.4rem 0.6rem 0.5rem;
   }
+
+  .my-info { gap: 1rem; margin-bottom: 0.35rem; }
+  .stat-value { font-size: 0.95rem; }
 
   .btn-bid {
     padding: 0.5rem 0.6rem;
     font-size: 0.8rem;
+    min-height: 38px;
   }
 
   .game-top-actions { top: 0.35rem; right: 0.35rem; }
