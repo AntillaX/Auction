@@ -29,31 +29,32 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 3.5rem 1.5rem 2rem;
+      justify-content: center;
+      padding: 2rem 1rem;
       -webkit-font-smoothing: antialiased;
     }
 
     .hub {
       width: 100%;
-      max-width: 480px;
+      max-width: 420px;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
     .hub-title {
-      font-size: 1.5rem;
+      font-size: 1.35rem;
       color: var(--accent);
-      letter-spacing: 0.1em;
-      margin-bottom: 0.5rem;
+      letter-spacing: 0.18em;
+      margin-bottom: 0.4rem;
       text-align: center;
     }
 
     .hub-subtitle {
-      font-size: 0.85rem;
+      font-size: 0.78rem;
       color: var(--text-secondary);
       letter-spacing: 0.05em;
-      margin-bottom: 2rem;
+      margin-bottom: 1.75rem;
       text-align: center;
     }
 
@@ -61,12 +62,12 @@
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 1.25rem;
+      gap: 0.9rem;
     }
 
     .tile {
       display: block;
-      padding: 1.25rem 1.25rem 1.4rem;
+      padding: 1rem 1.1rem 1.1rem;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: var(--radius-lg);
@@ -83,35 +84,27 @@
       outline: none;
     }
 
-    .tile-label {
-      display: block;
-      font-size: 0.7rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 0.5rem;
-    }
-
     .tile-name {
       display: block;
-      font-size: 1.25rem;
+      font-size: 1.1rem;
       font-weight: 700;
-      letter-spacing: 0.08em;
-      margin-bottom: 0.5rem;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.45rem;
       text-transform: uppercase;
+      color: var(--accent);
     }
 
     .tile-desc {
       display: block;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: var(--text-secondary);
       line-height: 1.5;
-      margin-bottom: 0.9rem;
+      margin-bottom: 0.75rem;
     }
 
     .tile-cta {
       display: block;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: 600;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -128,11 +121,22 @@
     .tile:focus-visible .tile-cta::after { transform: translateX(4px); }
 
     footer {
-      margin-top: 2.5rem;
-      font-size: 0.7rem;
+      margin-top: 2rem;
+      font-size: 0.65rem;
       color: var(--text-dim);
       letter-spacing: 0.12em;
       text-transform: uppercase;
+    }
+
+    @media (min-width: 480px) {
+      .hub { max-width: 460px; }
+      .hub-title { font-size: 1.5rem; }
+      .hub-subtitle { font-size: 0.85rem; margin-bottom: 2rem; }
+      .tiles { gap: 1.1rem; }
+      .tile { padding: 1.2rem 1.25rem 1.35rem; }
+      .tile-name { font-size: 1.2rem; }
+      .tile-desc { font-size: 0.85rem; }
+      .tile-cta { font-size: 0.72rem; }
     }
   </style>
 </head>
@@ -143,14 +147,12 @@
 
     <div class="tiles">
       <a class="tile" href="/platform/">
-        <span class="tile-label">Action</span>
         <span class="tile-name">Platform</span>
-        <span class="tile-desc">Fast-paced multiplayer platformer. Jump, shoot, and outlast your friends.</span>
+        <span class="tile-desc">A 4-player game of reads and bluffs.</span>
         <span class="tile-cta">Play Platform</span>
       </a>
 
       <a class="tile" href="/auction/">
-        <span class="tile-label">Strategy</span>
         <span class="tile-name">Auction</span>
         <span class="tile-desc">Bid, bluff, and build the strongest squad of football legends. First to 655 points wins.</span>
         <span class="tile-cta">Play Auction</span>
