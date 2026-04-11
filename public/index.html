@@ -5,6 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>AUCTION</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- Google Analytics (GA4) — same measurement ID as hub and
+       Platform so unique users are counted once across the whole
+       site. Custom events for the auction funnel are emitted from
+       app.js via the `track()` helper. -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-S648R7WPGJ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-S648R7WPGJ', {
+      // Auction is a single-page app — disable automatic page_view
+      // on load so we can fire virtual page_views as the screen
+      // changes (lobby, room, game, game_over).
+      send_page_view: false,
+    });
+  </script>
 </head>
 <body>
   <div id="app">
