@@ -817,34 +817,178 @@ input:focus {
   font-size: 0.9rem;
 }
 
-/* Deck Area */
-.deck-area {
-  padding: 0.4rem 0.5rem;
-  flex-shrink: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+/* Game Top Actions (help + deck peek) */
+.game-top-actions {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  gap: 0.4rem;
+  z-index: 15;
 }
 
-.deck-label {
-  font-size: 0.65rem;
+.btn-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.1s, border-color 0.15s;
+}
+
+.btn-icon:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--accent);
+}
+
+.btn-icon:active {
+  transform: scale(0.92);
+}
+
+/* Deck Peek Overlay */
+.deck-overlay,
+.help-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.94);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.deck-overlay.hidden,
+.help-overlay.hidden {
+  display: none;
+}
+
+.deck-overlay-content,
+.help-overlay-content {
+  min-height: 100%;
+  padding: 3rem 1rem 2rem;
+  max-width: 520px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.deck-overlay-title {
+  color: var(--accent);
+  text-align: center;
+  font-size: 1.4rem;
+  margin-bottom: 1.25rem;
+  margin-top: 0.25rem;
+}
+
+.deck-section {
+  margin-bottom: 1.5rem;
+}
+
+.deck-section-label {
+  font-size: 0.7rem;
   color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.5rem;
   text-align: center;
 }
 
-.deck-sequence {
-  display: flex;
-  gap: 3px;
-  overflow-x: auto;
-  padding-bottom: 0.3rem;
-  scrollbar-width: none;
-  justify-content: center;
-  flex-wrap: wrap;
+.deck-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
 }
 
-.deck-sequence::-webkit-scrollbar {
-  display: none;
+.deck-grid .card-small {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 0.78;
+  min-width: 0;
+}
+
+.deck-grid .card-sm-name {
+  font-size: 0.45rem;
+}
+
+.deck-grid .card-sm-value {
+  font-size: 0.55rem;
+}
+
+.deck-grid .card-discarded {
+  opacity: 0.55;
+  filter: grayscale(0.3);
+}
+
+.deck-claimed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.deck-claimed-row {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.6rem;
+}
+
+.deck-claimed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+
+.deck-claimed-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.deck-claimed-pts {
+  font-size: 0.7rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.deck-claimed-cards {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 3px;
+}
+
+.deck-claimed-cards .card-small {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 0.78;
+  min-width: 0;
+}
+
+.deck-claimed-cards .card-sm-name {
+  font-size: 0.45rem;
+}
+
+.deck-claimed-cards .card-sm-value {
+  font-size: 0.55rem;
+}
+
+.deck-empty-msg {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 0.5rem;
+  font-style: italic;
+}
+
+.help-overlay-content .instructions-title {
+  margin-top: 0.25rem;
 }
 
 /* Player Controls (sticky bottom) */
@@ -1113,29 +1257,29 @@ input:focus {
 }
 
 .study-deck {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: center;
-  margin-bottom: 1.5rem;
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+  margin: 0 auto 1.5rem;
+  max-width: 440px;
+  width: 100%;
 }
 
 .study-deck .card-small {
-  width: 54px;
-  height: 70px;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 0.78;
+  min-width: 0;
   opacity: 0;
   animation: study-card-in 0.3s ease-out forwards;
 }
 
 .study-deck .card-sm-name {
-  font-size: 0.5rem;
+  font-size: 0.45rem;
 }
 
 .study-deck .card-sm-value {
-  font-size: 0.6rem;
+  font-size: 0.55rem;
 }
 
 @keyframes study-card-in {
