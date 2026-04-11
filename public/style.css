@@ -1468,6 +1468,67 @@ input:focus {
   to { transform: rotate(360deg); }
 }
 
+/* ── Last-player-standing overlay ── */
+.last-player-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 180;
+  padding: 1.25rem;
+  backdrop-filter: blur(4px);
+  animation: fade-in 0.2s ease-out;
+}
+
+.last-player-overlay.hidden { display: none; }
+
+.last-player-card {
+  background: var(--bg-surface);
+  border: 1px solid rgba(212, 168, 67, 0.35);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem 1.5rem;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.last-player-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+  margin-bottom: 0.5rem;
+}
+
+.last-player-sub {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.1rem;
+}
+
+.last-player-count {
+  font-size: 3.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.last-player-hint {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* ── Animations ── */
 @keyframes bid-pulse {
   0% { box-shadow: 0 0 0 0 var(--accent-glow); }
