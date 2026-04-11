@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLATFORMVV</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0a;
+      --table-felt: #0d1f15;
+      --table-felt-light: #132a1c;
+      --text-primary: #e8e0d0;
+      --text-secondary: #888;
+      --text-dim: #555;
+      --accent: #d4a843;
+      --accent-glow: rgba(212, 168, 67, 0.3);
+      --radius-lg: 12px;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background:
+        radial-gradient(ellipse at 50% 40%, var(--table-felt-light) 0%, var(--table-felt) 50%, #080f0b 100%);
+      color: var(--text-primary);
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.25rem;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .hub {
+      width: 100%;
+      max-width: 720px;
+      text-align: center;
+    }
+
+    .hub-title {
+      font-size: clamp(2.5rem, 8vw, 4.25rem);
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      text-shadow: 0 0 32px var(--accent-glow);
+      margin-bottom: 0.35rem;
+    }
+
+    .hub-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      margin-bottom: 2.5rem;
+      text-transform: uppercase;
+    }
+
+    .tiles {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    @media (min-width: 560px) {
+      .tiles { grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    }
+
+    .tile {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+      padding: 1.5rem 1.5rem 1.75rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-lg);
+      color: var(--text-primary);
+      text-decoration: none;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tile::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 80% 0%, var(--accent-glow), transparent 55%);
+      opacity: 0;
+      transition: opacity 0.18s ease;
+      pointer-events: none;
+    }
+
+    .tile:hover,
+    .tile:focus-visible {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--accent-glow) inset;
+      outline: none;
+    }
+
+    .tile:hover::after,
+    .tile:focus-visible::after { opacity: 0.6; }
+
+    .tile-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .tile-name {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.6rem;
+    }
+
+    .tile-desc {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 1.25rem;
+    }
+
+    .tile-cta {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-top: auto;
+    }
+
+    .tile-cta::after {
+      content: " \2192";
+      transition: transform 0.18s ease;
+      display: inline-block;
+    }
+
+    .tile:hover .tile-cta::after,
+    .tile:focus-visible .tile-cta::after { transform: translateX(4px); }
+
+    footer {
+      margin-top: 2.5rem;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <main class="hub">
+    <h1 class="hub-title">PLATFORMVV</h1>
+    <p class="hub-subtitle">Multiplayer games &middot; pick your table</p>
+
+    <div class="tiles">
+      <a class="tile" href="/platform/">
+        <span class="tile-label">Action</span>
+        <span class="tile-name">PLATFORM</span>
+        <span class="tile-desc">Fast-paced multiplayer platformer. Jump, shoot, and outlast your friends on shifting arenas.</span>
+        <span class="tile-cta">Play Platform</span>
+      </a>
+
+      <a class="tile" href="/auction/">
+        <span class="tile-label">Strategy</span>
+        <span class="tile-name">AUCTION</span>
+        <span class="tile-desc">Bid, bluff, and build the strongest squad of football legends. First to 655 points wins.</span>
+        <span class="tile-cta">Play Auction</span>
+      </a>
+    </div>
+
+    <footer>platformvv.com</footer>
+  </main>
+</body>
+</html>
