@@ -1468,6 +1468,59 @@ input:focus {
   to { transform: rotate(360deg); }
 }
 
+/* ── Rotate-to-portrait gate ──
+   Auction is designed for portrait phones. On short landscape
+   viewports (i.e. a phone held sideways) we show a full-screen
+   "rotate your phone" nudge. Desktop, tablets, and anything with
+   a decent height are unaffected. */
+.rotate-overlay {
+  display: none;
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .rotate-overlay {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, #1a1a1a 0%, #0a0a0a 70%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    padding: 1rem;
+  }
+
+  .rotate-content {
+    text-align: center;
+    color: var(--text-primary);
+    max-width: 320px;
+  }
+
+  .rotate-icon {
+    font-size: 3rem;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+    animation: rotate-nudge 1.8s ease-in-out infinite;
+    display: inline-block;
+  }
+
+  .rotate-title {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.4rem;
+  }
+
+  .rotate-sub {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+}
+
+@keyframes rotate-nudge {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-90deg); }
+}
+
 /* ── Last-player-standing overlay ── */
 .last-player-overlay {
   position: fixed;
