@@ -111,6 +111,12 @@
 
     <!-- Game Screen -->
     <div id="game-screen" class="screen">
+      <!-- Top-right action buttons -->
+      <div class="game-top-actions">
+        <button id="deck-peek-btn" class="btn-icon" title="View deck" aria-label="View deck">&#9782;</button>
+        <button id="help-btn" class="btn-icon" title="How to Play" aria-label="How to Play">?</button>
+      </div>
+
       <!-- Study Phase Overlay -->
       <div id="study-overlay" class="study-overlay hidden">
         <div class="study-content">
@@ -146,10 +152,54 @@
         <button id="more-time-btn" class="btn btn-more-time hidden">More Time</button>
       </div>
 
-      <!-- Remaining Deck -->
-      <div id="deck-area" class="deck-area">
-        <div class="deck-label">Upcoming</div>
-        <div id="deck-sequence" class="deck-sequence"></div>
+      <!-- Deck Peek Overlay -->
+      <div id="deck-overlay" class="deck-overlay hidden">
+        <div class="deck-overlay-content">
+          <button id="deck-overlay-close" class="btn-back">&larr; Close</button>
+          <h2 class="deck-overlay-title">The Deck</h2>
+          <div class="deck-section">
+            <div class="deck-section-label" id="deck-upcoming-label">Upcoming</div>
+            <div id="deck-upcoming" class="deck-grid"></div>
+          </div>
+          <div class="deck-section">
+            <div class="deck-section-label" id="deck-discard-label">Discard</div>
+            <div id="deck-discard" class="deck-grid"></div>
+          </div>
+          <div class="deck-section">
+            <div class="deck-section-label">Claimed</div>
+            <div id="deck-claimed" class="deck-claimed-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- In-game Help Overlay -->
+      <div id="help-overlay" class="help-overlay hidden">
+        <div class="help-overlay-content">
+          <button id="help-overlay-close" class="btn-back">&larr; Close</button>
+          <h2 class="instructions-title">How to Play</h2>
+          <div class="instructions-body">
+            <div class="rule-section">
+              <h3>The Goal</h3>
+              <p>Be the first player to reach <strong>655 points</strong> by winning football player cards at auction.</p>
+            </div>
+            <div class="rule-section">
+              <h3>How Auctions Work</h3>
+              <ol>
+                <li>Cards are auctioned one at a time in the revealed order</li>
+                <li>Anyone can open bidding at <strong>$50 minimum</strong></li>
+                <li>Bids must be in <strong>$10 increments</strong> and beat the current bid by at least $10</li>
+                <li>Each bid resets a <strong>10-second timer</strong></li>
+                <li>Each player can use <strong>More Time</strong> once per round to reset the timer</li>
+                <li>When the timer expires, the highest bidder wins the card and pays their bid</li>
+                <li>If nobody bids, the card is discarded</li>
+              </ol>
+            </div>
+            <div class="rule-section">
+              <h3>Ending the Game</h3>
+              <p>The first player to reach <strong>655 points</strong> wins instantly. If the deck runs out, discarded cards are recycled. If two full passes through discards produce no bids, the highest score wins.</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Player Controls (sticky bottom) -->

@@ -50,6 +50,21 @@ document.addEventListener('DOMContentLoaded', () => {
   $('how-to-play-btn').addEventListener('click', () => showScreen('instructions-screen'));
   $('instructions-back-btn').addEventListener('click', () => showScreen('lobby-screen'));
 
+  $('help-btn').addEventListener('click', () => {
+    $('help-overlay').classList.remove('hidden');
+  });
+  $('help-overlay-close').addEventListener('click', () => {
+    $('help-overlay').classList.add('hidden');
+  });
+
+  $('deck-peek-btn').addEventListener('click', () => {
+    renderDeckOverlay();
+    $('deck-overlay').classList.remove('hidden');
+  });
+  $('deck-overlay-close').addEventListener('click', () => {
+    $('deck-overlay').classList.add('hidden');
+  });
+
   $('room-code-display').addEventListener('click', () => {
     if (roomCode) {
       navigator.clipboard.writeText(roomCode).then(() => showToast('Code copied!', 'success'));
@@ -213,6 +228,8 @@ function handleMessage(msg) {
       gameState = msg;
       stopTimer();
       hideResultBanner();
+      $('deck-overlay').classList.add('hidden');
+      $('help-overlay').classList.add('hidden');
       renderGameOver();
       showScreen('gameover-screen');
       break;
@@ -346,9 +363,12 @@ function renderGame() {
   if (!gameState) return;
   renderOpponents();
   renderAuctionArea();
-  renderDeckSequence();
   renderMyInfo();
   updateBidControls();
+  // If deck overlay is open, keep it in sync with latest state
+  if (!$('deck-overlay').classList.contains('hidden')) {
+    renderDeckOverlay();
+  }
 }
 
 function renderOpponents() {
@@ -434,22 +454,82 @@ function renderAuctionArea() {
   }
 }
 
-function renderDeckSequence() {
-  const container = $('deck-sequence');
-  container.innerHTML = '';
+function renderDeckOverlay() {
+  if (!gameState) return;
 
-  const remaining = gameState.remainingCards || [];
-  const label = $('deck-area').querySelector('.deck-label');
+  // Upcoming (current + remaining in this pass)
+  const upcomingContainer = $('deck-upcoming');
+  upcomingContainer.innerHTML = '';
+  const upcoming = [];
+  if (gameState.gameState === 'auction' && gameState.currentCard) {
+    upcoming.push(gameState.currentCard);
+  }
+  (gameState.remainingCards || []).forEach((c) => upcoming.push(c));
 
-  if (remaining.length === 0 && gameState.discardPile && gameState.discardPile.length > 0) {
-    if (label) label.textContent = `Discard (${gameState.discardPile.length})`;
-    gameState.discardPile.forEach((card) => {
-      container.appendChild(createCardElement(card, 'card-small'));
-    });
+  $('deck-upcoming-label').textContent =
+    `Upcoming (${upcoming.length})${gameState.inDiscardPhase ? ' — Discard Pass' : ''}`;
+
+  if (upcoming.length === 0) {
+    const msg = document.createElement('div');
+    msg.className = 'deck-empty-msg';
+    msg.textContent = 'No cards left in this pass.';
+    upcomingContainer.appendChild(msg);
   } else {
-    if (label) label.textContent = `Upcoming (${remaining.length})`;
-    remaining.forEach((card) => {
-      container.appendChild(createCardElement(card, 'card-small'));
+    upcoming.forEach((card) => {
+      upcomingContainer.appendChild(createCardElement(card, 'card-small'));
+    });
+  }
+
+  // Discard pile (cards that went with no bid, waiting for next pass)
+  const discardContainer = $('deck-discard');
+  discardContainer.innerHTML = '';
+  const discard = gameState.discardPile || [];
+  $('deck-discard-label').textContent = `Discard (${discard.length})`;
+
+  if (discard.length === 0) {
+    const msg = document.createElement('div');
+    msg.className = 'deck-empty-msg';
+    msg.textContent = 'Nothing discarded yet.';
+    discardContainer.appendChild(msg);
+  } else {
+    discard.forEach((card) => {
+      const el = createCardElement(card, 'card-small');
+      el.classList.add('card-discarded');
+      discardContainer.appendChild(el);
+    });
+  }
+
+  // Claimed — grouped by player
+  const claimedContainer = $('deck-claimed');
+  claimedContainer.innerHTML = '';
+  const players = gameState.players || [];
+  const anyClaimed = players.some((p) => p.cardsWon && p.cardsWon.length > 0);
+
+  if (!anyClaimed) {
+    const msg = document.createElement('div');
+    msg.className = 'deck-empty-msg';
+    msg.textContent = 'No cards claimed yet.';
+    claimedContainer.appendChild(msg);
+  } else {
+    players.forEach((p) => {
+      if (!p.cardsWon || p.cardsWon.length === 0) return;
+      const row = document.createElement('div');
+      row.className = 'deck-claimed-row';
+      const total = p.cardsWon.reduce((s, c) => s + (c.value || 0), 0);
+      const header = document.createElement('div');
+      header.className = 'deck-claimed-header';
+      header.innerHTML = `
+        <span class="deck-claimed-name">${esc(p.name)}${p.id === myPlayerId ? ' (you)' : ''}</span>
+        <span class="deck-claimed-pts">${p.cardsWon.length} cards · ${total} pts</span>
+      `;
+      row.appendChild(header);
+      const cardsWrap = document.createElement('div');
+      cardsWrap.className = 'deck-claimed-cards';
+      p.cardsWon.forEach((card) => {
+        cardsWrap.appendChild(createCardElement(card, 'card-small'));
+      });
+      row.appendChild(cardsWrap);
+      claimedContainer.appendChild(row);
     });
   }
 }
@@ -515,9 +595,10 @@ function updateBidControls() {
   customInput.disabled = !isAuction || !me || me.budget < minBid;
   customBtn.disabled = !isAuction || !me || me.budget < minBid;
 
-  // More Time button
+  // More Time button — hidden when not auctioning or when you're the leading bidder
   const moreTimeBtn = $('more-time-btn');
-  if (isAuction) {
+  const isLeading = gameState.highestBidderId === myPlayerId;
+  if (isAuction && !isLeading) {
     moreTimeBtn.classList.remove('hidden');
     const alreadyUsed = (gameState.extendedBy || []).includes(myPlayerId);
     moreTimeBtn.disabled = alreadyUsed;
