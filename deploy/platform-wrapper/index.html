@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLATFORM</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      background: #000;
+      overflow: hidden;
+    }
+
+    /*
+     * Fullscreen iframe that loads Godot's web export. We keep the export
+     * untouched on disk (Platform_WebClaude.html etc.) and layer a Home link
+     * on top of it so players can get back to the hub without losing the
+     * Godot runtime. The iframe is same-origin, so COOP/COEP headers set by
+     * nginx for /platform/ apply to both parent and frame, keeping
+     * SharedArrayBuffer / threaded export happy.
+     */
+    iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    .hub-link {
+      position: fixed;
+      top: 0.75rem;
+      left: 0.75rem;
+      z-index: 10;
+      padding: 0.45rem 0.75rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #e8e0d0;
+      background: rgba(10, 10, 10, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      text-decoration: none;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .hub-link:hover,
+    .hub-link:focus-visible {
+      color: #d4a843;
+      border-color: #d4a843;
+      background: rgba(10, 10, 10, 0.9);
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <a class="hub-link" href="/" aria-label="Back to platformvv hub">&larr; Hub</a>
+  <iframe src="Platform_WebClaude.html" allow="cross-origin-isolated; fullscreen; gamepad; autoplay"></iframe>
+</body>
+</html>

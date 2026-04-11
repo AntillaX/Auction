@@ -9,13 +9,13 @@
 
     :root {
       --bg: #0a0a0a;
-      --table-felt: #0d1f15;
-      --table-felt-light: #132a1c;
+      --bg-surface: #141414;
       --text-primary: #e8e0d0;
       --text-secondary: #888;
       --text-dim: #555;
       --accent: #d4a843;
       --accent-glow: rgba(212, 168, 67, 0.3);
+      --radius: 8px;
       --radius-lg: 12px;
     }
 
@@ -23,124 +23,105 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background:
-        radial-gradient(ellipse at 50% 40%, var(--table-felt-light) 0%, var(--table-felt) 50%, #080f0b 100%);
+      background: radial-gradient(ellipse at center, #1a1a1a 0%, #0a0a0a 70%);
       color: var(--text-primary);
       min-height: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 2rem 1.25rem;
+      padding: 3.5rem 1.5rem 2rem;
       -webkit-font-smoothing: antialiased;
     }
 
     .hub {
       width: 100%;
-      max-width: 720px;
-      text-align: center;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .hub-title {
-      font-size: clamp(2.5rem, 8vw, 4.25rem);
-      font-weight: 800;
-      letter-spacing: 0.18em;
+      font-size: 1.5rem;
       color: var(--accent);
-      text-shadow: 0 0 32px var(--accent-glow);
-      margin-bottom: 0.35rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+      text-align: center;
     }
 
     .hub-subtitle {
+      font-size: 0.85rem;
       color: var(--text-secondary);
-      font-size: 0.95rem;
-      letter-spacing: 0.08em;
-      margin-bottom: 2.5rem;
-      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2rem;
+      text-align: center;
     }
 
     .tiles {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1rem;
-    }
-
-    @media (min-width: 560px) {
-      .tiles { grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
     }
 
     .tile {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      text-align: left;
-      padding: 1.5rem 1.5rem 1.75rem;
+      display: block;
+      padding: 1.25rem 1.25rem 1.4rem;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: var(--radius-lg);
       color: var(--text-primary);
       text-decoration: none;
-      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .tile::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse at 80% 0%, var(--accent-glow), transparent 55%);
-      opacity: 0;
-      transition: opacity 0.18s ease;
-      pointer-events: none;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
     }
 
     .tile:hover,
     .tile:focus-visible {
-      transform: translateY(-3px);
+      transform: translateY(-2px);
       border-color: var(--accent);
       background: rgba(255, 255, 255, 0.05);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--accent-glow) inset;
       outline: none;
     }
 
-    .tile:hover::after,
-    .tile:focus-visible::after { opacity: 0.6; }
-
     .tile-label {
+      display: block;
       font-size: 0.7rem;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.15em;
       text-transform: uppercase;
       color: var(--accent);
       margin-bottom: 0.5rem;
     }
 
     .tile-name {
-      font-size: 1.75rem;
+      display: block;
+      font-size: 1.25rem;
       font-weight: 700;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.6rem;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
     }
 
     .tile-desc {
-      font-size: 0.88rem;
+      display: block;
+      font-size: 0.85rem;
       color: var(--text-secondary);
       line-height: 1.5;
-      margin-bottom: 1.25rem;
+      margin-bottom: 0.9rem;
     }
 
     .tile-cta {
-      font-size: 0.8rem;
+      display: block;
+      font-size: 0.75rem;
       font-weight: 600;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--accent);
-      margin-top: auto;
     }
 
     .tile-cta::after {
       content: " \2192";
-      transition: transform 0.18s ease;
       display: inline-block;
+      transition: transform 0.18s ease;
     }
 
     .tile:hover .tile-cta::after,
@@ -148,7 +129,7 @@
 
     footer {
       margin-top: 2.5rem;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--text-dim);
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -163,14 +144,14 @@
     <div class="tiles">
       <a class="tile" href="/platform/">
         <span class="tile-label">Action</span>
-        <span class="tile-name">PLATFORM</span>
-        <span class="tile-desc">Fast-paced multiplayer platformer. Jump, shoot, and outlast your friends on shifting arenas.</span>
+        <span class="tile-name">Platform</span>
+        <span class="tile-desc">Fast-paced multiplayer platformer. Jump, shoot, and outlast your friends.</span>
         <span class="tile-cta">Play Platform</span>
       </a>
 
       <a class="tile" href="/auction/">
         <span class="tile-label">Strategy</span>
-        <span class="tile-name">AUCTION</span>
+        <span class="tile-name">Auction</span>
         <span class="tile-desc">Bid, bluff, and build the strongest squad of football legends. First to 655 points wins.</span>
         <span class="tile-cta">Play Auction</span>
       </a>
