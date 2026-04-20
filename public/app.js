@@ -968,17 +968,9 @@ function animateCardPassed() {
 }
 
 // ── Card Element Builder ──
-function posCategory(pos) {
-  if (pos === 'GK') return 'gk';
-  if (['CB', 'LB', 'RB'].includes(pos)) return 'def';
-  if (['CM', 'CAM', 'RM', 'AM'].includes(pos)) return 'mid';
-  return 'att';
-}
-
 function createCardElement(card, sizeClass) {
   const el = document.createElement('div');
-  const cat = card.position ? posCategory(card.position) : '';
-  el.className = `card ${sizeClass} card-tier-${card.value}` + (cat ? ` card-pos-${cat}` : '');
+  el.className = `card ${sizeClass} card-tier-${card.value}`;
   el.setAttribute('data-value', card.value);
   el.setAttribute('data-name', card.name);
   const posHtml = card.position ? `<span class="card-pos-label">${card.position}</span>` : '';

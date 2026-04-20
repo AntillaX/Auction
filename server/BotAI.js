@@ -86,6 +86,10 @@ function calculateMaxBid(bot, card, game) {
     maxBid = Math.max(maxBid, Math.min(blockAmount, bot.budget));
   }
 
+  // Jitter: ±15% randomness so bots aren't robotically optimal
+  const jitter = 0.85 + Math.random() * 0.30;
+  maxBid *= jitter;
+
   maxBid = Math.min(maxBid, bot.budget);
   maxBid = Math.floor(maxBid / 10) * 10;
   return Math.max(0, maxBid);
