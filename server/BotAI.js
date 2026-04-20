@@ -4,52 +4,40 @@ const MIN_BID_INCREMENT = 10;
 
 const BOT_BIASES = {
   Allegri: {
-    favorites: ['Buffon', 'Ronaldo', 'Van Dijk'],
-    dislikes: ['Neymar', 'Lamine Yamal', 'Ronaldinho', 'Morata'],
+    mustHave: 'Buffon',
+    likes: ['Ronaldo', 'Ramos'],
+    dislikes: ['Neymar', 'Lamine Yamal', 'Ronaldinho', 'Morata', 'Lingard', 'Mustafi', 'Maguire'],
   },
   Conte: {
-    favorites: ['Haaland', 'Beckham', 'Bellingham'],
-    dislikes: ['Jordi Alba', 'Pedri', 'Marcelo', 'Mustafi'],
+    mustHave: 'Haaland',
+    likes: ['Beckham', 'Van Dijk'],
+    dislikes: ['Jordi Alba', 'Pedri', 'Marcelo', 'Mustafi', 'Morata', 'Lingard', 'Maguire'],
   },
   Simeone: {
-    favorites: ['Casillas', 'Dani Carvajal', 'Ramos'],
-    dislikes: ['Ronaldinho', 'Neymar', 'Lingard', 'Maguire'],
+    mustHave: 'Ramos',
+    likes: ['Casillas', 'Dani Carvajal'],
+    dislikes: ['Ronaldinho', 'Neymar', 'Lingard', 'Maguire', 'Mustafi', 'Morata', 'Jordi Alba'],
   },
   Ancelotti: {
-    favorites: ['Ronaldo', 'Modric', 'Courtois'],
-    dislikes: ['Lingard', 'Mustafi', 'Jordi Alba', 'Maguire'],
+    mustHave: 'Modric',
+    likes: ['Ronaldo', 'Courtois'],
+    dislikes: ['Lingard', 'Mustafi', 'Jordi Alba', 'Maguire', 'Morata', 'Marcelo', 'De Gea'],
   },
   Mourinho: {
-    favorites: ['Neuer', 'Xavi', 'Ramos'],
-    dislikes: ['Pedri', 'Lamine Yamal', 'Iniesta', 'Neymar'],
+    mustHave: 'Neuer',
+    likes: ['Xavi', 'Ramos'],
+    dislikes: ['Pedri', 'Lamine Yamal', 'Iniesta', 'Neymar', 'Lingard', 'Mustafi', 'Maguire'],
   },
 };
-
-// Calculate the maximum amount a bot is willing to pay for a card.
-//
-// Strategy: budget is a finite resource spread across the points
-// still needed to reach 644.  Base price is proportional to
-// (card value / points needed) * budget.  Layers on top:
-//
-//   1. Scarcity  — premium for above-average cards, discount when
-//      better ones are coming.
-//   2. Personality — each bot overpays for favourites (~20%) and
-//      mostly ignores cards it dislikes (~70% discount).
-//   3. Blocking  — if an opponent would reach 644 by winning this
-//      card, bid just enough to outprice their budget.
-//   4. Win-now   — if this card clinches the game, go all-in.
 
 function calculateMaxBid(bot, card, game) {
   const needed = WIN_THRESHOLD - bot.score;
   if (needed <= 0) return 0;
 
-  // This card clinches the game — spend everything
   if (card.value >= needed) return bot.budget;
 
-  // Base valuation: budget per point * card points
   let maxBid = (card.value / needed) * bot.budget;
 
-  // Scarcity: compare this card to what's still coming
   const future = [...game.getRemainingCards(), ...game.discardPile];
   if (future.length > 0) {
     const avg = future.reduce((s, c) => s + c.value, 0) / future.length;
@@ -62,19 +50,17 @@ function calculateMaxBid(bot, card, game) {
     maxBid = bot.budget;
   }
 
-  // Personality bias (applied before blocking so a bot can still
-  // be forced to block on a card it dislikes)
   const bias = BOT_BIASES[bot.name];
   if (bias) {
-    if (bias.favorites.includes(card.name)) {
-      maxBid *= 1.2;
+    if (bias.mustHave === card.name) {
+      maxBid *= 1.5;
+    } else if (bias.likes.includes(card.name)) {
+      maxBid *= 1.15;
     } else if (bias.dislikes.includes(card.name)) {
-      maxBid *= 0.3;
+      maxBid *= 0.5;
     }
   }
 
-  // Blocking: if an opponent would win with this card, bid just
-  // enough to outprice them — no need to burn the whole budget.
   let blockAmount = 0;
   for (const [id, p] of game.players) {
     if (id === bot.id) continue;
@@ -86,13 +72,15 @@ function calculateMaxBid(bot, card, game) {
     maxBid = Math.max(maxBid, Math.min(blockAmount, bot.budget));
   }
 
-  // Jitter: ±15% randomness so bots aren't robotically optimal
-  const jitter = 0.85 + Math.random() * 0.30;
-  maxBid *= jitter;
-
   maxBid = Math.min(maxBid, bot.budget);
   maxBid = Math.floor(maxBid / 10) * 10;
   return Math.max(0, maxBid);
 }
 
-module.exports = { calculateMaxBid };
+function willStartBid(bot, card) {
+  const bias = BOT_BIASES[bot.name];
+  if (bias && bias.dislikes.includes(card.name)) return false;
+  return true;
+}
+
+module.exports = { calculateMaxBid, willStartBid };

@@ -55,11 +55,23 @@ body {
   position: absolute;
   top: 0;
   left: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .screen.active {
   display: flex;
   flex-direction: column;
+  opacity: 1;
+}
+
+.screen.screen-fade-in {
+  animation: screen-in 0.35s ease-out;
+}
+
+@keyframes screen-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* ── Lobby ── */
@@ -512,21 +524,33 @@ input:focus {
 
 .result-banner-inner.won {
   border-color: var(--accent);
-  box-shadow: 0 0 30px var(--accent-glow);
+  box-shadow: 0 0 40px var(--accent-glow), 0 0 80px rgba(212, 168, 67, 0.15);
+  animation: result-won-glow 0.6s ease-out;
+}
+
+.result-banner-inner.won.result-me {
+  box-shadow: 0 0 50px var(--accent-glow), 0 0 100px rgba(212, 168, 67, 0.2);
 }
 
 .result-banner-inner.passed {
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.1);
+  opacity: 0.7;
+}
+
+@keyframes result-won-glow {
+  0% { box-shadow: 0 0 0 rgba(212, 168, 67, 0); transform: scale(0.95); }
+  50% { box-shadow: 0 0 60px var(--accent-glow), 0 0 120px rgba(212, 168, 67, 0.3); transform: scale(1.02); }
+  100% { transform: scale(1); }
 }
 
 .result-title {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 700;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.25rem;
 }
 
 .result-title.won { color: var(--accent); }
-.result-title.passed { color: var(--text-secondary); }
+.result-title.passed { color: var(--text-dim); }
 
 .result-detail {
   font-size: 0.8rem;
@@ -594,6 +618,13 @@ input:focus {
 .opponent-card.just-won-card {
   border-color: var(--accent);
   box-shadow: 0 0 20px var(--accent-glow), 0 0 40px rgba(212, 168, 67, 0.15);
+  animation: opponent-won-pulse 0.6s ease-out;
+}
+
+@keyframes opponent-won-pulse {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.06); }
+  100% { transform: scale(1); }
 }
 
 .opponent-name {
@@ -803,35 +834,34 @@ input:focus {
   left: 8px;
 }
 
-/* Card color tiers — clear premium hierarchy */
-.card-tier-85  { background: linear-gradient(145deg, #252528, #323236); color: #8a8a8e; border-color: rgba(80, 80, 85, 0.4); }
-.card-tier-88  { background: linear-gradient(145deg, #2a2e38, #383e4a); color: #9aa2b0; border-color: rgba(100, 110, 130, 0.35); }
-.card-tier-92  { background: linear-gradient(145deg, #283848, #36505e); color: #b0c8d8; border-color: rgba(120, 160, 190, 0.3); }
-.card-tier-95  { background: linear-gradient(145deg, #3a3848, #504e62); color: #d4d0e8; border-color: rgba(160, 150, 200, 0.4); }
-.card-tier-98  { background: linear-gradient(145deg, #6a520a, #9a7a10); color: #fff4d0; border-color: rgba(200, 160, 50, 0.5); }
+/* Card color tiers — clear descending hierarchy
+   100: gold (max premium)
+   98:  warm bronze/copper (premium but below gold)
+   95:  cool silver-blue (still premium)
+   92:  standard steel (not premium)
+   88:  muted slate
+   85:  dull dark                                   */
+.card-tier-85  { background: linear-gradient(145deg, #1e1e20, #2a2a2e); color: #787880; border-color: rgba(60, 60, 65, 0.4); }
+.card-tier-88  { background: linear-gradient(145deg, #242830, #323840); color: #8890a0; border-color: rgba(80, 90, 110, 0.35); }
+.card-tier-92  { background: linear-gradient(145deg, #2a3440, #3a4854); color: #a0b4c4; border-color: rgba(100, 140, 170, 0.3); }
+.card-tier-95  { background: linear-gradient(145deg, #383e50, #4c546a); color: #c8cce0; border-color: rgba(150, 160, 200, 0.4); }
+.card-tier-98  { background: linear-gradient(145deg, #4a3020, #6a4830); color: #f0d8b8; border-color: rgba(180, 120, 60, 0.5); }
 .card-tier-100 { background: linear-gradient(145deg, #7a600a, #aa8810); color: #fffae0; border-color: rgba(220, 180, 60, 0.6); }
-
-.card-large.card-tier-92 {
-  box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.5),
-    0 0 20px rgba(100, 160, 200, 0.12),
-    inset 0 1px 0 rgba(255,255,255,0.08);
-}
 
 .card-large.card-tier-95 {
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.6),
-    0 0 35px rgba(140, 130, 200, 0.22),
-    inset 0 1px 0 rgba(255,255,255,0.12);
-  border-color: rgba(160, 150, 200, 0.4);
+    0 0 30px rgba(150, 160, 210, 0.18),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+  border-color: rgba(150, 160, 200, 0.4);
 }
 
 .card-large.card-tier-98 {
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.6),
-    0 0 50px rgba(200, 160, 30, 0.3),
-    inset 0 1px 0 rgba(255,255,255,0.15);
-  border-color: rgba(210, 170, 50, 0.5);
+    0 0 40px rgba(180, 120, 60, 0.25),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+  border-color: rgba(180, 120, 60, 0.5);
 }
 
 .card-large.card-tier-100 {
@@ -876,6 +906,29 @@ input:focus {
     opacity: 1;
     transform: scale(1) translateY(0);
   }
+}
+
+/* Outbid shake */
+.anim-outbid .card-large {
+  animation: outbid-shake 0.4s ease-out;
+}
+
+@keyframes outbid-shake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-6px); }
+  30% { transform: translateX(5px); }
+  45% { transform: translateX(-4px); }
+  60% { transform: translateX(3px); }
+  75% { transform: translateX(-1px); }
+}
+
+.anim-outbid-flash {
+  animation: outbid-flash 0.5s ease-out;
+}
+
+@keyframes outbid-flash {
+  0% { color: var(--danger); transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
 
 /* Bid Info */
@@ -956,13 +1009,23 @@ input:focus {
   transition: width 0.1s linear, background-color 0.5s;
 }
 
+.timer-bar.timer-critical {
+  animation: timer-shake 0.3s ease-in-out infinite;
+}
+
 .timer-bar.timer-critical::after {
-  animation: timer-pulse 0.6s ease-in-out infinite;
+  animation: timer-pulse 0.5s ease-in-out infinite;
 }
 
 @keyframes timer-pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--danger); }
-  50% { opacity: 0.6; box-shadow: 0 0 12px var(--danger); }
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--danger); }
+  50% { opacity: 0.5; box-shadow: 0 0 16px var(--danger); }
+}
+
+@keyframes timer-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-1px); }
+  75% { transform: translateX(1px); }
 }
 
 .timer-text {
@@ -973,12 +1036,18 @@ input:focus {
   margin-top: 0.3rem;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
-  transition: color 0.3s;
+  transition: color 0.3s, transform 0.2s;
 }
 
 .timer-text.timer-critical-text {
   color: var(--danger);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  animation: timer-text-pulse 0.5s ease-in-out infinite;
+}
+
+@keyframes timer-text-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
 /* Game Top Actions (help + deck peek) */
@@ -1238,7 +1307,12 @@ input:focus {
   height: 100%;
   background: var(--accent);
   border-radius: 2px;
-  transition: width 0.6s ease;
+  transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.my-score-fill.score-glow {
+  box-shadow: 0 0 8px var(--accent-glow), 0 0 16px rgba(212, 168, 67, 0.2);
+  background: linear-gradient(90deg, var(--accent), #e8c44e);
 }
 
 .bid-controls {
@@ -1431,8 +1505,16 @@ input:focus {
 }
 
 @keyframes confetti-fall {
-  0% { opacity: 1; transform: translateY(0) rotate(0deg); }
-  100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+  0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(100vh) rotate(1080deg) scale(0.5); }
+}
+
+@keyframes confetti-drift {
+  0% { opacity: 1; transform: translateY(0) translateX(0) rotate(0deg); }
+  50% { transform: translateY(50vh) translateX(20px) rotate(540deg); }
+  70% { opacity: 0.8; }
+  100% { opacity: 0; transform: translateY(100vh) translateX(-10px) rotate(1080deg); }
 }
 
 /* ── Study Overlay ── */
@@ -1533,6 +1615,23 @@ input:focus {
 @keyframes study-card-in {
   from { opacity: 0; transform: scale(0.5) translateY(10px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.study-deck .card-small {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+@media (hover: hover) {
+  .study-deck .card-small:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    z-index: 2;
+  }
+}
+
+.study-deck .card-small:active {
+  transform: scale(1.1);
 }
 
 /* ── Toast ── */
@@ -1711,25 +1810,27 @@ input:focus {
 }
 
 @keyframes card-awarded {
-  0% { transform: scale(1); opacity: 1; }
-  30% { transform: scale(1.15); opacity: 1; }
-  100% { transform: scale(0.2); opacity: 0; }
+  0% { transform: scale(1); opacity: 1; box-shadow: 0 0 20px var(--accent-glow); }
+  25% { transform: scale(1.12); opacity: 1; box-shadow: 0 0 50px var(--accent-glow); }
+  100% { transform: scale(0.15) translateY(-40px); opacity: 0; }
 }
 
 @keyframes card-passed {
   0% { transform: scale(1) translateY(0); opacity: 1; }
-  100% { transform: scale(0.7) translateY(40px); opacity: 0; }
+  100% { transform: scale(0.6) translateY(50px); opacity: 0; filter: grayscale(1); }
 }
 
 @keyframes score-pop {
   0% { transform: scale(1); }
-  40% { transform: scale(1.3); color: var(--accent); }
+  30% { transform: scale(1.35); color: var(--accent); }
+  60% { transform: scale(0.95); }
   100% { transform: scale(1); }
 }
 
 @keyframes budget-flash {
-  0% { color: var(--danger); }
-  100% { }
+  0% { color: var(--danger); transform: scale(1.1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
 }
 
 .anim-bid-pulse {

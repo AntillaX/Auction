@@ -151,6 +151,9 @@ class Game {
       if (id === this.highestBidderId) continue;
       if (!player.canAfford(this.getMinimumBid())) continue;
 
+      const noBidsYet = !this.highestBidderId;
+      if (noBidsYet && !BotAI.willStartBid(player, this.currentCard)) continue;
+
       const maxBid = BotAI.calculateMaxBid(player, this.currentCard, this);
       if (maxBid < this.getMinimumBid()) continue;
 
