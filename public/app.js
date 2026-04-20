@@ -323,11 +323,15 @@ function handleMessage(msg) {
       startLocalTimer(msg.timerRemaining, msg.timerStartedAt);
       break;
 
-    case 'bid_placed':
+    case 'bid_placed': {
+      const wasWinning = gameState && gameState.highestBidderId === myPlayerId;
       gameState = msg;
       renderGame();
       startLocalTimer(msg.timerRemaining, msg.timerStartedAt);
       highlightBidder(msg.playerId);
+      if (wasWinning && msg.playerId !== myPlayerId) {
+        triggerOutbidFeedback();
+      }
       // Only track bids that *I* placed — otherwise every player
       // logs every other player's bid and the numbers double up.
       if (msg.playerId === myPlayerId) {
@@ -338,6 +342,7 @@ function handleMessage(msg) {
         });
       }
       break;
+    }
 
     case 'time_extended':
       gameState = msg;
@@ -402,8 +407,9 @@ function handleMessage(msg) {
 
 // ── Screens ──
 function showScreen(id) {
-  document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
-  $(id).classList.add('active');
+  document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active', 'screen-fade-in'));
+  const target = $(id);
+  target.classList.add('active', 'screen-fade-in');
   trackScreen(id);
 }
 
@@ -574,7 +580,7 @@ function showResultBanner(type, playerName, amount, card, isMe) {
 
   if (type === 'won') {
     const who = isMe ? 'You won' : `${esc(playerName)} won`;
-    inner.className = 'result-banner-inner won';
+    inner.className = 'result-banner-inner won' + (isMe ? ' result-me' : '');
     inner.innerHTML = `
       <div class="result-title won">${who} ${esc(cardName)}!</div>
       <div class="result-detail">${cardPts}pts for <span class="result-price">$${amount.toLocaleString()}</span></div>
@@ -784,10 +790,17 @@ function renderMyInfo() {
   if (me.budget < 100) budgetEl.classList.add('broke');
   else if (me.budget < 300) budgetEl.classList.add('low-budget');
 
-  $('my-score').textContent = `${me.score} / 644`;
+  const scoreEl = $('my-score');
+  const prevScore = parseInt(scoreEl.textContent) || 0;
+  scoreEl.textContent = `${me.score} / 644`;
 
   const scorePct = Math.min(100, Math.round((me.score / 644) * 100));
-  $('my-score-fill').style.width = `${scorePct}%`;
+  const fill = $('my-score-fill');
+  fill.style.width = `${scorePct}%`;
+  if (me.score > prevScore) {
+    fill.classList.add('score-glow');
+    setTimeout(() => fill.classList.remove('score-glow'), 1200);
+  }
 }
 
 function updateBidControls() {
@@ -967,6 +980,21 @@ function animateCardPassed() {
   }
 }
 
+function triggerOutbidFeedback() {
+  const container = $('current-card-container');
+  if (container) {
+    container.classList.remove('anim-outbid');
+    void container.offsetWidth;
+    container.classList.add('anim-outbid');
+  }
+  const status = $('bid-status');
+  if (status) {
+    status.classList.remove('anim-outbid-flash');
+    void status.offsetWidth;
+    status.classList.add('anim-outbid-flash');
+  }
+}
+
 // ── Card Element Builder ──
 function createCardElement(card, sizeClass) {
   const el = document.createElement('div');
@@ -1077,18 +1105,21 @@ function renderGameOver() {
 function spawnConfetti() {
   const container = $('confetti-container');
   container.innerHTML = '';
-  const colors = ['#d4a843', '#e0b54e', '#2ecc71', '#e74c3c', '#3498db', '#9b59b6', '#f39c12'];
+  const colors = ['#d4a843', '#e0b54e', '#2ecc71', '#e74c3c', '#3498db', '#9b59b6', '#f39c12', '#fff', '#ffd700'];
+  const anims = ['confetti-fall', 'confetti-drift'];
 
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < 80; i++) {
     const piece = document.createElement('div');
     piece.className = 'confetti-piece';
     piece.style.left = `${Math.random() * 100}%`;
     piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-    piece.style.animationDuration = `${2 + Math.random() * 3}s`;
-    piece.style.animationDelay = `${Math.random() * 1.5}s`;
-    piece.style.width = `${4 + Math.random() * 8}px`;
-    piece.style.height = `${4 + Math.random() * 8}px`;
-    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+    piece.style.animationName = anims[Math.floor(Math.random() * anims.length)];
+    piece.style.animationDuration = `${2.5 + Math.random() * 3.5}s`;
+    piece.style.animationDelay = `${Math.random() * 2}s`;
+    const size = 4 + Math.random() * 10;
+    piece.style.width = `${size}px`;
+    piece.style.height = `${size * (0.5 + Math.random() * 0.8)}px`;
+    piece.style.borderRadius = Math.random() > 0.6 ? '50%' : Math.random() > 0.5 ? '2px' : '0';
     container.appendChild(piece);
   }
 }
