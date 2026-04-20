@@ -1,26 +1,26 @@
-const WIN_THRESHOLD = 655;
+const WIN_THRESHOLD = 644;
 const MIN_OPENING_BID = 50;
 const MIN_BID_INCREMENT = 10;
 
 const BOT_BIASES = {
   Allegri: {
     favorites: ['Buffon', 'Ronaldo', 'Van Dijk'],
-    dislikes: ['Neymar', 'Lamine Yamal', 'Ronaldinho', 'Fred'],
+    dislikes: ['Neymar', 'Lamine Yamal', 'Ronaldinho', 'Morata'],
   },
   Conte: {
-    favorites: ['Haaland', 'Rooney', 'Beckham'],
-    dislikes: ['Jordi Alba', 'Iniesta', 'Pedri', 'Marcelo'],
+    favorites: ['Haaland', 'Beckham', 'Bellingham'],
+    dislikes: ['Jordi Alba', 'Pedri', 'Marcelo', 'Mustafi'],
   },
   Simeone: {
-    favorites: ['Casillas', 'Dani Carvajal', 'Modric'],
-    dislikes: ['Ronaldinho', 'Neymar', 'Lingard', 'Fred'],
+    favorites: ['Casillas', 'Dani Carvajal', 'Ramos'],
+    dislikes: ['Ronaldinho', 'Neymar', 'Lingard', 'Maguire'],
   },
   Ancelotti: {
-    favorites: ['Ronaldo', 'Modric', 'Benzema'],
-    dislikes: ['Fred', 'Lingard', 'Jordi Alba', 'Maradona'],
+    favorites: ['Ronaldo', 'Modric', 'Courtois'],
+    dislikes: ['Lingard', 'Mustafi', 'Jordi Alba', 'Maguire'],
   },
   Mourinho: {
-    favorites: ['Ibrahimovic', 'Rooney', 'Ramos'],
+    favorites: ['Neuer', 'Xavi', 'Ramos'],
     dislikes: ['Pedri', 'Lamine Yamal', 'Iniesta', 'Neymar'],
   },
 };
@@ -28,14 +28,14 @@ const BOT_BIASES = {
 // Calculate the maximum amount a bot is willing to pay for a card.
 //
 // Strategy: budget is a finite resource spread across the points
-// still needed to reach 655.  Base price is proportional to
+// still needed to reach 644.  Base price is proportional to
 // (card value / points needed) * budget.  Layers on top:
 //
 //   1. Scarcity  — premium for above-average cards, discount when
 //      better ones are coming.
 //   2. Personality — each bot overpays for favourites (~20%) and
 //      mostly ignores cards it dislikes (~70% discount).
-//   3. Blocking  — if an opponent would reach 655 by winning this
+//   3. Blocking  — if an opponent would reach 644 by winning this
 //      card, bid just enough to outprice their budget.
 //   4. Win-now   — if this card clinches the game, go all-in.
 

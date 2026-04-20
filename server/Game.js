@@ -1,6 +1,6 @@
 const BotAI = require('./BotAI');
 
-const WIN_THRESHOLD = 655;
+const WIN_THRESHOLD = 644;
 const MIN_OPENING_BID = 50;
 const MIN_BID_INCREMENT = 10;
 const TIMER_DURATION = 10000; // 10 seconds
@@ -41,34 +41,43 @@ class Game {
 
   generateDeck() {
     return [
-      { name: 'Messi', value: 100 },
-      { name: 'Ronaldo', value: 98 },
-      { name: 'Mbappé', value: 98 },
-      { name: 'Zidane', value: 98 },
-      { name: 'Neymar', value: 96 },
-      { name: 'Ronaldinho', value: 96 },
-      { name: 'Maradona', value: 96 },
-      { name: 'Beckham', value: 96 },
-      { name: 'Haaland', value: 94 },
-      { name: 'De Bruyne', value: 94 },
-      { name: 'Modric', value: 94 },
-      { name: 'Iniesta', value: 94 },
-      { name: 'Casillas', value: 94 },
-      { name: 'Lamine Yamal', value: 94 },
-      { name: 'Ibrahimovic', value: 92 },
-      { name: 'Buffon', value: 92 },
-      { name: 'Lewandowski', value: 92 },
-      { name: 'Benzema', value: 92 },
-      { name: 'Rooney', value: 92 },
-      { name: 'Van Dijk', value: 92 },
-      { name: 'Neuer', value: 92 },
-      { name: 'Ramos', value: 90 },
-      { name: 'Lingard', value: 90 },
-      { name: 'Fred', value: 90 },
-      { name: 'Pedri', value: 90 },
-      { name: 'Marcelo', value: 90 },
-      { name: 'Jordi Alba', value: 90 },
-      { name: 'Dani Carvajal', value: 90 },
+      // 100 (2)
+      { name: 'Messi', value: 100, position: 'RW' },
+      { name: 'Pedri', value: 100, position: 'CM' },
+      // 98 (2)
+      { name: 'Ronaldo', value: 98, position: 'LW' },
+      { name: 'Neuer', value: 98, position: 'GK' },
+      // 95 (7)
+      { name: 'Neymar', value: 95, position: 'LW' },
+      { name: 'Mbappé', value: 95, position: 'ST' },
+      { name: 'Zidane', value: 95, position: 'CAM' },
+      { name: 'Ronaldinho', value: 95, position: 'CAM' },
+      { name: 'Ramos', value: 95, position: 'CB' },
+      { name: 'Buffon', value: 95, position: 'GK' },
+      { name: 'Casillas', value: 95, position: 'GK' },
+      // 92 (8)
+      { name: 'Lamine Yamal', value: 92, position: 'RW' },
+      { name: 'Modric', value: 92, position: 'CM' },
+      { name: 'De Bruyne', value: 92, position: 'CAM' },
+      { name: 'Iniesta', value: 92, position: 'CM' },
+      { name: 'Van Dijk', value: 92, position: 'CB' },
+      { name: 'Courtois', value: 92, position: 'GK' },
+      { name: 'De Gea', value: 92, position: 'GK' },
+      { name: 'Ter Stegen', value: 92, position: 'GK' },
+      // 88 (7)
+      { name: 'Haaland', value: 88, position: 'ST' },
+      { name: 'Beckham', value: 88, position: 'RM' },
+      { name: 'Xavi', value: 88, position: 'CM' },
+      { name: 'Marcelo', value: 88, position: 'LB' },
+      { name: 'Dani Carvajal', value: 88, position: 'RB' },
+      { name: 'Jordi Alba', value: 88, position: 'LB' },
+      { name: 'Piqué', value: 88, position: 'CB' },
+      // 85 (5)
+      { name: 'Morata', value: 85, position: 'ST' },
+      { name: 'Bellingham', value: 85, position: 'CM' },
+      { name: 'Lingard', value: 85, position: 'AM' },
+      { name: 'Maguire', value: 85, position: 'CB' },
+      { name: 'Mustafi', value: 85, position: 'CB' },
     ];
   }
 
