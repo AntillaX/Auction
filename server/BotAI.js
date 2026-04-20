@@ -4,24 +4,24 @@ const MIN_BID_INCREMENT = 10;
 
 const BOT_BIASES = {
   Allegri: {
-    favorites: ['Buffon', 'Ronaldo', 'Van Dijk', 'Neuer'],
-    dislikes: ['Neymar', 'Lamine Yamal'],
+    favorites: ['Buffon', 'Ronaldo', 'Van Dijk'],
+    dislikes: ['Neymar', 'Lamine Yamal', 'Ronaldinho', 'Fred'],
   },
   Conte: {
-    favorites: ['Haaland', 'Rooney', 'Beckham', 'Ramos'],
-    dislikes: ['Jordi Alba', 'Iniesta'],
+    favorites: ['Haaland', 'Rooney', 'Beckham'],
+    dislikes: ['Jordi Alba', 'Iniesta', 'Pedri', 'Marcelo'],
   },
   Simeone: {
-    favorites: ['Casillas', 'Dani Carvajal', 'Marcelo', 'Modric'],
-    dislikes: ['Ronaldinho', 'Neymar'],
+    favorites: ['Casillas', 'Dani Carvajal', 'Modric'],
+    dislikes: ['Ronaldinho', 'Neymar', 'Lingard', 'Fred'],
   },
   Ancelotti: {
-    favorites: ['Ronaldo', 'Modric', 'Benzema', 'Marcelo'],
-    dislikes: ['Fred', 'Lingard'],
+    favorites: ['Ronaldo', 'Modric', 'Benzema'],
+    dislikes: ['Fred', 'Lingard', 'Jordi Alba', 'Maradona'],
   },
   Mourinho: {
-    favorites: ['Ibrahimovic', 'Rooney', 'Ramos', 'Neuer'],
-    dislikes: ['Pedri', 'Lamine Yamal'],
+    favorites: ['Ibrahimovic', 'Rooney', 'Ramos'],
+    dislikes: ['Pedri', 'Lamine Yamal', 'Iniesta', 'Neymar'],
   },
 };
 

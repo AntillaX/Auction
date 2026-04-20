@@ -1018,16 +1018,42 @@ function renderGameOver() {
   scoresDiv.innerHTML = '';
 
   players.forEach((p, i) => {
+    const entry = document.createElement('div');
+    entry.className = 'score-entry';
+
     const row = document.createElement('div');
     row.className = 'score-row' + (p.id === gameState.winnerId ? ' is-winner' : '');
     const rankIcon = i === 0 ? '\u2654' : `${i + 1}`;
+    const hasCards = p.cardsWon && p.cardsWon.length > 0;
+    const startOpen = hasCards && p.id === myPlayerId;
+
     row.innerHTML = `
       <span class="score-rank">${rankIcon}</span>
       <span class="score-name">${esc(p.name)}${p.isBot ? ' <span class="bot-tag">Bot</span>' : ''}${p.id === myPlayerId ? ' (you)' : ''}</span>
       <span class="score-points">${p.score} pts</span>
       <span class="score-budget">$${p.budget.toLocaleString()} left</span>
+      ${hasCards ? `<span class="score-toggle">${startOpen ? '\u25b4' : '\u25be'}</span>` : ''}
     `;
-    scoresDiv.appendChild(row);
+    entry.appendChild(row);
+
+    if (hasCards) {
+      const teamDiv = document.createElement('div');
+      teamDiv.className = 'score-team' + (startOpen ? ' expanded' : '');
+      if (startOpen) row.classList.add('team-open');
+      p.cardsWon.forEach((card) => {
+        teamDiv.appendChild(createCardElement(card, 'card-small'));
+      });
+      entry.appendChild(teamDiv);
+
+      row.style.cursor = 'pointer';
+      row.addEventListener('click', () => {
+        const open = teamDiv.classList.toggle('expanded');
+        row.classList.toggle('team-open', open);
+        row.querySelector('.score-toggle').textContent = open ? '\u25b4' : '\u25be';
+      });
+    }
+
+    scoresDiv.appendChild(entry);
   });
 
   // Play Again is now a ready button that every player presses.
