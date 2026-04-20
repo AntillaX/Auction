@@ -792,71 +792,56 @@ input:focus {
   opacity: 0.75;
 }
 
-/* Card corner pips */
-.card-large::before,
-.card-large::after {
+/* Card corner pips — value top-left, position bottom-right */
+.card-large::before {
   position: absolute;
   font-size: 0.55rem;
   font-weight: 600;
   opacity: 0.5;
-}
-
-.card-large::before {
   content: attr(data-value);
   top: 6px;
   left: 8px;
 }
 
-.card-large::after {
-  content: attr(data-value);
-  bottom: 6px;
-  right: 8px;
-  transform: rotate(180deg);
-}
+/* Card color tiers — clear premium hierarchy */
+.card-tier-85  { background: linear-gradient(145deg, #252528, #323236); color: #8a8a8e; border-color: rgba(80, 80, 85, 0.4); }
+.card-tier-88  { background: linear-gradient(145deg, #2a2e38, #383e4a); color: #9aa2b0; border-color: rgba(100, 110, 130, 0.35); }
+.card-tier-92  { background: linear-gradient(145deg, #283848, #36505e); color: #b0c8d8; border-color: rgba(120, 160, 190, 0.3); }
+.card-tier-95  { background: linear-gradient(145deg, #3a3848, #504e62); color: #d4d0e8; border-color: rgba(160, 150, 200, 0.4); }
+.card-tier-98  { background: linear-gradient(145deg, #6a520a, #9a7a10); color: #fff4d0; border-color: rgba(200, 160, 50, 0.5); }
+.card-tier-100 { background: linear-gradient(145deg, #7a600a, #aa8810); color: #fffae0; border-color: rgba(220, 180, 60, 0.6); }
 
-/* Card color tiers — Football player cards */
-.card-tier-85  { background: linear-gradient(145deg, #2a2a2e, #38383c); color: #9a9a9e; }
-.card-tier-88  { background: linear-gradient(145deg, #2e3340, #3c424e); color: #a8b0bc; }
-.card-tier-92  { background: linear-gradient(145deg, #2a3a48, #384e5c); color: #b8ccd8; }
-.card-tier-95  { background: linear-gradient(145deg, #3a3a44, #50505c); color: #d0d0dc; border-color: rgba(180, 180, 200, 0.3); }
-.card-tier-98  { background: linear-gradient(145deg, #8a6a0b, #b8860b); color: #fff8e0; border-color: rgba(212, 168, 67, 0.5); }
-.card-tier-100 { background: linear-gradient(145deg, #9a7a0b, #c8960b); color: #fffce8; border-color: rgba(230, 190, 70, 0.6); }
+.card-large.card-tier-92 {
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(100, 160, 200, 0.12),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+}
 
 .card-large.card-tier-95 {
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.6),
-    0 0 35px rgba(180, 180, 210, 0.2),
-    inset 0 1px 0 rgba(255,255,255,0.15);
-  border-color: rgba(180, 180, 200, 0.35);
+    0 0 35px rgba(140, 130, 200, 0.22),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+  border-color: rgba(160, 150, 200, 0.4);
 }
 
 .card-large.card-tier-98 {
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.6),
-    0 0 50px rgba(184, 134, 11, 0.35),
+    0 0 50px rgba(200, 160, 30, 0.3),
     inset 0 1px 0 rgba(255,255,255,0.15);
-  border-color: rgba(212, 168, 67, 0.5);
+  border-color: rgba(210, 170, 50, 0.5);
 }
 
 .card-large.card-tier-100 {
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.6),
-    0 0 60px rgba(200, 160, 20, 0.45),
-    0 0 90px rgba(230, 190, 50, 0.15),
+    0 0 60px rgba(220, 180, 40, 0.4),
+    0 0 90px rgba(240, 200, 60, 0.15),
     inset 0 1px 0 rgba(255,255,255,0.2);
   border-color: rgba(230, 190, 70, 0.6);
 }
-
-/* Position category stripes */
-.card-pos-gk  { border-top: 3px solid #2ecc71; }
-.card-pos-def { border-top: 3px solid #3498db; }
-.card-pos-mid { border-top: 3px solid #e67e22; }
-.card-pos-att { border-top: 3px solid #e74c3c; }
-
-.card-large.card-pos-gk  { border-top: 4px solid #2ecc71; }
-.card-large.card-pos-def { border-top: 4px solid #3498db; }
-.card-large.card-pos-mid { border-top: 4px solid #e67e22; }
-.card-large.card-pos-att { border-top: 4px solid #e74c3c; }
 
 /* Position label — bottom-right of card */
 .card-pos-label {
@@ -871,9 +856,9 @@ input:focus {
 }
 
 .card-large .card-pos-label {
-  bottom: 28px;
-  right: 10px;
-  font-size: 0.7rem;
+  bottom: 6px;
+  right: 8px;
+  font-size: 0.65rem;
   opacity: 0.5;
 }
 
