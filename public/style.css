@@ -815,35 +815,66 @@ input:focus {
 }
 
 /* Card color tiers — Football player cards */
-.card-tier-90  { background: linear-gradient(145deg, #2a3a42, #384850); color: #b8c8d0; }
-.card-tier-92  { background: linear-gradient(145deg, #2a4038, #385048); color: #b8d0c8; }
-.card-tier-94  { background: linear-gradient(145deg, #1e2e5a, #2c3e6e); color: #c0d0f0; }
-.card-tier-96  { background: linear-gradient(145deg, #3e1e5e, #502e72); color: #e0c0f0; }
-.card-tier-98  { background: linear-gradient(145deg, #5e1a1a, #742828); color: #f0b8b8; }
-.card-tier-100 { background: linear-gradient(145deg, #8a6a0b, #b8860b); color: #fff8e0; }
+.card-tier-85  { background: linear-gradient(145deg, #2a2a2e, #38383c); color: #9a9a9e; }
+.card-tier-88  { background: linear-gradient(145deg, #2e3340, #3c424e); color: #a8b0bc; }
+.card-tier-92  { background: linear-gradient(145deg, #2a3a48, #384e5c); color: #b8ccd8; }
+.card-tier-95  { background: linear-gradient(145deg, #3a3a44, #50505c); color: #d0d0dc; border-color: rgba(180, 180, 200, 0.3); }
+.card-tier-98  { background: linear-gradient(145deg, #8a6a0b, #b8860b); color: #fff8e0; border-color: rgba(212, 168, 67, 0.5); }
+.card-tier-100 { background: linear-gradient(145deg, #9a7a0b, #c8960b); color: #fffce8; border-color: rgba(230, 190, 70, 0.6); }
 
-.card-large.card-tier-96 {
+.card-large.card-tier-95 {
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.6),
-    0 0 40px rgba(140, 60, 180, 0.25),
-    inset 0 1px 0 rgba(255,255,255,0.1);
-  border-color: rgba(140, 60, 180, 0.35);
+    0 0 35px rgba(180, 180, 210, 0.2),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+  border-color: rgba(180, 180, 200, 0.35);
 }
 
 .card-large.card-tier-98 {
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.6),
-    0 0 45px rgba(200, 50, 50, 0.3),
-    inset 0 1px 0 rgba(255,255,255,0.1);
-  border-color: rgba(200, 50, 50, 0.4);
+    0 0 50px rgba(184, 134, 11, 0.35),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+  border-color: rgba(212, 168, 67, 0.5);
 }
 
 .card-large.card-tier-100 {
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.6),
-    0 0 60px rgba(184, 134, 11, 0.45),
+    0 0 60px rgba(200, 160, 20, 0.45),
+    0 0 90px rgba(230, 190, 50, 0.15),
     inset 0 1px 0 rgba(255,255,255,0.2);
-  border-color: rgba(212, 168, 67, 0.6);
+  border-color: rgba(230, 190, 70, 0.6);
+}
+
+/* Position category stripes */
+.card-pos-gk  { border-top: 3px solid #2ecc71; }
+.card-pos-def { border-top: 3px solid #3498db; }
+.card-pos-mid { border-top: 3px solid #e67e22; }
+.card-pos-att { border-top: 3px solid #e74c3c; }
+
+.card-large.card-pos-gk  { border-top: 4px solid #2ecc71; }
+.card-large.card-pos-def { border-top: 4px solid #3498db; }
+.card-large.card-pos-mid { border-top: 4px solid #e67e22; }
+.card-large.card-pos-att { border-top: 4px solid #e74c3c; }
+
+/* Position label — bottom-right of card */
+.card-pos-label {
+  position: absolute;
+  bottom: 4px;
+  right: 6px;
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  opacity: 0.6;
+  letter-spacing: 0.03em;
+}
+
+.card-large .card-pos-label {
+  bottom: 28px;
+  right: 10px;
+  font-size: 0.7rem;
+  opacity: 0.5;
 }
 
 /* Card entrance animation */

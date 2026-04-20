@@ -628,7 +628,7 @@ function renderOpponents() {
     card.className = cls;
     card.id = `opponent-${p.id}`;
 
-    const scorePct = Math.min(100, Math.round((p.score / 655) * 100));
+    const scorePct = Math.min(100, Math.round((p.score / 644) * 100));
     const progressCls = scorePct >= 70 ? 'high' : scorePct >= 40 ? 'mid' : 'low';
     card.innerHTML = `
       <span class="opponent-name">${esc(p.name)}${p.isBot ? ' <span class="bot-tag">Bot</span>' : ''}</span>
@@ -784,9 +784,9 @@ function renderMyInfo() {
   if (me.budget < 100) budgetEl.classList.add('broke');
   else if (me.budget < 300) budgetEl.classList.add('low-budget');
 
-  $('my-score').textContent = `${me.score} / 655`;
+  $('my-score').textContent = `${me.score} / 644`;
 
-  const scorePct = Math.min(100, Math.round((me.score / 655) * 100));
+  const scorePct = Math.min(100, Math.round((me.score / 644) * 100));
   $('my-score-fill').style.width = `${scorePct}%`;
 }
 
@@ -968,15 +968,24 @@ function animateCardPassed() {
 }
 
 // ── Card Element Builder ──
+function posCategory(pos) {
+  if (pos === 'GK') return 'gk';
+  if (['CB', 'LB', 'RB'].includes(pos)) return 'def';
+  if (['CM', 'CAM', 'RM', 'AM'].includes(pos)) return 'mid';
+  return 'att';
+}
+
 function createCardElement(card, sizeClass) {
   const el = document.createElement('div');
-  el.className = `card ${sizeClass} card-tier-${card.value}`;
+  const cat = card.position ? posCategory(card.position) : '';
+  el.className = `card ${sizeClass} card-tier-${card.value}` + (cat ? ` card-pos-${cat}` : '');
   el.setAttribute('data-value', card.value);
   el.setAttribute('data-name', card.name);
+  const posHtml = card.position ? `<span class="card-pos-label">${card.position}</span>` : '';
   if (sizeClass === 'card-large') {
-    el.innerHTML = `<span class="card-player-name${nameShrinkClass(card.name)}">${esc(card.name)}</span><span class="card-player-value">${card.value}<span class="card-pts-label">pts</span></span>`;
+    el.innerHTML = `<span class="card-player-name${nameShrinkClass(card.name)}">${esc(card.name)}</span><span class="card-player-value">${card.value}<span class="card-pts-label">pts</span></span>${posHtml}`;
   } else {
-    el.innerHTML = `<span class="card-sm-name">${esc(card.name)}</span><span class="card-sm-value">${card.value}</span>`;
+    el.innerHTML = `<span class="card-sm-name">${esc(card.name)}</span><span class="card-sm-value">${card.value}</span>${posHtml}`;
   }
   return el;
 }
@@ -1003,7 +1012,7 @@ function renderGameOver() {
 
   let reasonText = '';
   switch (gameState.reason) {
-    case 'threshold': reasonText = 'Reached 655 points!'; break;
+    case 'threshold': reasonText = 'Reached 644 points!'; break;
     case 'deck_exhausted': reasonText = 'All cards auctioned \u2014 highest score wins'; break;
     case 'stalemate': reasonText = 'No bids in two passes \u2014 highest score wins'; break;
     case 'all_broke': reasonText = 'All players out of funds \u2014 highest score wins'; break;
