@@ -190,10 +190,6 @@ function handleMessage(ws, msg) {
         ws.send(JSON.stringify({ type: 'error', message: 'Only the host can start the game' }));
         return;
       }
-      if (room.players.size < 2) {
-        ws.send(JSON.stringify({ type: 'error', message: 'Need at least 2 players' }));
-        return;
-      }
       room.startGame();
       break;
     }

@@ -1,10 +1,11 @@
 const STARTING_BUDGET = 1000;
 
 class Player {
-  constructor(id, name, ws) {
+  constructor(id, name, ws, isBot = false) {
     this.id = id;
     this.name = name;
     this.ws = ws;
+    this.isBot = isBot;
     this.budget = STARTING_BUDGET;
     this.score = 0;
     this.cardsWon = [];
@@ -38,6 +39,7 @@ class Player {
       score: this.score,
       cardsWon: this.cardsWon,
       connected: this.connected,
+      isBot: this.isBot,
     };
   }
 }

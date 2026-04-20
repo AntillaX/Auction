@@ -3,6 +3,7 @@ const Player = require('./Player');
 
 const MAX_PLAYERS = 5;
 const LAST_PLAYER_GRACE_MS = 10000;
+const BOT_NAMES = ['Allegri', 'Conte', 'Simeone', 'Ancelotti', 'Mourinho'];
 
 class Room {
   constructor(code) {
@@ -14,17 +15,17 @@ class Room {
     this.lastPlayerTimer = null;
   }
 
-  connectedCount() {
+  connectedCount(humansOnly = false) {
     let n = 0;
     for (const [, p] of this.players) {
-      if (p.connected) n++;
+      if (p.connected && (!humansOnly || !p.isBot)) n++;
     }
     return n;
   }
 
-  firstConnectedId() {
+  firstConnectedHumanId() {
     for (const [id, p] of this.players) {
-      if (p.connected) return id;
+      if (p.connected && !p.isBot) return id;
     }
     return null;
   }
@@ -94,25 +95,24 @@ class Room {
       this.game.reconsiderReady();
     }
 
-    // If the game is still in progress and only one player remains
-    // connected, start a grace timer. If nobody rejoins within the
-    // window, end the game with the lone survivor as the winner.
+    // If no human players remain connected, start a grace timer.
+    // With bots the game is technically playable, but a match with
+    // zero humans watching is pointless — end it after the grace
+    // window unless someone reconnects.
     if (this.state === 'playing' && this.game && this.game.state !== 'finished') {
-      const connected = this.connectedCount();
-      if (connected <= 1 && !this.lastPlayerTimer) {
-        const survivorId = this.firstConnectedId();
+      const humanCount = this.connectedCount(true);
+      if (humanCount === 0 && !this.lastPlayerTimer) {
         this.broadcast({
           type: 'last_player_warning',
-          survivorId,
+          survivorId: null,
           graceMs: LAST_PLAYER_GRACE_MS,
         });
         this.lastPlayerTimer = setTimeout(() => {
           this.lastPlayerTimer = null;
           if (!this.game || this.game.state === 'finished') return;
-          if (this.connectedCount() > 1) return;
-          const winnerId = this.firstConnectedId();
+          if (this.connectedCount(true) > 0) return;
           this.state = 'finished';
-          this.game.endGame('last_player_standing', winnerId);
+          this.game.endGame('all_left');
         }, LAST_PLAYER_GRACE_MS);
       }
     }
@@ -128,7 +128,7 @@ class Room {
 
     // Somebody came back before the grace timer fired — cancel the
     // auto-win and let everyone know the countdown is off.
-    if (this.lastPlayerTimer && this.connectedCount() > 1) {
+    if (this.lastPlayerTimer && this.connectedCount(true) > 0) {
       this.clearLastPlayerTimer();
       this.broadcast({
         type: 'last_player_cleared',
@@ -145,15 +145,26 @@ class Room {
   isEmpty() {
     if (this.players.size === 0) return true;
     for (const [, player] of this.players) {
-      if (player.connected) return false;
+      if (player.connected && !player.isBot) return false;
     }
     return true;
   }
 
+  fillBots() {
+    let i = 0;
+    while (this.players.size < MAX_PLAYERS && i < BOT_NAMES.length) {
+      const botId = `bot_${i}`;
+      if (!this.players.has(botId)) {
+        const bot = new Player(botId, BOT_NAMES[i], null, true);
+        this.players.set(botId, bot);
+      }
+      i++;
+    }
+  }
+
   startGame() {
     if (this.state !== 'lobby') return;
-    if (this.players.size < 2) return;
-
+    this.fillBots();
     this.state = 'playing';
     this.game = new Game(this.players, this.broadcast.bind(this));
     this.game.start();
