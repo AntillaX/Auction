@@ -1,3 +1,5 @@
+const BotAI = require('./BotAI');
+
 const WIN_THRESHOLD = 655;
 const MIN_OPENING_BID = 50;
 const MIN_BID_INCREMENT = 10;
@@ -5,6 +7,10 @@ const TIMER_DURATION = 10000; // 10 seconds
 const DELAY_CARD_WON = 2500;
 const DELAY_CARD_PASSED = 1500;
 const STUDY_AUTOSTART_MS = 45000; // auto-start auctions if not all ready
+const BOT_BID_DELAY_MIN = 1200;
+const BOT_BID_DELAY_MAX = 3500;
+const BOT_READY_DELAY_MIN = 800;
+const BOT_READY_DELAY_MAX = 2000;
 
 class Game {
   constructor(players, broadcast) {
@@ -27,13 +33,10 @@ class Game {
     this.consecutiveEmptyPasses = 0;
     this.nextCardTimeout = null;
     this.extendedBy = new Set();
-    // Ready system (shared between study phase and play-again).
-    // readyPlayers tracks who has pressed "Ready" in the current
-    // waiting phase. During study, a 45s auto-start fallback kicks
-    // in so one AFK player can't hold the game hostage.
     this.readyPlayers = new Set();
     this.studyAutoStartTimeout = null;
     this.studyAutoStartAt = 0;
+    this.botTimeouts = [];
   }
 
   generateDeck() {
@@ -102,12 +105,56 @@ class Game {
       type: 'game_started',
       ...this.getFullState(),
     });
+
+    this.scheduleBotReady();
   }
 
   clearStudyAutoStart() {
     if (this.studyAutoStartTimeout) {
       clearTimeout(this.studyAutoStartTimeout);
       this.studyAutoStartTimeout = null;
+    }
+  }
+
+  // ── Bot helpers ──
+
+  clearBotTimeouts() {
+    for (const t of this.botTimeouts) clearTimeout(t);
+    this.botTimeouts = [];
+  }
+
+  scheduleBotReady() {
+    this.clearBotTimeouts();
+    for (const [id, player] of this.players) {
+      if (!player.isBot) continue;
+      const delay = BOT_READY_DELAY_MIN +
+        Math.random() * (BOT_READY_DELAY_MAX - BOT_READY_DELAY_MIN);
+      this.botTimeouts.push(setTimeout(() => this.markReady(id), delay));
+    }
+  }
+
+  scheduleBotBids() {
+    this.clearBotTimeouts();
+    if (this.state !== 'auction') return;
+
+    for (const [id, player] of this.players) {
+      if (!player.isBot) continue;
+      if (id === this.highestBidderId) continue;
+      if (!player.canAfford(this.getMinimumBid())) continue;
+
+      const maxBid = BotAI.calculateMaxBid(player, this.currentCard, this);
+      if (maxBid < this.getMinimumBid()) continue;
+
+      const delay = BOT_BID_DELAY_MIN +
+        Math.random() * (BOT_BID_DELAY_MAX - BOT_BID_DELAY_MIN);
+      this.botTimeouts.push(setTimeout(() => {
+        if (this.state !== 'auction') return;
+        if (id === this.highestBidderId) return;
+        const bid = this.getMinimumBid();
+        if (bid <= maxBid && player.canAfford(bid)) {
+          this.placeBid(id, bid);
+        }
+      }, delay));
     }
   }
 
@@ -243,6 +290,7 @@ class Game {
     });
 
     this.startTimer();
+    this.scheduleBotBids();
   }
 
   startTimer() {
@@ -328,6 +376,7 @@ class Game {
       ...this.getFullState(),
     });
 
+    this.scheduleBotBids();
     return { success: true };
   }
 
@@ -359,10 +408,12 @@ class Game {
       ...this.getFullState(),
     });
 
+    this.scheduleBotBids();
     return { success: true };
   }
 
   resolveAuction() {
+    this.clearBotTimeouts();
     this.state = 'between_rounds';
     let delay;
 
@@ -429,7 +480,7 @@ class Game {
     this.state = 'finished';
     this.clearTimer();
     this.clearStudyAutoStart();
-    // New phase, new ready set — everyone has to press Play Again.
+    this.clearBotTimeouts();
     this.readyPlayers = new Set();
 
     if (!winnerId) {
@@ -450,6 +501,8 @@ class Game {
       reason,
       ...this.getFullState(),
     });
+
+    this.scheduleBotReady();
   }
 
   getMinimumBid() {
@@ -496,6 +549,7 @@ class Game {
   reset() {
     this.clearTimer();
     this.clearStudyAutoStart();
+    this.clearBotTimeouts();
     for (const [, player] of this.players) {
       player.reset();
     }
@@ -520,6 +574,7 @@ class Game {
   destroy() {
     this.clearTimer();
     this.clearStudyAutoStart();
+    this.clearBotTimeouts();
   }
 }
 

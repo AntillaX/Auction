@@ -449,6 +449,7 @@ function renderRoom(state) {
     slot.innerHTML = `
       <div class="player-dot ${p.connected ? '' : 'disconnected'}"></div>
       <span class="player-slot-name">${esc(p.name)}${p.id === myPlayerId ? ' (you)' : ''}</span>
+      ${p.isBot ? '<span class="player-slot-badge bot-badge">Bot</span>' : ''}
       ${p.id === state.hostId ? '<span class="player-slot-badge">Host</span>' : ''}
     `;
     list.appendChild(slot);
@@ -458,7 +459,12 @@ function renderRoom(state) {
   const waitMsg = $('waiting-msg');
   if (state.hostId === myPlayerId) {
     startBtn.classList.remove('hidden');
-    startBtn.disabled = players.length < 2;
+    const humanCount = players.filter((p) => !p.isBot).length;
+    const botCount = 5 - humanCount;
+    startBtn.textContent = botCount > 0
+      ? `Start Game (+${botCount} Bot${botCount !== 1 ? 's' : ''})`
+      : 'Start Game';
+    startBtn.disabled = false;
     waitMsg.classList.add('hidden');
   } else {
     startBtn.classList.add('hidden');
@@ -625,7 +631,7 @@ function renderOpponents() {
     const scorePct = Math.min(100, Math.round((p.score / 655) * 100));
     const progressCls = scorePct >= 70 ? 'high' : scorePct >= 40 ? 'mid' : 'low';
     card.innerHTML = `
-      <span class="opponent-name">${esc(p.name)}</span>
+      <span class="opponent-name">${esc(p.name)}${p.isBot ? ' <span class="bot-tag">Bot</span>' : ''}</span>
       <span class="opponent-budget">$${p.budget.toLocaleString()}</span>
       <span class="opponent-score">${p.score} pts</span>
       <span class="opponent-cards-won">${p.cardsWon.length} card${p.cardsWon.length !== 1 ? 's' : ''}</span>
@@ -1002,6 +1008,7 @@ function renderGameOver() {
     case 'stalemate': reasonText = 'No bids in two passes \u2014 highest score wins'; break;
     case 'all_broke': reasonText = 'All players out of funds \u2014 highest score wins'; break;
     case 'last_player_standing': reasonText = 'Last player standing \u2014 everyone else disconnected'; break;
+    case 'all_left': reasonText = 'All players left \u2014 highest score wins'; break;
     default: reasonText = 'Game over';
   }
   $('win-reason').textContent = reasonText;
@@ -1016,7 +1023,7 @@ function renderGameOver() {
     const rankIcon = i === 0 ? '\u2654' : `${i + 1}`;
     row.innerHTML = `
       <span class="score-rank">${rankIcon}</span>
-      <span class="score-name">${esc(p.name)}${p.id === myPlayerId ? ' (you)' : ''}</span>
+      <span class="score-name">${esc(p.name)}${p.isBot ? ' <span class="bot-tag">Bot</span>' : ''}${p.id === myPlayerId ? ' (you)' : ''}</span>
       <span class="score-points">${p.score} pts</span>
       <span class="score-budget">$${p.budget.toLocaleString()} left</span>
     `;

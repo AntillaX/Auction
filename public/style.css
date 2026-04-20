@@ -432,6 +432,19 @@ input:focus {
   letter-spacing: 0.1em;
 }
 
+.bot-badge {
+  color: var(--text-secondary);
+}
+
+.bot-tag {
+  font-size: 0.55em;
+  font-weight: 400;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  vertical-align: middle;
+}
+
 .room-actions {
   display: flex;
   flex-direction: column;
