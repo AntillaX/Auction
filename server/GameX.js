@@ -445,7 +445,7 @@ class GameX {
     if (this.highestBidderId) {
       const winner = this.players.get(this.highestBidderId);
       winner.deductBudget(this.highestBid);
-      winner.addCard(this.currentCard);
+      winner.addCard(this.currentCard, this.highestBid);
       this.currentIndex++;
 
       if (this.inDiscardPhase) {
