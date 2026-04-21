@@ -1,18 +1,26 @@
 const Game = require('./Game');
+const GameX = require('./GameX');
 const Player = require('./Player');
 
-const MAX_PLAYERS = 5;
+const MAX_PLAYERS_AUCTION = 5;
+const MAX_PLAYERS_AUCTIONX = 4;
+const MIN_PLAYERS_NO_BOTS = 3;
 const LAST_PLAYER_GRACE_MS = 10000;
 const BOT_NAMES = ['Allegri', 'Conte', 'Simeone', 'Ancelotti', 'Mourinho'];
 
 class Room {
-  constructor(code) {
+  constructor(code, mode = 'auction') {
     this.code = code;
+    this.mode = mode;
     this.players = new Map();
     this.hostId = null;
     this.game = null;
-    this.state = 'lobby'; // lobby | playing | finished
+    this.state = 'lobby';
     this.lastPlayerTimer = null;
+  }
+
+  get maxPlayers() {
+    return this.mode === 'auctionx' ? MAX_PLAYERS_AUCTIONX : MAX_PLAYERS_AUCTION;
   }
 
   connectedCount(humansOnly = false) {
@@ -38,8 +46,8 @@ class Room {
   }
 
   addPlayer(playerId, name, ws) {
-    if (this.players.size >= MAX_PLAYERS) {
-      return { success: false, error: 'Room is full (max 5 players)' };
+    if (this.players.size >= this.maxPlayers) {
+      return { success: false, error: `Room is full (max ${this.maxPlayers} players)` };
     }
     if (this.state !== 'lobby') {
       return { success: false, error: 'Game already in progress' };
@@ -152,7 +160,7 @@ class Room {
 
   fillBots() {
     let i = 0;
-    while (this.players.size < MAX_PLAYERS && i < BOT_NAMES.length) {
+    while (this.players.size < this.maxPlayers && i < BOT_NAMES.length) {
       const botId = `bot_${i}`;
       if (!this.players.has(botId)) {
         const bot = new Player(botId, BOT_NAMES[i], null, true);
@@ -162,11 +170,16 @@ class Room {
     }
   }
 
-  startGame() {
+  canStartWithoutBots() {
+    return this.connectedCount(true) >= MIN_PLAYERS_NO_BOTS;
+  }
+
+  startGame(noBots = false) {
     if (this.state !== 'lobby') return;
-    this.fillBots();
+    if (!noBots) this.fillBots();
     this.state = 'playing';
-    this.game = new Game(this.players, this.broadcast.bind(this));
+    const GameClass = this.mode === 'auctionx' ? GameX : Game;
+    this.game = new GameClass(this.players, this.broadcast.bind(this));
     this.game.start();
   }
 
@@ -201,6 +214,8 @@ class Room {
       roomCode: this.code,
       hostId: this.hostId,
       roomState: this.state,
+      mode: this.mode,
+      canStartWithoutBots: this.canStartWithoutBots(),
       players: this.getPlayersArray(),
     };
   }

@@ -2116,3 +2116,193 @@ input:focus {
     padding: 0.35rem 0.5rem;
   }
 }
+
+/* ── Mode Selection Screen ── */
+.mode-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3.5rem 1.25rem 1.5rem;
+  background: radial-gradient(ellipse at center, #1a1a1a 0%, #0a0a0a 70%);
+  width: 100%;
+  overflow-y: auto;
+}
+
+.mode-title {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 2rem;
+}
+
+.mode-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 340px;
+}
+
+.mode-card {
+  background: var(--bg-surface);
+  border: 1px solid #2a2a2a;
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  font-family: inherit;
+  color: var(--text-primary);
+}
+
+.mode-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow);
+  transform: translateY(-2px);
+}
+
+.mode-card:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.mode-card-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  margin-bottom: 0.5rem;
+}
+
+.mode-card-badge.badge-x {
+  color: #6ec6ff;
+}
+
+.mode-card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  margin-bottom: 0.5rem;
+}
+
+.x-accent {
+  color: #6ec6ff;
+  text-shadow: 0 0 12px rgba(110, 198, 255, 0.4);
+}
+
+.mode-card-desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+
+.mode-card-desc strong {
+  color: var(--text-primary);
+}
+
+.mode-card-meta {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.mode-card-x {
+  border-color: rgba(110, 198, 255, 0.15);
+}
+
+.mode-card-x:hover {
+  border-color: #6ec6ff;
+  box-shadow: 0 0 20px rgba(110, 198, 255, 0.2);
+}
+
+/* ── AuctionX Game Theme ── */
+#game-screen.mode-auctionx {
+  background:
+    radial-gradient(ellipse 140% 110% at 50% 45%,
+      #0c1525 0%,
+      #080e1a 55%,
+      #040810 100%);
+}
+
+/* ── Duplicate Warning ── */
+.duplicate-warning {
+  font-size: 0.72rem;
+  color: var(--warning);
+  font-weight: 600;
+  margin-top: 0.25rem;
+  letter-spacing: 0.04em;
+}
+
+/* ── Lineup Overlay ── */
+.lineup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.92);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.lineup-overlay.hidden { display: none; }
+
+.lineup-overlay-content {
+  min-height: 100%;
+  padding: 3rem 1rem 2rem;
+  max-width: 420px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.lineup-overlay-title {
+  color: var(--accent);
+  text-align: center;
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+  margin-top: 0.25rem;
+}
+
+.lineup-formation {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.lineup-row {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.lineup-empty {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.lineup-summary {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 1rem;
+  font-weight: 600;
+}
+
+/* Position category tints on small cards */
+.card-small.pos-gk  { box-shadow: 0 0 6px rgba(46, 204, 113, 0.3); }
+.card-small.pos-def  { box-shadow: 0 0 6px rgba(52, 152, 219, 0.3); }
+.card-small.pos-mid  { box-shadow: 0 0 6px rgba(243, 156, 18, 0.3); }
+.card-small.pos-att  { box-shadow: 0 0 6px rgba(231, 76, 60, 0.3); }
+
+.lineup-bench {
+  margin-top: 0.5rem;
+}

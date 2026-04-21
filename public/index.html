@@ -50,7 +50,29 @@
       </div>
     </div>
 
-    <!-- Instructions Screen -->
+    <!-- Mode Selection Screen -->
+    <div id="mode-screen" class="screen">
+      <button id="mode-back-btn" class="btn-home">&larr; Back</button>
+      <div class="mode-container">
+        <h2 class="mode-title">Choose Mode</h2>
+        <div class="mode-cards">
+          <button id="mode-classic-btn" class="mode-card">
+            <div class="mode-card-badge">Classic</div>
+            <h3 class="mode-card-title">AUCTION</h3>
+            <p class="mode-card-desc">Race to <strong>644 points</strong>. 5 players, 35 cards. First to the target wins.</p>
+            <div class="mode-card-meta">5 players &middot; 35 cards</div>
+          </button>
+          <button id="mode-x-btn" class="mode-card mode-card-x">
+            <div class="mode-card-badge badge-x">New</div>
+            <h3 class="mode-card-title">AUCTION <span class="x-accent">X</span></h3>
+            <p class="mode-card-desc">Build a squad of <strong>11 players</strong> scoring <strong>1,000+ points</strong>. Positions matter.</p>
+            <div class="mode-card-meta">4 players &middot; 45 cards</div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Instructions Screen (Classic) -->
     <div id="instructions-screen" class="screen">
       <div class="instructions-container">
         <button id="instructions-back-btn" class="btn-back">&larr; Back</button>
@@ -110,11 +132,68 @@
       </div>
     </div>
 
+    <!-- Instructions Screen (AuctionX) -->
+    <div id="instructions-x-screen" class="screen">
+      <div class="instructions-container">
+        <button id="instructions-x-back-btn" class="btn-back">&larr; Back</button>
+        <h2 class="instructions-title">How to Play &mdash; Auction X</h2>
+
+        <div class="instructions-body">
+          <div class="rule-section">
+            <h3>Goal</h3>
+            <p>Build a squad of <strong>11 players</strong> with at least <strong>1,000 points</strong> in the right positions.</p>
+          </div>
+
+          <div class="rule-section">
+            <h3>Squad Requirements</h3>
+            <ul>
+              <li>11 cards total</li>
+              <li>Min 1 GK, 3 DEF, 3 MID, 2 ATT</li>
+              <li>Max 2 GKs</li>
+              <li>No duplicate players (one card per player name)</li>
+              <li>Total score &ge; 1,000</li>
+            </ul>
+          </div>
+
+          <div class="rule-section">
+            <h3>Setup</h3>
+            <p><strong>4 players</strong>, <strong>$1,000</strong> each. 45 cards with duplicate players at different tiers.</p>
+          </div>
+
+          <div class="rule-section">
+            <h3>The Cards</h3>
+            <div class="card-table">
+              <div class="card-table-row"><span class="ct-value">100 pts</span><span class="ct-names">&times; 2</span></div>
+              <div class="card-table-row"><span class="ct-value">98 pts</span><span class="ct-names">&times; 4</span></div>
+              <div class="card-table-row"><span class="ct-value">95 pts</span><span class="ct-names">&times; 9</span></div>
+              <div class="card-table-row"><span class="ct-value">92 pts</span><span class="ct-names">&times; 9</span></div>
+              <div class="card-table-row"><span class="ct-value">88 pts</span><span class="ct-names">&times; 11</span></div>
+              <div class="card-table-row"><span class="ct-value">85 pts</span><span class="ct-names">&times; 10</span></div>
+            </div>
+            <p class="rule-note">45 cards &middot; duplicate players across tiers</p>
+          </div>
+
+          <div class="rule-section">
+            <h3>Auctions</h3>
+            <ul>
+              <li>Same as classic &mdash; $50 open, $10 steps, 10s timer</li>
+              <li>You can't bid on a player you already own</li>
+            </ul>
+          </div>
+
+          <div class="rule-section">
+            <h3>Winning</h3>
+            <p>First to complete a valid squad wins instantly. If nobody completes one, the player with the most cards wins (tiebreak by score).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Room Screen -->
     <div id="room-screen" class="screen">
       <button id="room-leave-btn" class="btn-home" aria-label="Back to Auction home">&larr; Home</button>
       <div class="room-container">
-        <h2 class="room-title">Room</h2>
+        <h2 id="room-title" class="room-title">Room</h2>
         <div id="room-code-display" class="room-code"></div>
         <p class="room-hint">Share this code with other players</p>
 
@@ -122,6 +201,7 @@
 
         <div class="room-actions">
           <button id="start-btn" class="btn btn-primary hidden">Start Game</button>
+          <button id="start-nobots-btn" class="btn btn-secondary hidden">Start Without Bots</button>
           <p id="waiting-msg" class="waiting-msg">Waiting for host to start...</p>
         </div>
       </div>
@@ -142,7 +222,7 @@
       <div id="study-overlay" class="study-overlay hidden">
         <div class="study-content">
           <h2>Study the Deck</h2>
-          <p class="study-sub">35 cards, revealed order. Plan ahead.</p>
+          <p id="study-sub" class="study-sub">35 cards, revealed order. Plan ahead.</p>
           <div id="study-deck" class="study-deck"></div>
           <div class="ready-bar">
             <button id="ready-btn" class="btn btn-primary">I'm Ready</button>
@@ -204,39 +284,17 @@
         <div class="instructions-container">
           <button id="help-overlay-close" class="btn-back">&larr; Close</button>
           <h2 class="instructions-title">How to Play</h2>
+          <div id="help-overlay-body" class="instructions-body"></div>
+        </div>
+      </div>
 
-          <div class="instructions-body">
-            <div class="rule-section">
-              <h3>Goal</h3>
-              <p>First to <strong>644 points</strong> wins.</p>
-            </div>
-
-            <div class="rule-section">
-              <h3>Auctions</h3>
-              <ul>
-                <li>Cards sold one at a time, in order</li>
-                <li>Open at <strong>$50</strong>, raise in <strong>$10</strong> steps</li>
-                <li>Each bid resets a <strong>10s</strong> timer</li>
-                <li><strong>More Time</strong>: one reset per player per round</li>
-                <li>Highest bid when time runs out wins</li>
-                <li>No bids &rarr; card discarded</li>
-              </ul>
-            </div>
-
-            <div class="rule-section">
-              <h3>Endgame</h3>
-              <p>Hit 644 and win instantly. Deck out &rarr; discards recycle. Two silent passes &rarr; highest score wins.</p>
-            </div>
-
-            <div class="rule-section">
-              <h3>Tips</h3>
-              <ul>
-                <li>Card order is public &mdash; plan ahead</li>
-                <li>Budgets and scores are public &mdash; read the room</li>
-                <li>Letting a card go can beat overpaying</li>
-              </ul>
-            </div>
-          </div>
+      <!-- Lineup Overlay (AuctionX — tap opponent to see their squad) -->
+      <div id="lineup-overlay" class="lineup-overlay hidden">
+        <div class="lineup-overlay-content">
+          <button id="lineup-overlay-close" class="btn-back">&larr; Close</button>
+          <h2 id="lineup-overlay-title" class="lineup-overlay-title">Squad</h2>
+          <div id="lineup-formation" class="lineup-formation"></div>
+          <div id="lineup-bench" class="lineup-bench"></div>
         </div>
       </div>
 
