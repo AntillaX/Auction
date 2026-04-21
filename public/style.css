@@ -2206,11 +2206,29 @@ input:focus {
   color: var(--text-primary);
 }
 
+.mode-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .mode-card-meta {
   font-size: 0.7rem;
   color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 0.1em;
+}
+
+.mode-card-help {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s;
+}
+
+.mode-card-help:hover {
+  color: var(--accent);
 }
 
 .mode-card-x {

@@ -17,6 +17,7 @@ let reconnectTimeout = null;
 let toastTimeout = null;
 let resultBannerTimeout = null;
 let lastCardWonBy = null;
+let instructionsReturnScreen = 'lobby-screen';
 
 // ── DOM refs ──
 const $ = (id) => document.getElementById(id);
@@ -124,8 +125,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   $('how-to-play-btn').addEventListener('click', () => showScreen('instructions-screen'));
-  $('instructions-back-btn').addEventListener('click', () => showScreen('lobby-screen'));
-  $('instructions-x-back-btn').addEventListener('click', () => showScreen('lobby-screen'));
+  $('instructions-back-btn').addEventListener('click', () => showScreen(instructionsReturnScreen));
+  $('instructions-x-back-btn').addEventListener('click', () => showScreen(instructionsReturnScreen));
+
+  $('mode-classic-help').addEventListener('click', (e) => {
+    e.stopPropagation();
+    instructionsReturnScreen = 'mode-screen';
+    showScreen('instructions-screen');
+  });
+  $('mode-x-help').addEventListener('click', (e) => {
+    e.stopPropagation();
+    instructionsReturnScreen = 'mode-screen';
+    showScreen('instructions-x-screen');
+  });
 
   $('help-btn').addEventListener('click', () => {
     $('help-overlay').classList.remove('hidden');
@@ -1168,9 +1180,13 @@ function renderGameOver() {
       const teamDiv = document.createElement('div');
       teamDiv.className = 'score-team' + (startOpen ? ' expanded' : '');
       if (startOpen) row.classList.add('team-open');
-      p.cardsWon.forEach((card) => {
-        teamDiv.appendChild(createCardElement(card, 'card-small'));
-      });
+      if (gameMode === 'auctionx') {
+        teamDiv.appendChild(buildFormationHTML(p));
+      } else {
+        p.cardsWon.forEach((card) => {
+          teamDiv.appendChild(createCardElement(card, 'card-small'));
+        });
+      }
       entry.appendChild(teamDiv);
 
       row.style.cursor = 'pointer';
@@ -1272,6 +1288,112 @@ function posCategory(pos) {
   return 'att';
 }
 
+// Slot definitions: each slot has a label and a list of preferred
+// positions (first = best fit). Higher-value cards get first pick.
+const FORMATION_SLOTS = {
+  att: [
+    { label: 'ATT', prefer: ['LW', 'CF'] },
+    { label: 'ATT', prefer: ['RW', 'ST'] },
+  ],
+  mid: [
+    { label: 'MID', prefer: ['CM', 'CAM'] },
+    { label: 'MID', prefer: ['CAM', 'CM'] },
+    { label: 'MID', prefer: ['CM', 'CAM'] },
+    { label: 'MID', prefer: ['RM', 'CM'] },
+  ],
+  def: [
+    { label: 'DEF', prefer: ['LB'] },
+    { label: 'DEF', prefer: ['CB'] },
+    { label: 'DEF', prefer: ['CB'] },
+    { label: 'DEF', prefer: ['RB'] },
+  ],
+  gk: [
+    { label: 'GK', prefer: ['GK'] },
+  ],
+};
+
+function assignCardsToSlots(cards, slotDefs) {
+  const sorted = [...cards].sort((a, b) => b.value - a.value);
+  const slotCount = Math.max(slotDefs.length, sorted.length);
+  const slots = [];
+  for (let i = 0; i < slotCount; i++) {
+    slots.push({ def: slotDefs[i] || slotDefs[slotDefs.length - 1], card: null });
+  }
+
+  const placed = new Set();
+
+  // Pass 1: assign cards to their best-fit slot (preferred position match)
+  for (const card of sorted) {
+    let bestSlot = -1;
+    let bestRank = 999;
+    for (let i = 0; i < slots.length; i++) {
+      if (slots[i].card) continue;
+      const rank = slots[i].def.prefer.indexOf(card.position);
+      if (rank !== -1 && rank < bestRank) {
+        bestRank = rank;
+        bestSlot = i;
+      }
+    }
+    if (bestSlot !== -1) {
+      slots[bestSlot].card = card;
+      placed.add(card);
+    }
+  }
+
+  // Pass 2: overflow — put remaining cards in any empty slot
+  for (const card of sorted) {
+    if (placed.has(card)) continue;
+    for (let i = 0; i < slots.length; i++) {
+      if (!slots[i].card) {
+        slots[i].card = card;
+        placed.add(card);
+        break;
+      }
+    }
+  }
+
+  return slots;
+}
+
+function buildFormationHTML(player) {
+  const groups = { att: [], mid: [], def: [], gk: [] };
+  (player.cardsWon || []).forEach((c) => {
+    groups[posCategory(c.position)].push(c);
+  });
+
+  const rowDefs = [
+    { key: 'att', cls: 'pos-att' },
+    { key: 'mid', cls: 'pos-mid' },
+    { key: 'def', cls: 'pos-def' },
+    { key: 'gk', cls: 'pos-gk' },
+  ];
+
+  const container = document.createElement('div');
+  container.className = 'lineup-formation';
+
+  rowDefs.forEach((row) => {
+    const slots = assignCardsToSlots(groups[row.key], FORMATION_SLOTS[row.key]);
+    const rowEl = document.createElement('div');
+    rowEl.className = 'lineup-row';
+
+    slots.forEach((slot) => {
+      if (slot.card) {
+        const el = createCardElement(slot.card, 'card-small');
+        el.classList.add(row.cls);
+        rowEl.appendChild(el);
+      } else {
+        const empty = document.createElement('div');
+        empty.className = `card card-small lineup-slot-empty ${row.cls}-empty`;
+        empty.innerHTML = `<span class="slot-label">${slot.def.label}</span>`;
+        rowEl.appendChild(empty);
+      }
+    });
+    container.appendChild(rowEl);
+  });
+
+  return container;
+}
+
 function showLineupOverlay(player) {
   const isMe = player.id === myPlayerId;
   $('lineup-overlay-title').textContent = isMe ? 'My Squad' : `${esc(player.name)}'s Squad`;
@@ -1280,39 +1402,8 @@ function showLineupOverlay(player) {
   formation.innerHTML = '';
   bench.innerHTML = '';
 
-  const groups = { att: [], mid: [], def: [], gk: [] };
-  (player.cardsWon || []).forEach((c) => {
-    groups[posCategory(c.position)].push(c);
-  });
-
-  const baseSlots = { att: 2, mid: 4, def: 4, gk: 1 };
-  const rows = [
-    { key: 'att', label: 'ATT', cls: 'pos-att' },
-    { key: 'mid', label: 'MID', cls: 'pos-mid' },
-    { key: 'def', label: 'DEF', cls: 'pos-def' },
-    { key: 'gk', label: 'GK', cls: 'pos-gk' },
-  ];
-
-  rows.forEach((row) => {
-    const cards = groups[row.key];
-    const slotCount = Math.max(baseSlots[row.key], cards.length);
-    const rowEl = document.createElement('div');
-    rowEl.className = 'lineup-row';
-
-    for (let i = 0; i < slotCount; i++) {
-      if (i < cards.length) {
-        const el = createCardElement(cards[i], 'card-small');
-        el.classList.add(row.cls);
-        rowEl.appendChild(el);
-      } else {
-        const empty = document.createElement('div');
-        empty.className = `card card-small lineup-slot-empty ${row.cls}-empty`;
-        empty.innerHTML = `<span class="slot-label">${row.label}</span>`;
-        rowEl.appendChild(empty);
-      }
-    }
-    formation.appendChild(rowEl);
-  });
+  const formationEl = buildFormationHTML(player);
+  while (formationEl.firstChild) formation.appendChild(formationEl.firstChild);
 
   const total = (player.cardsWon || []).reduce((s, c) => s + c.value, 0);
   const count = (player.cardsWon || []).length;
