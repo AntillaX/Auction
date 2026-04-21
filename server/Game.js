@@ -44,10 +44,12 @@ class Game {
       // 100 (2)
       { name: 'Messi', value: 100, position: 'RW' },
       { name: 'Pedri', value: 100, position: 'CM' },
-      // 98 (2)
+      // 98 (4)
       { name: 'Ronaldo', value: 98, position: 'LW' },
       { name: 'Neuer', value: 98, position: 'GK' },
-      // 95 (7)
+      { name: 'Lamine Yamal', value: 98, position: 'RW' },
+      { name: 'Van Dijk', value: 98, position: 'CB' },
+      // 95 (9)
       { name: 'Neymar', value: 95, position: 'LW' },
       { name: 'Mbappé', value: 95, position: 'ST' },
       { name: 'Zidane', value: 95, position: 'CAM' },
@@ -55,27 +57,29 @@ class Game {
       { name: 'Ramos', value: 95, position: 'CB' },
       { name: 'Buffon', value: 95, position: 'GK' },
       { name: 'Casillas', value: 95, position: 'GK' },
-      // 92 (8)
-      { name: 'Lamine Yamal', value: 92, position: 'RW' },
+      { name: 'Maradona', value: 95, position: 'CF' },
+      { name: 'Cruyff', value: 95, position: 'CF' },
+      // 92 (7)
       { name: 'Modric', value: 92, position: 'CM' },
       { name: 'De Bruyne', value: 92, position: 'CAM' },
       { name: 'Iniesta', value: 92, position: 'CM' },
-      { name: 'Van Dijk', value: 92, position: 'CB' },
       { name: 'Courtois', value: 92, position: 'GK' },
       { name: 'De Gea', value: 92, position: 'GK' },
       { name: 'Ter Stegen', value: 92, position: 'GK' },
-      // 88 (7)
+      { name: 'Jordi Alba', value: 92, position: 'LB' },
+      // 88 (8)
       { name: 'Haaland', value: 88, position: 'ST' },
       { name: 'Beckham', value: 88, position: 'RM' },
       { name: 'Xavi', value: 88, position: 'CM' },
       { name: 'Marcelo', value: 88, position: 'LB' },
       { name: 'Dani Carvajal', value: 88, position: 'RB' },
-      { name: 'Jordi Alba', value: 88, position: 'LB' },
+      { name: 'Allison', value: 88, position: 'GK' },
       { name: 'Piqué', value: 88, position: 'CB' },
+      { name: 'Puyol', value: 88, position: 'CB' },
       // 85 (5)
       { name: 'Morata', value: 85, position: 'ST' },
       { name: 'Bellingham', value: 85, position: 'CM' },
-      { name: 'Lingard', value: 85, position: 'AM' },
+      { name: 'Lingard', value: 85, position: 'CM' },
       { name: 'Maguire', value: 85, position: 'CB' },
       { name: 'Mustafi', value: 85, position: 'CB' },
     ];

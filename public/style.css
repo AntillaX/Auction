@@ -903,7 +903,20 @@ input:focus {
   }
 }
 
-/* Outbid flash */
+/* Outbid shake + flash */
+.anim-outbid .card-large {
+  animation: outbid-shake 0.4s ease-out;
+}
+
+@keyframes outbid-shake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-6px); }
+  30% { transform: translateX(5px); }
+  45% { transform: translateX(-4px); }
+  60% { transform: translateX(3px); }
+  75% { transform: translateX(-1px); }
+}
+
 .anim-outbid-flash {
   animation: outbid-flash 0.5s ease-out;
 }
