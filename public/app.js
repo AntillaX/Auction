@@ -981,6 +981,12 @@ function animateCardPassed() {
 }
 
 function triggerOutbidFeedback() {
+  const container = $('current-card-container');
+  if (container) {
+    container.classList.remove('anim-outbid');
+    void container.offsetWidth;
+    container.classList.add('anim-outbid');
+  }
   const status = $('bid-status');
   if (status) {
     status.classList.remove('anim-outbid-flash');
