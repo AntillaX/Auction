@@ -1,5 +1,5 @@
 const MIN_OPENING_BID = 50;
-const MIN_BID_INCREMENT = 10;
+const MIN_BID_INCREMENT = 5;
 const TEAM_SIZE = 11;
 const MIN_SCORE = 1000;
 const TEAM_REQS = { gk: 1, def: 3, mid: 3, att: 2 };
@@ -9,27 +9,27 @@ const BOT_BIASES = {
   Allegri: {
     mustHave: ['Buffon', 'Beckham'],
     likes: ['Ronaldo', 'Ramos'],
-    dislikes: ['Neymar', 'Ronaldinho', 'Morata', 'Lingard', 'Mustafi', 'Maguire', 'Maradona'],
+    dislikes: ['Neymar', 'Ronaldinho', 'Bellingham', 'Lingard', 'Ter Stegen', 'Maguire', 'Maradona'],
   },
   Conte: {
     mustHave: ['Haaland', 'Marcelo'],
     likes: ['Beckham', 'Van Dijk'],
-    dislikes: ['Jordi Alba', 'Mustafi', 'Morata', 'Lingard', 'Maguire', 'De Gea', 'Puyol'],
+    dislikes: ['Jordi Alba', 'Piqué', 'Bellingham', 'Lingard', 'Maguire', 'De Gea', 'Puyol'],
   },
   Simeone: {
     mustHave: ['Ramos', 'Marcelo'],
-    likes: ['Casillas', 'Dani Carvajal'],
-    dislikes: ['Ronaldinho', 'Neymar', 'Lingard', 'Maguire', 'Mustafi', 'Morata', 'Cruyff'],
+    likes: ['Casillas', 'Carvajal'],
+    dislikes: ['Ronaldinho', 'Neymar', 'Lingard', 'Maguire', 'Ter Stegen', 'Bellingham', 'Cruyff'],
   },
   Ancelotti: {
     mustHave: ['Modric', 'Beckham', 'Marcelo'],
     likes: ['Ronaldo', 'Courtois'],
-    dislikes: ['Lingard', 'Mustafi', 'Jordi Alba', 'Maguire', 'Morata', 'De Gea', 'Puyol'],
+    dislikes: ['Lingard', 'Piqué', 'Jordi Alba', 'Maguire', 'Bellingham', 'De Gea', 'Puyol'],
   },
   Mourinho: {
     mustHave: ['Neuer', 'Beckham'],
     likes: ['Xavi', 'Ramos'],
-    dislikes: ['Iniesta', 'Neymar', 'Lingard', 'Mustafi', 'Maguire', 'Puyol', 'Morata'],
+    dislikes: ['Iniesta', 'Neymar', 'Lingard', 'Ter Stegen', 'Maguire', 'Puyol', 'Bellingham'],
   },
 };
 
@@ -129,7 +129,7 @@ function calculateMaxBid(bot, card, game) {
   }
 
   maxBid = Math.min(maxBid, bot.budget);
-  maxBid = Math.floor(maxBid / 10) * 10;
+  maxBid = Math.floor(maxBid / 5) * 5;
   return Math.max(0, maxBid);
 }
 

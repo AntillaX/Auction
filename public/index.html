@@ -106,7 +106,7 @@
             <h3>Auctions</h3>
             <ul>
               <li>Cards sold one at a time, in order</li>
-              <li>Open at <strong>$50</strong>, raise in <strong>$10</strong> steps</li>
+              <li>Open at <strong>$50</strong>, raise in <strong>$5</strong> steps</li>
               <li>Each bid resets a <strong>10s</strong> timer</li>
               <li><strong>More Time</strong>: one reset per player per round</li>
               <li>Highest bid when time runs out wins</li>
@@ -164,11 +164,11 @@
             <h3>The Cards</h3>
             <div class="card-table">
               <div class="card-table-row"><span class="ct-value">100 pts</span><span class="ct-names">&times; 2</span></div>
-              <div class="card-table-row"><span class="ct-value">98 pts</span><span class="ct-names">&times; 4</span></div>
-              <div class="card-table-row"><span class="ct-value">95 pts</span><span class="ct-names">&times; 9</span></div>
-              <div class="card-table-row"><span class="ct-value">92 pts</span><span class="ct-names">&times; 9</span></div>
-              <div class="card-table-row"><span class="ct-value">88 pts</span><span class="ct-names">&times; 11</span></div>
-              <div class="card-table-row"><span class="ct-value">85 pts</span><span class="ct-names">&times; 10</span></div>
+              <div class="card-table-row"><span class="ct-value">98 pts</span><span class="ct-names">&times; 7</span></div>
+              <div class="card-table-row"><span class="ct-value">95 pts</span><span class="ct-names">&times; 11</span></div>
+              <div class="card-table-row"><span class="ct-value">92 pts</span><span class="ct-names">&times; 7</span></div>
+              <div class="card-table-row"><span class="ct-value">88 pts</span><span class="ct-names">&times; 12</span></div>
+              <div class="card-table-row"><span class="ct-value">85 pts</span><span class="ct-names">&times; 6</span></div>
             </div>
             <p class="rule-note">45 cards &middot; duplicate players across tiers</p>
           </div>
@@ -176,7 +176,7 @@
           <div class="rule-section">
             <h3>Auctions</h3>
             <ul>
-              <li>Same as classic &mdash; $50 open, $10 steps, 10s timer</li>
+              <li>Same as classic &mdash; $50 open, $5 steps, 10s timer</li>
               <li>You can't bid on a player you already own</li>
             </ul>
           </div>
@@ -301,6 +301,10 @@
       <!-- Player Controls (sticky bottom) -->
       <div id="player-controls" class="player-controls">
         <div id="my-info" class="my-info">
+          <button id="my-lineup-btn" class="my-lineup-btn hidden" aria-label="View my lineup">
+            <span id="my-name" class="my-name"></span>
+            <span class="my-lineup-chevron">&#9656;</span>
+          </button>
           <div class="my-stat">
             <span class="stat-label">Budget</span>
             <span id="my-budget" class="stat-value budget-value">$1,000</span>
@@ -316,13 +320,13 @@
         <div id="bid-controls" class="bid-controls">
           <div class="bid-buttons">
             <button id="bid-min" class="btn btn-bid" data-action="min">Min $50</button>
-            <button id="bid-plus10" class="btn btn-bid" data-action="+10">+$10</button>
+            <button id="bid-plus5" class="btn btn-bid" data-action="+5">+$5</button>
+            <button id="bid-plus25" class="btn btn-bid" data-action="+25">+$25</button>
             <button id="bid-plus50" class="btn btn-bid" data-action="+50">+$50</button>
-            <button id="bid-plus100" class="btn btn-bid" data-action="+100">+$100</button>
           </div>
           <div class="custom-bid-row">
             <span class="custom-label">Custom:</span>
-            <input type="number" id="custom-bid-input" step="10" min="50" placeholder="Amount">
+            <input type="number" id="custom-bid-input" step="5" min="50" placeholder="Amount">
             <button id="custom-bid-btn" class="btn btn-bid btn-custom-go">Bid</button>
           </div>
         </div>
