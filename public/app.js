@@ -124,7 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  $('how-to-play-btn').addEventListener('click', () => showScreen('instructions-screen'));
   $('instructions-back-btn').addEventListener('click', () => showScreen(instructionsReturnScreen));
   $('instructions-x-back-btn').addEventListener('click', () => showScreen(instructionsReturnScreen));
 
@@ -849,17 +848,27 @@ function renderDeckOverlay() {
       const row = document.createElement('div');
       row.className = 'deck-claimed-row';
       const total = p.cardsWon.reduce((s, c) => s + (c.value || 0), 0);
+      const totalSpent = p.cardsWon.reduce((s, c) => s + (c.price || 0), 0);
       const header = document.createElement('div');
       header.className = 'deck-claimed-header';
       header.innerHTML = `
         <span class="deck-claimed-name">${esc(p.name)}${p.id === myPlayerId ? ' (you)' : ''}</span>
-        <span class="deck-claimed-pts">${p.cardsWon.length} cards · ${total} pts</span>
+        <span class="deck-claimed-pts">${p.cardsWon.length} cards · ${total} pts · $${totalSpent.toLocaleString()} spent</span>
       `;
       row.appendChild(header);
       const cardsWrap = document.createElement('div');
       cardsWrap.className = 'deck-claimed-cards';
       p.cardsWon.forEach((card) => {
-        cardsWrap.appendChild(createCardElement(card, 'card-small'));
+        const wrap = document.createElement('div');
+        wrap.className = 'deck-card-price-wrap';
+        wrap.appendChild(createCardElement(card, 'card-small'));
+        if (card.price != null) {
+          const tag = document.createElement('span');
+          tag.className = 'deck-card-price';
+          tag.textContent = `$${card.price}`;
+          wrap.appendChild(tag);
+        }
+        cardsWrap.appendChild(wrap);
       });
       row.appendChild(cardsWrap);
       claimedContainer.appendChild(row);
