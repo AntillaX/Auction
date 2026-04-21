@@ -84,9 +84,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.currentTarget && e.currentTarget.blur) e.currentTarget.blur();
   };
   $('bid-min').addEventListener('click', bidTap('min'));
-  $('bid-plus10').addEventListener('click', bidTap('+10'));
+  $('bid-plus5').addEventListener('click', bidTap('+5'));
+  $('bid-plus25').addEventListener('click', bidTap('+25'));
   $('bid-plus50').addEventListener('click', bidTap('+50'));
-  $('bid-plus100').addEventListener('click', bidTap('+100'));
   $('custom-bid-btn').addEventListener('click', (e) => {
     placeCustomBid();
     if (e.currentTarget && e.currentTarget.blur) e.currentTarget.blur();
@@ -144,6 +144,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $('lineup-overlay-close').addEventListener('click', () => {
     $('lineup-overlay').classList.add('hidden');
+  });
+
+  $('my-lineup-btn').addEventListener('click', () => {
+    const me = getMyPlayer();
+    if (me) showLineupOverlay(me);
   });
 
   $('room-code-display').addEventListener('click', () => {
@@ -854,6 +859,11 @@ function renderMyInfo() {
   const me = getMyPlayer();
   if (!me) return;
 
+  const nameBtn = $('my-lineup-btn');
+  const nameEl = $('my-name');
+  nameEl.textContent = me.name;
+  nameBtn.classList.remove('hidden');
+
   const budgetEl = $('my-budget');
   budgetEl.textContent = `$${me.budget.toLocaleString()}`;
   budgetEl.className = 'stat-value budget-value';
@@ -893,35 +903,35 @@ function updateBidControls() {
   const canBid = isAuction && me && me.budget >= minBid && gameState.highestBidderId !== myPlayerId && !alreadyOwned;
 
   const btnMin = $('bid-min');
-  const btn10 = $('bid-plus10');
+  const btn5 = $('bid-plus5');
+  const btn25 = $('bid-plus25');
   const btn50 = $('bid-plus50');
-  const btn100 = $('bid-plus100');
 
-  const plus10 = gameState.highestBid > 0 ? gameState.highestBid + 10 : 50;
+  const plus5 = gameState.highestBid > 0 ? gameState.highestBid + 5 : 50;
+  const plus25 = gameState.highestBid > 0 ? gameState.highestBid + 25 : 75;
   const plus50 = gameState.highestBid > 0 ? gameState.highestBid + 50 : 100;
-  const plus100 = gameState.highestBid > 0 ? gameState.highestBid + 100 : 150;
 
   if (isAuction && gameState.highestBidderId === myPlayerId) {
     btnMin.textContent = 'Winning!';
     btnMin.disabled = true;
-    btn10.textContent = `$${plus10}`;
-    btn10.disabled = true;
+    btn5.textContent = `$${plus5}`;
+    btn5.disabled = true;
+    btn25.textContent = `$${plus25}`;
+    btn25.disabled = true;
     btn50.textContent = `$${plus50}`;
     btn50.disabled = true;
-    btn100.textContent = `$${plus100}`;
-    btn100.disabled = true;
   } else {
     btnMin.textContent = `$${minBid}`;
     btnMin.disabled = !canBid;
 
-    btn10.textContent = `$${plus10}`;
-    btn10.disabled = !canBid || !me || me.budget < plus10;
+    btn5.textContent = `$${plus5}`;
+    btn5.disabled = !canBid || !me || me.budget < plus5;
+
+    btn25.textContent = `$${plus25}`;
+    btn25.disabled = !canBid || !me || me.budget < plus25;
 
     btn50.textContent = `$${plus50}`;
     btn50.disabled = !canBid || !me || me.budget < plus50;
-
-    btn100.textContent = `$${plus100}`;
-    btn100.disabled = !canBid || !me || me.budget < plus100;
   }
 
   const customInput = $('custom-bid-input');
@@ -951,12 +961,12 @@ function placeBidAction(action) {
   let amount;
   switch (action) {
     case 'min': amount = minBid; break;
-    case '+10': amount = gameState.highestBid > 0 ? gameState.highestBid + 10 : 50; break;
+    case '+5': amount = gameState.highestBid > 0 ? gameState.highestBid + 5 : 50; break;
+    case '+25': amount = gameState.highestBid > 0 ? gameState.highestBid + 25 : 75; break;
     case '+50': amount = gameState.highestBid > 0 ? gameState.highestBid + 50 : 100; break;
-    case '+100': amount = gameState.highestBid > 0 ? gameState.highestBid + 100 : 150; break;
   }
   if (amount) {
-    amount = Math.ceil(amount / 10) * 10;
+    amount = Math.ceil(amount / 5) * 5;
     send({ type: 'place_bid', amount });
   }
 }
@@ -965,7 +975,7 @@ function placeCustomBid() {
   const input = $('custom-bid-input');
   let amount = parseInt(input.value, 10);
   if (isNaN(amount) || amount <= 0) { showToast('Enter a valid bid amount'); return; }
-  amount = Math.round(amount / 10) * 10;
+  amount = Math.round(amount / 5) * 5;
   if (amount < 50) amount = 50;
   send({ type: 'place_bid', amount });
   input.value = '';
@@ -1236,7 +1246,7 @@ function populateHelpOverlay() {
         <li>First to complete a valid squad wins</li>
       </ul></div>
       <div class="rule-section"><h3>Auctions</h3><ul>
-        <li>$50 open, $10 steps, 10s timer</li>
+        <li>$50 open, $5 steps, 10s timer</li>
         <li>Can't bid on a player you already own</li>
       </ul></div>
     `;
@@ -1245,7 +1255,7 @@ function populateHelpOverlay() {
       <div class="rule-section"><h3>Goal</h3><p>First to <strong>644 points</strong> wins.</p></div>
       <div class="rule-section"><h3>Auctions</h3><ul>
         <li>Cards sold one at a time, in order</li>
-        <li>Open at <strong>$50</strong>, raise in <strong>$10</strong> steps</li>
+        <li>Open at <strong>$50</strong>, raise in <strong>$5</strong> steps</li>
         <li>Each bid resets a <strong>10s</strong> timer</li>
         <li>Highest bid when time runs out wins</li>
       </ul></div>
@@ -1254,7 +1264,7 @@ function populateHelpOverlay() {
   }
 }
 
-// ── AuctionX Lineup Overlay ──
+// ── Lineup Overlay ──
 function posCategory(pos) {
   if (pos === 'GK') return 'gk';
   if (['CB', 'LB', 'RB'].includes(pos)) return 'def';
@@ -1263,42 +1273,50 @@ function posCategory(pos) {
 }
 
 function showLineupOverlay(player) {
-  $('lineup-overlay-title').textContent = `${esc(player.name)}'s Squad`;
+  const isMe = player.id === myPlayerId;
+  $('lineup-overlay-title').textContent = isMe ? 'My Squad' : `${esc(player.name)}'s Squad`;
   const formation = $('lineup-formation');
   const bench = $('lineup-bench');
   formation.innerHTML = '';
   bench.innerHTML = '';
 
-  if (!player.cardsWon || player.cardsWon.length === 0) {
-    formation.innerHTML = '<div class="lineup-empty">No cards yet</div>';
-  } else {
-    const groups = { att: [], mid: [], def: [], gk: [] };
-    player.cardsWon.forEach((c) => {
-      groups[posCategory(c.position)].push(c);
-    });
+  const groups = { att: [], mid: [], def: [], gk: [] };
+  (player.cardsWon || []).forEach((c) => {
+    groups[posCategory(c.position)].push(c);
+  });
 
-    const rows = [
-      { label: 'ATT', cards: groups.att, cls: 'pos-att' },
-      { label: 'MID', cards: groups.mid, cls: 'pos-mid' },
-      { label: 'DEF', cards: groups.def, cls: 'pos-def' },
-      { label: 'GK', cards: groups.gk, cls: 'pos-gk' },
-    ];
+  const baseSlots = { att: 2, mid: 4, def: 4, gk: 1 };
+  const rows = [
+    { key: 'att', label: 'ATT', cls: 'pos-att' },
+    { key: 'mid', label: 'MID', cls: 'pos-mid' },
+    { key: 'def', label: 'DEF', cls: 'pos-def' },
+    { key: 'gk', label: 'GK', cls: 'pos-gk' },
+  ];
 
-    rows.forEach((row) => {
-      if (row.cards.length === 0) return;
-      const rowEl = document.createElement('div');
-      rowEl.className = 'lineup-row';
-      row.cards.forEach((c) => {
-        const el = createCardElement(c, 'card-small');
+  rows.forEach((row) => {
+    const cards = groups[row.key];
+    const slotCount = Math.max(baseSlots[row.key], cards.length);
+    const rowEl = document.createElement('div');
+    rowEl.className = 'lineup-row';
+
+    for (let i = 0; i < slotCount; i++) {
+      if (i < cards.length) {
+        const el = createCardElement(cards[i], 'card-small');
         el.classList.add(row.cls);
         rowEl.appendChild(el);
-      });
-      formation.appendChild(rowEl);
-    });
+      } else {
+        const empty = document.createElement('div');
+        empty.className = `card card-small lineup-slot-empty ${row.cls}-empty`;
+        empty.innerHTML = `<span class="slot-label">${row.label}</span>`;
+        rowEl.appendChild(empty);
+      }
+    }
+    formation.appendChild(rowEl);
+  });
 
-    const total = player.cardsWon.reduce((s, c) => s + c.value, 0);
-    bench.innerHTML = `<div class="lineup-summary">${player.cardsWon.length}/11 cards &middot; ${total} pts</div>`;
-  }
+  const total = (player.cardsWon || []).reduce((s, c) => s + c.value, 0);
+  const count = (player.cardsWon || []).length;
+  bench.innerHTML = `<div class="lineup-summary">${count}/11 cards &middot; ${total} pts${total >= 1000 && count >= 11 ? ' &check;' : ''}</div>`;
 
   $('lineup-overlay').classList.remove('hidden');
 }

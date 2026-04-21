@@ -3,7 +3,7 @@ const BotAIX = require('./BotAIX');
 const TEAM_SIZE = 11;
 const MIN_SCORE = 1000;
 const MIN_OPENING_BID = 50;
-const MIN_BID_INCREMENT = 10;
+const MIN_BID_INCREMENT = 5;
 const TIMER_DURATION = 10000;
 const DELAY_CARD_WON = 2500;
 const DELAY_CARD_PASSED = 1500;
@@ -78,14 +78,16 @@ class GameX {
       // 100 (2)
       { name: 'Messi', value: 100, position: 'RW' },
       { name: 'Pedri', value: 100, position: 'CM' },
-      // 98 (4)
+      // 98 (7)
       { name: 'Ronaldo', value: 98, position: 'LW' },
       { name: 'Neuer', value: 98, position: 'GK' },
       { name: 'Lamine Yamal', value: 98, position: 'RW' },
       { name: 'Van Dijk', value: 98, position: 'CB' },
-      // 95 (9)
+      { name: 'Mbappé', value: 98, position: 'ST' },
+      { name: 'Iniesta', value: 98, position: 'CM' },
+      { name: 'Xavi', value: 98, position: 'CM' },
+      // 95 (11)
       { name: 'Neymar', value: 95, position: 'LW' },
-      { name: 'Mbappé', value: 95, position: 'ST' },
       { name: 'Zidane', value: 95, position: 'CAM' },
       { name: 'Ronaldinho', value: 95, position: 'CAM' },
       { name: 'Ramos', value: 95, position: 'CB' },
@@ -93,39 +95,37 @@ class GameX {
       { name: 'Casillas', value: 95, position: 'GK' },
       { name: 'Maradona', value: 95, position: 'CF' },
       { name: 'Cruyff', value: 95, position: 'CF' },
-      // 92 (9)
+      { name: 'Beckenbauer', value: 95, position: 'CB' },
+      { name: 'Kroos', value: 95, position: 'CM' },
+      { name: 'Beckham', value: 95, position: 'RM' },
+      // 92 (7)
+      { name: 'Ronaldo', value: 92, position: 'LW' },
+      { name: 'Neuer', value: 92, position: 'GK' },
       { name: 'Modric', value: 92, position: 'CM' },
       { name: 'De Bruyne', value: 92, position: 'CAM' },
-      { name: 'Iniesta', value: 92, position: 'CM' },
       { name: 'Courtois', value: 92, position: 'GK' },
       { name: 'De Gea', value: 92, position: 'GK' },
       { name: 'Ter Stegen', value: 92, position: 'GK' },
-      { name: 'Ronaldo', value: 92, position: 'LW' },
-      { name: 'Neuer', value: 92, position: 'GK' },
-      { name: 'Bellingham', value: 92, position: 'CM' },
-      // 88 (11)
-      { name: 'Haaland', value: 88, position: 'ST' },
+      // 88 (12)
+      { name: 'Mbappé', value: 88, position: 'ST' },
+      { name: 'Neymar', value: 88, position: 'LW' },
+      { name: 'Zidane', value: 88, position: 'CAM' },
       { name: 'Beckham', value: 88, position: 'RM' },
-      { name: 'Xavi', value: 88, position: 'CM' },
-      { name: 'Marcelo', value: 88, position: 'LB' },
-      { name: 'Dani Carvajal', value: 88, position: 'RB' },
+      { name: 'Haaland', value: 88, position: 'ST' },
       { name: 'Jordi Alba', value: 88, position: 'LB' },
       { name: 'Piqué', value: 88, position: 'CB' },
       { name: 'Puyol', value: 88, position: 'CB' },
-      { name: 'Lamine Yamal', value: 88, position: 'RW' },
+      { name: 'Carvajal', value: 88, position: 'RB' },
+      { name: 'Marcelo', value: 88, position: 'LB' },
+      { name: 'Ramos', value: 88, position: 'CB' },
       { name: 'Van Dijk', value: 88, position: 'CB' },
-      { name: 'Zidane', value: 88, position: 'CAM' },
-      // 85 (10)
-      { name: 'Morata', value: 85, position: 'ST' },
+      // 85 (6)
+      { name: 'Modric', value: 85, position: 'CM' },
+      { name: 'Carvajal', value: 85, position: 'RB' },
+      { name: 'Marcelo', value: 85, position: 'LB' },
       { name: 'Bellingham', value: 85, position: 'CM' },
       { name: 'Lingard', value: 85, position: 'CM' },
       { name: 'Maguire', value: 85, position: 'CB' },
-      { name: 'Mustafi', value: 85, position: 'CB' },
-      { name: 'Modric', value: 85, position: 'CM' },
-      { name: 'Marcelo', value: 85, position: 'LB' },
-      { name: 'Dani Carvajal', value: 85, position: 'RB' },
-      { name: 'Jordi Alba', value: 85, position: 'LB' },
-      { name: 'Iniesta', value: 85, position: 'CM' },
     ];
   }
 
@@ -376,7 +376,7 @@ class GameX {
       return { success: false, error: 'Invalid bid amount' };
     }
     if (amount % MIN_BID_INCREMENT !== 0) {
-      return { success: false, error: 'Bid must be in $10 increments' };
+      return { success: false, error: 'Bid must be in $5 increments' };
     }
     if (!player.canAfford(amount)) {
       return { success: false, error: 'Cannot afford this bid' };
