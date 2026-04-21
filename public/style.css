@@ -618,13 +618,6 @@ input:focus {
 .opponent-card.just-won-card {
   border-color: var(--accent);
   box-shadow: 0 0 20px var(--accent-glow), 0 0 40px rgba(212, 168, 67, 0.15);
-  animation: opponent-won-pulse 0.6s ease-out;
-}
-
-@keyframes opponent-won-pulse {
-  0% { transform: scale(1); }
-  30% { transform: scale(1.06); }
-  100% { transform: scale(1); }
 }
 
 .opponent-name {
@@ -844,24 +837,26 @@ input:focus {
 .card-tier-85  { background: linear-gradient(145deg, #1e1e20, #2a2a2e); color: #787880; border-color: rgba(60, 60, 65, 0.4); }
 .card-tier-88  { background: linear-gradient(145deg, #242830, #323840); color: #8890a0; border-color: rgba(80, 90, 110, 0.35); }
 .card-tier-92  { background: linear-gradient(145deg, #2a3440, #3a4854); color: #a0b4c4; border-color: rgba(100, 140, 170, 0.3); }
-.card-tier-95  { background: linear-gradient(145deg, #383e50, #4c546a); color: #c8cce0; border-color: rgba(150, 160, 200, 0.4); }
-.card-tier-98  { background: linear-gradient(145deg, #4a3020, #6a4830); color: #f0d8b8; border-color: rgba(180, 120, 60, 0.5); }
+.card-tier-95  { background: linear-gradient(145deg, #404060, #585880); color: #dcdcf0; border-color: rgba(170, 170, 220, 0.45); }
+.card-tier-98  { background: linear-gradient(145deg, #5a3818, #7a5228); color: #fce4c0; border-color: rgba(200, 140, 70, 0.55); }
 .card-tier-100 { background: linear-gradient(145deg, #7a600a, #aa8810); color: #fffae0; border-color: rgba(220, 180, 60, 0.6); }
 
 .card-large.card-tier-95 {
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.6),
-    0 0 30px rgba(150, 160, 210, 0.18),
-    inset 0 1px 0 rgba(255,255,255,0.1);
-  border-color: rgba(150, 160, 200, 0.4);
+    0 0 35px rgba(170, 170, 230, 0.22),
+    0 0 60px rgba(150, 150, 210, 0.1),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+  border-color: rgba(170, 170, 220, 0.45);
 }
 
 .card-large.card-tier-98 {
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.6),
-    0 0 40px rgba(180, 120, 60, 0.25),
-    inset 0 1px 0 rgba(255,255,255,0.12);
-  border-color: rgba(180, 120, 60, 0.5);
+    0 0 45px rgba(200, 140, 60, 0.3),
+    0 0 70px rgba(180, 120, 50, 0.12),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+  border-color: rgba(200, 140, 70, 0.55);
 }
 
 .card-large.card-tier-100 {
@@ -908,20 +903,7 @@ input:focus {
   }
 }
 
-/* Outbid shake */
-.anim-outbid .card-large {
-  animation: outbid-shake 0.4s ease-out;
-}
-
-@keyframes outbid-shake {
-  0%, 100% { transform: translateX(0); }
-  15% { transform: translateX(-6px); }
-  30% { transform: translateX(5px); }
-  45% { transform: translateX(-4px); }
-  60% { transform: translateX(3px); }
-  75% { transform: translateX(-1px); }
-}
-
+/* Outbid flash */
 .anim-outbid-flash {
   animation: outbid-flash 0.5s ease-out;
 }
