@@ -39,8 +39,11 @@ function calculateMaxBid(bot, card, game) {
   let maxBid = (card.value / needed) * bot.budget;
 
   const future = [...game.getRemainingCards(), ...game.discardPile];
+  const avg = future.length > 0
+    ? future.reduce((s, c) => s + c.value, 0) / future.length
+    : card.value;
+
   if (future.length > 0) {
-    const avg = future.reduce((s, c) => s + c.value, 0) / future.length;
     if (card.value > avg) {
       maxBid *= 1 + (card.value - avg) / 100;
     } else if (future.length > 3) {
@@ -48,6 +51,13 @@ function calculateMaxBid(bot, card, game) {
     }
   } else {
     maxBid = bot.budget;
+  }
+
+  const pointsAfter = needed - card.value;
+  if (pointsAfter > 0) {
+    const cardsStillNeeded = Math.ceil(pointsAfter / avg);
+    const reserve = cardsStillNeeded * MIN_OPENING_BID;
+    maxBid = Math.min(maxBid, bot.budget - reserve);
   }
 
   const bias = BOT_BIASES[bot.name];
