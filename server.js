@@ -102,7 +102,8 @@ function handleMessage(ws, msg) {
       const name = sanitizeName(msg.playerName);
       const code = generateRoomCode();
       const playerId = generatePlayerId();
-      const room = new Room(code);
+      const mode = msg.mode === 'auctionx' ? 'auctionx' : 'auction';
+      const room = new Room(code, mode);
       rooms.set(code, room);
 
       room.addPlayer(playerId, name, ws);
@@ -190,7 +191,7 @@ function handleMessage(ws, msg) {
         ws.send(JSON.stringify({ type: 'error', message: 'Only the host can start the game' }));
         return;
       }
-      room.startGame();
+      room.startGame(!!msg.noBots);
       break;
     }
 

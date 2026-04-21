@@ -8,6 +8,7 @@ let myPlayerId = null;
 let roomCode = null;
 let isHost = false;
 let gameState = null;
+let gameMode = 'auction';
 let localTimerStart = 0;
 let localTimerDuration = 0;
 let timerRaf = null;
@@ -50,15 +51,22 @@ function trackScreen(screenId) {
 
 // ── Init ──
 document.addEventListener('DOMContentLoaded', () => {
-  $('create-btn').addEventListener('click', createRoom);
+  $('create-btn').addEventListener('click', () => showScreen('mode-screen'));
   $('join-btn').addEventListener('click', joinRoom);
   $('player-name').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') createRoom();
+    if (e.key === 'Enter') showScreen('mode-screen');
   });
   $('room-code-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') joinRoom();
   });
+
+  // Mode selection
+  $('mode-classic-btn').addEventListener('click', () => { gameMode = 'auction'; createRoom(); });
+  $('mode-x-btn').addEventListener('click', () => { gameMode = 'auctionx'; createRoom(); });
+  $('mode-back-btn').addEventListener('click', () => showScreen('lobby-screen'));
+
   $('start-btn').addEventListener('click', () => send({ type: 'start_game' }));
+  $('start-nobots-btn').addEventListener('click', () => send({ type: 'start_game', noBots: true }));
   // Single "Ready" button in the study overlay — server decides
   // whether it's a study-phase or play-again ready based on state.
   $('ready-btn').addEventListener('click', () => {
@@ -117,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $('how-to-play-btn').addEventListener('click', () => showScreen('instructions-screen'));
   $('instructions-back-btn').addEventListener('click', () => showScreen('lobby-screen'));
+  $('instructions-x-back-btn').addEventListener('click', () => showScreen('lobby-screen'));
 
   $('help-btn').addEventListener('click', () => {
     $('help-overlay').classList.remove('hidden');
@@ -133,6 +142,10 @@ document.addEventListener('DOMContentLoaded', () => {
     $('deck-overlay').classList.add('hidden');
   });
 
+  $('lineup-overlay-close').addEventListener('click', () => {
+    $('lineup-overlay').classList.add('hidden');
+  });
+
   $('room-code-display').addEventListener('click', () => {
     if (roomCode) {
       navigator.clipboard.writeText(roomCode).then(() => showToast('Code copied!', 'success'));
@@ -146,9 +159,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const savedRoom = sessionStorage.getItem('auction_room');
   const savedPlayer = sessionStorage.getItem('auction_player');
+  const savedMode = sessionStorage.getItem('auction_mode');
   if (savedRoom && savedPlayer) {
     roomCode = savedRoom;
     myPlayerId = savedPlayer;
+    if (savedMode) gameMode = savedMode;
     connect(() => {
       send({ type: 'reconnect', roomCode, playerId: myPlayerId });
     });
@@ -218,11 +233,13 @@ function handleMessage(msg) {
       roomCode = msg.roomCode;
       myPlayerId = msg.playerId;
       isHost = msg.hostId === myPlayerId;
+      gameMode = msg.mode || 'auction';
       sessionStorage.setItem('auction_room', roomCode);
       sessionStorage.setItem('auction_player', myPlayerId);
+      sessionStorage.setItem('auction_mode', gameMode);
       renderRoom(msg);
       showScreen('room-screen');
-      track(msg.type, { player_count: (msg.players || []).length });
+      track(msg.type, { player_count: (msg.players || []).length, mode: gameMode });
       break;
 
     case 'player_joined':
@@ -286,6 +303,8 @@ function handleMessage(msg) {
 
     case 'reconnected':
       isHost = msg.hostId === myPlayerId;
+      gameMode = msg.mode || 'auction';
+      applyModeTheme();
       if (msg.gameState === 'finished') {
         gameState = msg;
         renderGameOver();
@@ -309,9 +328,11 @@ function handleMessage(msg) {
 
     case 'game_started':
       gameState = msg;
+      gameMode = msg.mode || 'auction';
+      applyModeTheme();
       showScreen('game-screen');
       showStudyPhase();
-      track('game_started', { player_count: (msg.players || []).length });
+      track('game_started', { player_count: (msg.players || []).length, mode: gameMode });
       break;
 
     case 'new_auction':
@@ -384,6 +405,7 @@ function handleMessage(msg) {
 
     case 'game_over':
       gameState = msg;
+      if (msg.mode) gameMode = msg.mode;
       stopTimer();
       stopLastPlayerCountdown();
       hideResultBanner();
@@ -416,7 +438,7 @@ function showScreen(id) {
 // ── Lobby ──
 function createRoom() {
   const name = $('player-name').value.trim() || 'Player';
-  connect(() => { send({ type: 'create_room', playerName: name }); });
+  connect(() => { send({ type: 'create_room', playerName: name, mode: gameMode }); });
 }
 
 function joinRoom() {
@@ -432,7 +454,9 @@ function backToLobby() {
   track('player_left', { from_state: (gameState && gameState.gameState) || 'lobby' });
   sessionStorage.removeItem('auction_room');
   sessionStorage.removeItem('auction_player');
-  roomCode = null; myPlayerId = null; gameState = null;
+  sessionStorage.removeItem('auction_mode');
+  roomCode = null; myPlayerId = null; gameState = null; gameMode = 'auction';
+  document.getElementById('game-screen').classList.remove('mode-auctionx');
   stopLastPlayerCountdown();
   if (ws) ws.close();
   // Clear the room code input so the last-used code doesn't linger
@@ -444,11 +468,18 @@ function backToLobby() {
 
 // ── Room ──
 function renderRoom(state) {
+  if (state.mode) gameMode = state.mode;
   $('room-code-display').textContent = state.roomCode || roomCode;
+
+  const roomTitle = $('room-title');
+  roomTitle.textContent = gameMode === 'auctionx' ? 'Auction X' : 'Room';
+
   const list = $('players-list');
   list.innerHTML = '';
 
   const players = state.players || [];
+  const maxPlayers = gameMode === 'auctionx' ? 4 : 5;
+
   players.forEach((p) => {
     const slot = document.createElement('div');
     slot.className = 'player-slot' + (p.id === state.hostId ? ' is-host' : '');
@@ -462,18 +493,27 @@ function renderRoom(state) {
   });
 
   const startBtn = $('start-btn');
+  const startNoBotsBtn = $('start-nobots-btn');
   const waitMsg = $('waiting-msg');
   if (state.hostId === myPlayerId) {
     startBtn.classList.remove('hidden');
     const humanCount = players.filter((p) => !p.isBot).length;
-    const botCount = 5 - humanCount;
+    const botCount = maxPlayers - humanCount;
     startBtn.textContent = botCount > 0
       ? `Start Game (+${botCount} Bot${botCount !== 1 ? 's' : ''})`
       : 'Start Game';
     startBtn.disabled = false;
+
+    if (state.canStartWithoutBots && botCount > 0) {
+      startNoBotsBtn.classList.remove('hidden');
+    } else {
+      startNoBotsBtn.classList.add('hidden');
+    }
+
     waitMsg.classList.add('hidden');
   } else {
     startBtn.classList.add('hidden');
+    startNoBotsBtn.classList.add('hidden');
     waitMsg.classList.remove('hidden');
   }
 }
@@ -488,6 +528,11 @@ function showStudyPhase() {
   deckDiv.innerHTML = '';
 
   const deck = gameState.originalDeck || gameState.deck || [];
+  const sub = $('study-sub');
+  sub.textContent = gameMode === 'auctionx'
+    ? `${deck.length} cards, duplicates across tiers. Build your squad.`
+    : `${deck.length} cards, revealed order. Plan ahead.`;
+
   deck.forEach((card, i) => {
     const el = createCardElement(card, 'card-small');
     el.style.animationDelay = `${i * 60}ms`;
@@ -621,6 +666,8 @@ function renderOpponents() {
   const bar = $('opponents-bar');
   bar.innerHTML = '';
 
+  const isX = gameMode === 'auctionx';
+  const target = isX ? 1000 : 644;
   const players = gameState.players || [];
   players.forEach((p) => {
     if (p.id === myPlayerId) return;
@@ -634,17 +681,33 @@ function renderOpponents() {
     card.className = cls;
     card.id = `opponent-${p.id}`;
 
-    const scorePct = Math.min(100, Math.round((p.score / 644) * 100));
-    const progressCls = scorePct >= 70 ? 'high' : scorePct >= 40 ? 'mid' : 'low';
-    card.innerHTML = `
-      <span class="opponent-name">${esc(p.name)}${p.isBot ? ' <span class="bot-tag">Bot</span>' : ''}</span>
-      <span class="opponent-budget">$${p.budget.toLocaleString()}</span>
-      <span class="opponent-score">${p.score} pts</span>
-      <span class="opponent-cards-won">${p.cardsWon.length} card${p.cardsWon.length !== 1 ? 's' : ''}</span>
-      <div class="opponent-progress">
-        <div class="opponent-progress-fill ${progressCls}" style="width:${scorePct}%"></div>
-      </div>
-    `;
+    if (isX) {
+      const cardCount = p.cardsWon.length;
+      const teamPct = Math.min(100, Math.round((cardCount / 11) * 100));
+      const progressCls = teamPct >= 80 ? 'high' : teamPct >= 50 ? 'mid' : 'low';
+      card.innerHTML = `
+        <span class="opponent-name">${esc(p.name)}${p.isBot ? ' <span class="bot-tag">Bot</span>' : ''}</span>
+        <span class="opponent-budget">$${p.budget.toLocaleString()}</span>
+        <span class="opponent-cards-won">${cardCount}/11 cards &middot; ${p.score} pts</span>
+        <div class="opponent-progress">
+          <div class="opponent-progress-fill ${progressCls}" style="width:${teamPct}%"></div>
+        </div>
+      `;
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', () => showLineupOverlay(p));
+    } else {
+      const scorePct = Math.min(100, Math.round((p.score / target) * 100));
+      const progressCls = scorePct >= 70 ? 'high' : scorePct >= 40 ? 'mid' : 'low';
+      card.innerHTML = `
+        <span class="opponent-name">${esc(p.name)}${p.isBot ? ' <span class="bot-tag">Bot</span>' : ''}</span>
+        <span class="opponent-budget">$${p.budget.toLocaleString()}</span>
+        <span class="opponent-score">${p.score} pts</span>
+        <span class="opponent-cards-won">${p.cardsWon.length} card${p.cardsWon.length !== 1 ? 's' : ''}</span>
+        <div class="opponent-progress">
+          <div class="opponent-progress-fill ${progressCls}" style="width:${scorePct}%"></div>
+        </div>
+      `;
+    }
     bar.appendChild(card);
   });
 }
@@ -681,6 +744,12 @@ function renderAuctionArea() {
   // Bid info
   const bidStatus = $('bid-status');
   if (state === 'auction') {
+    const me = getMyPlayer();
+    const alreadyOwned = gameMode === 'auctionx' && me && gameState.currentCard
+      && me.cardsWon.some((c) => c.name === gameState.currentCard.name);
+    const ownedTag = alreadyOwned
+      ? '<div class="duplicate-warning">Already in your squad</div>' : '';
+
     if (gameState.highestBid > 0) {
       const bidderName = getBidderName(gameState.highestBidderId);
       const isMe = gameState.highestBidderId === myPlayerId;
@@ -689,9 +758,10 @@ function renderAuctionArea() {
         <div class="bid-leader ${isMe ? 'bid-you-winning' : ''}">
           ${isMe ? 'You are winning!' : `${esc(bidderName)} is winning`}
         </div>
+        ${ownedTag}
       `;
     } else {
-      bidStatus.innerHTML = `<span class="no-bids-prompt">No bids yet &mdash; minimum $50</span>`;
+      bidStatus.innerHTML = `<span class="no-bids-prompt">No bids yet &mdash; minimum $50</span>${ownedTag}`;
     }
   } else if (state === 'between_rounds') {
     // Keep showing last bid state
@@ -792,9 +862,20 @@ function renderMyInfo() {
 
   const scoreEl = $('my-score');
   const prevScore = parseInt(scoreEl.textContent) || 0;
-  scoreEl.textContent = `${me.score} / 644`;
+  const isX = gameMode === 'auctionx';
+  const target = isX ? 1000 : 644;
 
-  const scorePct = Math.min(100, Math.round((me.score / 644) * 100));
+  if (isX) {
+    const label = document.querySelector('.score-stat .stat-label');
+    if (label) label.textContent = 'Squad';
+    scoreEl.textContent = `${me.cardsWon.length}/11 · ${me.score}pts`;
+  } else {
+    scoreEl.textContent = `${me.score} / ${target}`;
+  }
+
+  const scorePct = isX
+    ? Math.min(100, Math.round((me.cardsWon.length / 11) * 100))
+    : Math.min(100, Math.round((me.score / target) * 100));
   const fill = $('my-score-fill');
   fill.style.width = `${scorePct}%`;
   if (me.score > prevScore) {
@@ -807,7 +888,9 @@ function updateBidControls() {
   const me = getMyPlayer();
   const isAuction = gameState.gameState === 'auction';
   const minBid = gameState.minimumBid || 50;
-  const canBid = isAuction && me && me.budget >= minBid && gameState.highestBidderId !== myPlayerId;
+  const alreadyOwned = gameMode === 'auctionx' && me && gameState.currentCard
+    && me.cardsWon.some((c) => c.name === gameState.currentCard.name);
+  const canBid = isAuction && me && me.budget >= minBid && gameState.highestBidderId !== myPlayerId && !alreadyOwned;
 
   const btnMin = $('bid-min');
   const btn10 = $('bid-plus10');
@@ -1033,16 +1116,22 @@ function renderGameOver() {
   let reasonText = '';
   switch (gameState.reason) {
     case 'threshold': reasonText = 'Reached 644 points!'; break;
-    case 'deck_exhausted': reasonText = 'All cards auctioned \u2014 highest score wins'; break;
-    case 'stalemate': reasonText = 'No bids in two passes \u2014 highest score wins'; break;
-    case 'all_broke': reasonText = 'All players out of funds \u2014 highest score wins'; break;
+    case 'team_complete': reasonText = 'Squad complete \u2014 11 players, 1,000+ points!'; break;
+    case 'deck_exhausted': reasonText = gameMode === 'auctionx' ? 'All cards auctioned \u2014 most cards wins' : 'All cards auctioned \u2014 highest score wins'; break;
+    case 'stalemate': reasonText = 'No bids in two passes \u2014 game over'; break;
+    case 'all_broke': reasonText = 'All players out of funds'; break;
     case 'last_player_standing': reasonText = 'Last player standing \u2014 everyone else disconnected'; break;
-    case 'all_left': reasonText = 'All players left \u2014 highest score wins'; break;
+    case 'all_left': reasonText = 'All players left'; break;
     default: reasonText = 'Game over';
   }
   $('win-reason').textContent = reasonText;
 
-  const players = [...(gameState.players || [])].sort((a, b) => b.score - a.score);
+  const players = [...(gameState.players || [])].sort((a, b) => {
+    if (gameMode === 'auctionx') {
+      if (b.cardsWon.length !== a.cardsWon.length) return b.cardsWon.length - a.cardsWon.length;
+    }
+    return b.score - a.score;
+  });
   const scoresDiv = $('final-scores');
   scoresDiv.innerHTML = '';
 
@@ -1122,6 +1211,96 @@ function spawnConfetti() {
     piece.style.borderRadius = Math.random() > 0.6 ? '50%' : Math.random() > 0.5 ? '2px' : '0';
     container.appendChild(piece);
   }
+}
+
+// ── Mode Theme ──
+function applyModeTheme() {
+  const gs = document.getElementById('game-screen');
+  if (gameMode === 'auctionx') {
+    gs.classList.add('mode-auctionx');
+  } else {
+    gs.classList.remove('mode-auctionx');
+  }
+  populateHelpOverlay();
+}
+
+function populateHelpOverlay() {
+  const body = $('help-overlay-body');
+  if (!body) return;
+  if (gameMode === 'auctionx') {
+    body.innerHTML = `
+      <div class="rule-section"><h3>Goal</h3><p>Build a squad of <strong>11 players</strong> with <strong>1,000+ points</strong>.</p></div>
+      <div class="rule-section"><h3>Squad</h3><ul>
+        <li>Min 1 GK, 3 DEF, 3 MID, 2 ATT</li>
+        <li>Max 2 GKs &mdash; no duplicate player names</li>
+        <li>First to complete a valid squad wins</li>
+      </ul></div>
+      <div class="rule-section"><h3>Auctions</h3><ul>
+        <li>$50 open, $10 steps, 10s timer</li>
+        <li>Can't bid on a player you already own</li>
+      </ul></div>
+    `;
+  } else {
+    body.innerHTML = `
+      <div class="rule-section"><h3>Goal</h3><p>First to <strong>644 points</strong> wins.</p></div>
+      <div class="rule-section"><h3>Auctions</h3><ul>
+        <li>Cards sold one at a time, in order</li>
+        <li>Open at <strong>$50</strong>, raise in <strong>$10</strong> steps</li>
+        <li>Each bid resets a <strong>10s</strong> timer</li>
+        <li>Highest bid when time runs out wins</li>
+      </ul></div>
+      <div class="rule-section"><h3>Endgame</h3><p>Hit 644 instantly. Deck out &rarr; discards recycle.</p></div>
+    `;
+  }
+}
+
+// ── AuctionX Lineup Overlay ──
+function posCategory(pos) {
+  if (pos === 'GK') return 'gk';
+  if (['CB', 'LB', 'RB'].includes(pos)) return 'def';
+  if (['CM', 'CAM', 'RM'].includes(pos)) return 'mid';
+  return 'att';
+}
+
+function showLineupOverlay(player) {
+  $('lineup-overlay-title').textContent = `${esc(player.name)}'s Squad`;
+  const formation = $('lineup-formation');
+  const bench = $('lineup-bench');
+  formation.innerHTML = '';
+  bench.innerHTML = '';
+
+  if (!player.cardsWon || player.cardsWon.length === 0) {
+    formation.innerHTML = '<div class="lineup-empty">No cards yet</div>';
+  } else {
+    const groups = { att: [], mid: [], def: [], gk: [] };
+    player.cardsWon.forEach((c) => {
+      groups[posCategory(c.position)].push(c);
+    });
+
+    const rows = [
+      { label: 'ATT', cards: groups.att, cls: 'pos-att' },
+      { label: 'MID', cards: groups.mid, cls: 'pos-mid' },
+      { label: 'DEF', cards: groups.def, cls: 'pos-def' },
+      { label: 'GK', cards: groups.gk, cls: 'pos-gk' },
+    ];
+
+    rows.forEach((row) => {
+      if (row.cards.length === 0) return;
+      const rowEl = document.createElement('div');
+      rowEl.className = 'lineup-row';
+      row.cards.forEach((c) => {
+        const el = createCardElement(c, 'card-small');
+        el.classList.add(row.cls);
+        rowEl.appendChild(el);
+      });
+      formation.appendChild(rowEl);
+    });
+
+    const total = player.cardsWon.reduce((s, c) => s + c.value, 0);
+    bench.innerHTML = `<div class="lineup-summary">${player.cardsWon.length}/11 cards &middot; ${total} pts</div>`;
+  }
+
+  $('lineup-overlay').classList.remove('hidden');
 }
 
 // ── Helpers ──
