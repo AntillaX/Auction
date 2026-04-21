@@ -4,27 +4,27 @@ const MIN_BID_INCREMENT = 10;
 
 const BOT_BIASES = {
   Allegri: {
-    mustHave: 'Buffon',
+    mustHave: ['Buffon', 'Beckham'],
     likes: ['Ronaldo', 'Ramos'],
     dislikes: ['Neymar', 'Ronaldinho', 'Morata', 'Lingard', 'Mustafi', 'Maguire', 'Maradona'],
   },
   Conte: {
-    mustHave: 'Haaland',
+    mustHave: ['Haaland', 'Marcelo'],
     likes: ['Beckham', 'Van Dijk'],
-    dislikes: ['Jordi Alba', 'Marcelo', 'Mustafi', 'Morata', 'Lingard', 'Maguire', 'De Gea'],
+    dislikes: ['Jordi Alba', 'Mustafi', 'Morata', 'Lingard', 'Maguire', 'De Gea', 'Puyol'],
   },
   Simeone: {
-    mustHave: 'Ramos',
+    mustHave: ['Ramos', 'Marcelo'],
     likes: ['Casillas', 'Dani Carvajal'],
     dislikes: ['Ronaldinho', 'Neymar', 'Lingard', 'Maguire', 'Mustafi', 'Morata', 'Cruyff'],
   },
   Ancelotti: {
-    mustHave: 'Modric',
+    mustHave: ['Modric', 'Beckham', 'Marcelo'],
     likes: ['Ronaldo', 'Courtois'],
-    dislikes: ['Lingard', 'Mustafi', 'Jordi Alba', 'Maguire', 'Morata', 'Marcelo', 'De Gea'],
+    dislikes: ['Lingard', 'Mustafi', 'Jordi Alba', 'Maguire', 'Morata', 'De Gea', 'Puyol'],
   },
   Mourinho: {
-    mustHave: 'Neuer',
+    mustHave: ['Neuer', 'Beckham'],
     likes: ['Xavi', 'Ramos'],
     dislikes: ['Iniesta', 'Neymar', 'Lingard', 'Mustafi', 'Maguire', 'Allison', 'Puyol'],
   },
@@ -63,7 +63,7 @@ function calculateMaxBid(bot, card, game) {
   const bias = BOT_BIASES[bot.name];
   let isNeutral = true;
   if (bias) {
-    if (bias.mustHave === card.name) {
+    if (bias.mustHave.includes(card.name)) {
       maxBid *= 1.5;
       isNeutral = false;
     } else if (bias.likes.includes(card.name)) {
