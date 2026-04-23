@@ -78,7 +78,7 @@ function calculateMaxBid(bot, card, game) {
   }
 
   let maxBid = (card.value / (MIN_SCORE - bot.score || 1)) * bot.budget;
-  maxBid = Math.min(maxBid, bot.budget / cardsNeeded * 1.5);
+  maxBid = Math.min(maxBid, bot.budget / cardsNeeded * 1.3);
 
   const future = [...game.getRemainingCards(), ...game.discardPile];
   const avg = future.length > 0
