@@ -1200,9 +1200,23 @@ function renderGameOver() {
 
       row.style.cursor = 'pointer';
       row.addEventListener('click', () => {
-        const open = teamDiv.classList.toggle('expanded');
-        row.classList.toggle('team-open', open);
-        row.querySelector('.score-toggle').textContent = open ? '\u25b4' : '\u25be';
+        const wasOpen = teamDiv.classList.contains('expanded');
+        // Close all open lineups
+        scoresDiv.querySelectorAll('.score-team.expanded').forEach(t => {
+          t.classList.remove('expanded');
+          const r = t.previousElementSibling;
+          if (r) {
+            r.classList.remove('team-open');
+            const tog = r.querySelector('.score-toggle');
+            if (tog) tog.textContent = '\u25be';
+          }
+        });
+        // Toggle this one (open if it was closed)
+        if (!wasOpen) {
+          teamDiv.classList.add('expanded');
+          row.classList.add('team-open');
+          row.querySelector('.score-toggle').textContent = '\u25b4';
+        }
       });
     }
 
