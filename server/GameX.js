@@ -86,26 +86,24 @@ class GameX {
       { name: 'Mbappé', value: 98, position: 'ST' },
       { name: 'Iniesta', value: 98, position: 'CM' },
       { name: 'Xavi', value: 98, position: 'CM' },
-      // 95 (11)
+      // 95 (12)
       { name: 'Neymar', value: 95, position: 'LW' },
       { name: 'Zidane', value: 95, position: 'CAM' },
       { name: 'Ronaldinho', value: 95, position: 'CAM' },
       { name: 'Ramos', value: 95, position: 'CB' },
       { name: 'Buffon', value: 95, position: 'GK' },
       { name: 'Casillas', value: 95, position: 'GK' },
+      { name: 'Courtois', value: 95, position: 'GK' },
       { name: 'Maradona', value: 95, position: 'CF' },
       { name: 'Cruyff', value: 95, position: 'CF' },
       { name: 'Beckenbauer', value: 95, position: 'CB' },
       { name: 'Kroos', value: 95, position: 'CM' },
       { name: 'Beckham', value: 95, position: 'RM' },
-      // 92 (7)
+      // 92 (4)
       { name: 'Ronaldo', value: 92, position: 'LW' },
-      { name: 'Neuer', value: 92, position: 'GK' },
       { name: 'Modric', value: 92, position: 'CM' },
       { name: 'De Bruyne', value: 92, position: 'CAM' },
-      { name: 'Courtois', value: 92, position: 'GK' },
       { name: 'De Gea', value: 92, position: 'GK' },
-      { name: 'Ter Stegen', value: 92, position: 'GK' },
       // 88 (12)
       { name: 'Mbappé', value: 88, position: 'ST' },
       { name: 'Neymar', value: 88, position: 'LW' },
