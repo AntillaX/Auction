@@ -46,6 +46,18 @@ function countCategories(cards) {
   return counts;
 }
 
+function wouldBreakTeam(bot, card) {
+  const counts = countCategories(bot.cardsWon);
+  const cat = posCategory(card.position);
+  counts[cat]++;
+  const slotsLeft = TEAM_SIZE - bot.cardsWon.length - 1;
+  let slotsNeeded = 0;
+  for (const [k, req] of Object.entries(TEAM_REQS)) {
+    if (counts[k] < req) slotsNeeded += req - counts[k];
+  }
+  return slotsNeeded > slotsLeft;
+}
+
 function positionalNeedMultiplier(bot, card) {
   const counts = countCategories(bot.cardsWon);
   const cat = posCategory(card.position);
@@ -65,6 +77,7 @@ function positionalNeedMultiplier(bot, card) {
 function calculateMaxBid(bot, card, game) {
   const cardsNeeded = TEAM_SIZE - bot.cardsWon.length;
   if (cardsNeeded <= 0) return 0;
+  if (wouldBreakTeam(bot, card)) return 0;
 
   if (cardsNeeded === 1) {
     const counts = countCategories(bot.cardsWon);
@@ -121,10 +134,19 @@ function calculateMaxBid(bot, card, game) {
   for (const [id, p] of game.players) {
     if (id === bot.id) continue;
     if (p.cardsWon.length >= TEAM_SIZE - 1 && p.budget >= MIN_OPENING_BID) {
-      blockAmount = Math.max(blockAmount, p.budget + MIN_BID_INCREMENT);
+      const pCounts = countCategories(p.cardsWon);
+      const cardCat = posCategory(card.position);
+      const needsCat = pCounts[cardCat] < TEAM_REQS[cardCat];
+      const allReqsMet = pCounts.gk >= TEAM_REQS.gk && pCounts.def >= TEAM_REQS.def &&
+        pCounts.mid >= TEAM_REQS.mid && pCounts.att >= TEAM_REQS.att;
+      if (needsCat || allReqsMet) {
+        if (p.score + card.value >= MIN_SCORE) {
+          blockAmount = Math.max(blockAmount, p.budget + MIN_BID_INCREMENT);
+        }
+      }
     }
   }
-  if (blockAmount > 0) {
+  if (blockAmount > 0 && !wouldBreakTeam(bot, card)) {
     maxBid = Math.max(maxBid, Math.min(blockAmount, bot.budget));
   }
 
@@ -135,6 +157,7 @@ function calculateMaxBid(bot, card, game) {
 
 function willStartBid(bot, card) {
   if (bot.cardsWon.some((c) => c.name === card.name)) return false;
+  if (wouldBreakTeam(bot, card)) return false;
   const bias = BOT_BIASES[bot.name];
   if (bias && bias.dislikes.includes(card.name)) return false;
   return true;

@@ -1158,6 +1158,9 @@ function renderGameOver() {
   $('win-reason').textContent = reasonText;
 
   const players = [...(gameState.players || [])].sort((a, b) => {
+    const aWinner = a.id === gameState.winnerId ? 1 : 0;
+    const bWinner = b.id === gameState.winnerId ? 1 : 0;
+    if (bWinner !== aWinner) return bWinner - aWinner;
     if (gameMode === 'auctionx') {
       if (b.cardsWon.length !== a.cardsWon.length) return b.cardsWon.length - a.cardsWon.length;
     }
