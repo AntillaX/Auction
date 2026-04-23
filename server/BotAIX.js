@@ -105,7 +105,7 @@ function calculateMaxBid(bot, card, game) {
       maxBid *= 1.4;
       isNeutral = false;
     } else if (bias.likes.includes(card.name)) {
-      maxBid *= 1.15;
+      maxBid *= 1.1;
       isNeutral = false;
     } else if (bias.dislikes.includes(card.name)) {
       maxBid *= 0.7;
