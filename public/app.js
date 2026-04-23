@@ -1405,7 +1405,6 @@ function assignCardsToSlots(cards, slotDefs) {
 
 function computeSlotCounts(groups, showEmptySlots) {
   const OUTFIELD = 10;
-  const MIN = { att: 2, mid: 3, def: 3 };
   const DEFAULT = { att: 2, mid: 4, def: 4 };
   const rows = ['att', 'mid', 'def'];
   const counts = {};
@@ -1419,10 +1418,9 @@ function computeSlotCounts(groups, showEmptySlots) {
   // Shrink rows to fit within 10 outfield slots
   while (total > OUTFIELD) {
     let shrunk = false;
-    // Find the row with the most slack (slots above both minimum and card count)
     let bestRow = null, bestSlack = 0;
     for (const r of rows) {
-      const floor = Math.max(MIN[r], groups[r].length);
+      const floor = groups[r].length;
       const slack = counts[r] - floor;
       if (slack > bestSlack) { bestSlack = slack; bestRow = r; }
     }
