@@ -1302,9 +1302,8 @@ function posCategory(pos) {
 // Slots are ordered left-to-right on the pitch.
 const FORMATION_SLOTS = {
   att: [
-    { label: 'ATT', prefer: ['LW'] },
-    { label: 'ATT', prefer: ['CF', 'ST'] },
-    { label: 'ATT', prefer: ['RW'] },
+    { label: 'ATT', prefer: ['LW', 'CF'] },
+    { label: 'ATT', prefer: ['RW', 'ST'] },
   ],
   mid: [
     { label: 'MID', prefer: ['LM'] },
