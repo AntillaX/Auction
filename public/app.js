@@ -1329,11 +1329,9 @@ const POS_ORDER = {
   RW: 2, RM: 2, RB: 2,
 };
 
-function buildRowSlots(cards, defaultSlotDefs) {
-  const count = cards.length;
+function buildRowSlots(count, cards, defaultSlotDefs) {
   if (count === 0) return [];
   if (count <= defaultSlotDefs.length) {
-    // Pick the subset of slot defs that best matches the cards' positions
     const needed = [];
     const used = new Set();
     const sorted = [...cards].sort((a, b) => b.value - a.value);
@@ -1346,13 +1344,11 @@ function buildRowSlots(cards, defaultSlotDefs) {
       }
       if (bestIdx !== -1) { used.add(bestIdx); needed.push(bestIdx); }
     }
-    // Fill remaining slots with unused defs (center positions first)
     for (let i = 0; i < defaultSlotDefs.length && needed.length < count; i++) {
       if (!used.has(i)) { used.add(i); needed.push(i); }
     }
     return needed.sort((a, b) => a - b).map(i => defaultSlotDefs[i]);
   }
-  // More cards than default slots — expand with center slots
   const slots = [...defaultSlotDefs];
   const centerDef = defaultSlotDefs.find(s => !['LW','LM','LB','RW','RM','RB'].some(p => s.prefer.includes(p))) || defaultSlotDefs[Math.floor(defaultSlotDefs.length / 2)];
   while (slots.length < count) slots.splice(Math.floor(slots.length / 2) + 1, 0, { ...centerDef });
@@ -1407,11 +1403,48 @@ function assignCardsToSlots(cards, slotDefs) {
   return slots;
 }
 
+function computeSlotCounts(groups, showEmptySlots) {
+  const OUTFIELD = 10;
+  const MIN = { att: 2, mid: 3, def: 3 };
+  const DEFAULT = { att: 2, mid: 4, def: 4 };
+  const rows = ['att', 'mid', 'def'];
+  const counts = {};
+
+  for (const r of rows) {
+    counts[r] = Math.max(showEmptySlots ? DEFAULT[r] : 0, groups[r].length);
+  }
+
+  let total = counts.att + counts.mid + counts.def;
+
+  // Shrink rows to fit within 10 outfield slots
+  while (total > OUTFIELD) {
+    let shrunk = false;
+    // Find the row with the most slack (slots above both minimum and card count)
+    let bestRow = null, bestSlack = 0;
+    for (const r of rows) {
+      const floor = Math.max(MIN[r], groups[r].length);
+      const slack = counts[r] - floor;
+      if (slack > bestSlack) { bestSlack = slack; bestRow = r; }
+    }
+    if (bestRow) {
+      counts[bestRow]--;
+      total--;
+      shrunk = true;
+    }
+    if (!shrunk) break;
+  }
+
+  counts.gk = Math.max(showEmptySlots ? 1 : 0, groups.gk.length);
+  return counts;
+}
+
 function buildFormationHTML(player, showEmptySlots) {
   const groups = { att: [], mid: [], def: [], gk: [] };
   (player.cardsWon || []).forEach((c) => {
     groups[posCategory(c.position)].push(c);
   });
+
+  const slotCounts = computeSlotCounts(groups, showEmptySlots);
 
   const rowDefs = [
     { key: 'att', cls: 'pos-att' },
@@ -1425,13 +1458,9 @@ function buildFormationHTML(player, showEmptySlots) {
 
   rowDefs.forEach((row) => {
     const cardsInRow = groups[row.key];
-    let slotDefs;
-    if (showEmptySlots) {
-      slotDefs = FORMATION_SLOTS[row.key];
-    } else {
-      slotDefs = buildRowSlots(cardsInRow, FORMATION_SLOTS[row.key]);
-      if (slotDefs.length === 0) return;
-    }
+    const count = slotCounts[row.key];
+    if (count === 0) return;
+    const slotDefs = buildRowSlots(count, cardsInRow, FORMATION_SLOTS[row.key]);
     const slots = assignCardsToSlots(cardsInRow, slotDefs);
     const rowEl = document.createElement('div');
     rowEl.className = 'lineup-row';
