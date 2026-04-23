@@ -1299,16 +1299,18 @@ function posCategory(pos) {
 
 // Slot definitions: each slot has a label and a list of preferred
 // positions (first = best fit). Higher-value cards get first pick.
+// Slots are ordered left-to-right on the pitch.
 const FORMATION_SLOTS = {
   att: [
-    { label: 'ATT', prefer: ['LW', 'CF'] },
-    { label: 'ATT', prefer: ['RW', 'ST'] },
+    { label: 'ATT', prefer: ['LW'] },
+    { label: 'ATT', prefer: ['CF', 'ST'] },
+    { label: 'ATT', prefer: ['RW'] },
   ],
   mid: [
+    { label: 'MID', prefer: ['LM'] },
     { label: 'MID', prefer: ['CM', 'CAM'] },
     { label: 'MID', prefer: ['CAM', 'CM'] },
-    { label: 'MID', prefer: ['CM', 'CAM'] },
-    { label: 'MID', prefer: ['RM', 'CM'] },
+    { label: 'MID', prefer: ['RM'] },
   ],
   def: [
     { label: 'DEF', prefer: ['LB'] },
@@ -1321,17 +1323,49 @@ const FORMATION_SLOTS = {
   ],
 };
 
+// Position ordering weight — lower = further left on the pitch
+const POS_ORDER = {
+  LW: 0, LM: 0, LB: 0,
+  CF: 1, ST: 1, CAM: 1, CM: 1, CB: 1, GK: 0,
+  RW: 2, RM: 2, RB: 2,
+};
+
+function buildRowSlots(cards, defaultSlotDefs) {
+  const count = cards.length;
+  if (count === 0) return [];
+  if (count <= defaultSlotDefs.length) {
+    // Pick the subset of slot defs that best matches the cards' positions
+    const needed = [];
+    const used = new Set();
+    const sorted = [...cards].sort((a, b) => b.value - a.value);
+    for (const card of sorted) {
+      let bestIdx = -1, bestRank = 999;
+      for (let i = 0; i < defaultSlotDefs.length; i++) {
+        if (used.has(i)) continue;
+        const rank = defaultSlotDefs[i].prefer.indexOf(card.position);
+        if (rank !== -1 && rank < bestRank) { bestRank = rank; bestIdx = i; }
+      }
+      if (bestIdx !== -1) { used.add(bestIdx); needed.push(bestIdx); }
+    }
+    // Fill remaining slots with unused defs (center positions first)
+    for (let i = 0; i < defaultSlotDefs.length && needed.length < count; i++) {
+      if (!used.has(i)) { used.add(i); needed.push(i); }
+    }
+    return needed.sort((a, b) => a - b).map(i => defaultSlotDefs[i]);
+  }
+  // More cards than default slots — expand with center slots
+  const slots = [...defaultSlotDefs];
+  const centerDef = defaultSlotDefs.find(s => !['LW','LM','LB','RW','RM','RB'].some(p => s.prefer.includes(p))) || defaultSlotDefs[Math.floor(defaultSlotDefs.length / 2)];
+  while (slots.length < count) slots.splice(Math.floor(slots.length / 2) + 1, 0, { ...centerDef });
+  return slots;
+}
+
 function assignCardsToSlots(cards, slotDefs) {
   const sorted = [...cards].sort((a, b) => b.value - a.value);
-  const slotCount = Math.max(slotDefs.length, sorted.length);
-  const slots = [];
-  for (let i = 0; i < slotCount; i++) {
-    slots.push({ def: slotDefs[i] || slotDefs[slotDefs.length - 1], card: null });
-  }
+  const slots = slotDefs.map(def => ({ def, card: null }));
 
   const placed = new Set();
 
-  // Pass 1: assign cards to their best-fit slot (preferred position match)
   for (const card of sorted) {
     let bestSlot = -1;
     let bestRank = 999;
@@ -1349,7 +1383,6 @@ function assignCardsToSlots(cards, slotDefs) {
     }
   }
 
-  // Pass 2: overflow — put remaining cards in any empty slot
   for (const card of sorted) {
     if (placed.has(card)) continue;
     for (let i = 0; i < slots.length; i++) {
@@ -1361,10 +1394,21 @@ function assignCardsToSlots(cards, slotDefs) {
     }
   }
 
+  // Re-sort filled slots: cards with explicit L/R positions go to edges
+  const filled = slots.filter(s => s.card);
+  filled.sort((a, b) => (POS_ORDER[a.card.position] ?? 1) - (POS_ORDER[b.card.position] ?? 1));
+  let fi = 0;
+  for (let i = 0; i < slots.length; i++) {
+    if (slots[i].card) {
+      slots[i] = { def: slots[i].def, card: filled[fi].card };
+      fi++;
+    }
+  }
+
   return slots;
 }
 
-function buildFormationHTML(player) {
+function buildFormationHTML(player, showEmptySlots) {
   const groups = { att: [], mid: [], def: [], gk: [] };
   (player.cardsWon || []).forEach((c) => {
     groups[posCategory(c.position)].push(c);
@@ -1381,7 +1425,15 @@ function buildFormationHTML(player) {
   container.className = 'lineup-formation';
 
   rowDefs.forEach((row) => {
-    const slots = assignCardsToSlots(groups[row.key], FORMATION_SLOTS[row.key]);
+    const cardsInRow = groups[row.key];
+    let slotDefs;
+    if (showEmptySlots) {
+      slotDefs = FORMATION_SLOTS[row.key];
+    } else {
+      slotDefs = buildRowSlots(cardsInRow, FORMATION_SLOTS[row.key]);
+      if (slotDefs.length === 0) return;
+    }
+    const slots = assignCardsToSlots(cardsInRow, slotDefs);
     const rowEl = document.createElement('div');
     rowEl.className = 'lineup-row';
 
@@ -1390,7 +1442,7 @@ function buildFormationHTML(player) {
         const el = createCardElement(slot.card, 'card-small');
         el.classList.add(row.cls);
         rowEl.appendChild(el);
-      } else {
+      } else if (showEmptySlots) {
         const empty = document.createElement('div');
         empty.className = `card card-small lineup-slot-empty ${row.cls}-empty`;
         empty.innerHTML = `<span class="slot-label">${slot.def.label}</span>`;
@@ -1411,7 +1463,7 @@ function showLineupOverlay(player) {
   formation.innerHTML = '';
   bench.innerHTML = '';
 
-  const formationEl = buildFormationHTML(player);
+  const formationEl = buildFormationHTML(player, true);
   while (formationEl.firstChild) formation.appendChild(formationEl.firstChild);
 
   const total = (player.cardsWon || []).reduce((s, c) => s + c.value, 0);
