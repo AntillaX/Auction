@@ -10,7 +10,7 @@ Artifacts for deploying AUCTION alongside PLATFORM on a single droplet.
   - `/ws` → Platform relay on `127.0.0.1:8080` (unchanged)
   - `/auction/` → Auction Node server on `127.0.0.1:3100`
 - `auction.service` — systemd unit mirroring `platform-relay.service`
-- `hub/index.html` — landing page with two tiles (PLATFORM, AUCTION)
+- `hub/index.html` — landing page with tiles for PLATFORM, AUCTION, and LEVEL 0
 - `platform-wrapper/index.html` — iframes Godot's `Platform_WebClaude.html`
   and overlays a "Hub" link, so we can add navigation chrome without
   editing any Godot-exported files on disk

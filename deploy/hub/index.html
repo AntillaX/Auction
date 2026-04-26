@@ -160,13 +160,13 @@
       .tile-cta { font-size: 0.72rem; }
     }
 
-    /* Landscape / wide viewports — lay the two game tiles out
+    /* Landscape / wide viewports — lay the game tiles out
        side-by-side so the hub doesn't look like a lonely column
        stranded in the middle of a wide screen. Kicks in once the
-       viewport is wide enough to host two tiles + breathing room. */
+       viewport is wide enough to host the tiles + breathing room. */
     @media (min-width: 720px) {
       body { padding: 2rem; }
-      .hub { max-width: 880px; }
+      .hub { max-width: 1080px; }
       .hub-title { font-size: 1.65rem; margin-bottom: 0.5rem; }
       .hub-subtitle { margin-bottom: 2.25rem; }
       .tiles {
@@ -200,6 +200,12 @@
         <span class="tile-name">Auction</span>
         <span class="tile-desc">Bid, bluff, and build the strongest squad of football legends. Classic mode or Auction X — build a full 11-player lineup.</span>
         <span class="tile-cta">Play Auction</span>
+      </a>
+
+      <a class="tile" href="/level0/" data-game="level0">
+        <span class="tile-name">Level 0</span>
+        <span class="tile-desc">Simple games for hanging out — tic-tac-toe today, four in a row and more soon. Spectators welcome.</span>
+        <span class="tile-cta">Play Level 0</span>
       </a>
     </div>
 
