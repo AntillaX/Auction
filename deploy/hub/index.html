@@ -141,6 +141,32 @@
     .tile:hover .tile-cta::after,
     .tile:focus-visible .tile-cta::after { transform: translateX(4px); }
 
+    /* "Level 0" is intentionally a quieter, smaller link beneath the
+       main tiles — it isn't a featured game like Platform or Auction,
+       just a corner of the site for casual stuff. */
+    .aside {
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+    .aside-link {
+      display: inline-block;
+      padding: 0.45rem 0.9rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 999px;
+      transition: color 0.18s ease, border-color 0.18s ease;
+    }
+    .aside-link:hover,
+    .aside-link:focus-visible {
+      color: var(--accent);
+      border-color: rgba(212, 168, 67, 0.4);
+      outline: none;
+    }
+
     footer {
       margin-top: 2rem;
       font-size: 0.65rem;
@@ -166,7 +192,7 @@
        viewport is wide enough to host the tiles + breathing room. */
     @media (min-width: 720px) {
       body { padding: 2rem; }
-      .hub { max-width: 1080px; }
+      .hub { max-width: 880px; }
       .hub-title { font-size: 1.65rem; margin-bottom: 0.5rem; }
       .hub-subtitle { margin-bottom: 2.25rem; }
       .tiles {
@@ -201,12 +227,10 @@
         <span class="tile-desc">Bid, bluff, and build the strongest squad of football legends. Classic mode or Auction X — build a full 11-player lineup.</span>
         <span class="tile-cta">Play Auction</span>
       </a>
+    </div>
 
-      <a class="tile" href="/level0/" data-game="level0">
-        <span class="tile-name">Level 0</span>
-        <span class="tile-desc">Simple games for hanging out — tic-tac-toe today, four in a row and more soon. Spectators welcome.</span>
-        <span class="tile-cta">Play Level 0</span>
-      </a>
+    <div class="aside">
+      <a class="aside-link" href="/level0/" data-game="level0">Level 0</a>
     </div>
 
     <footer>platformvv.com</footer>
