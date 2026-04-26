@@ -9,6 +9,7 @@ Artifacts for deploying AUCTION alongside PLATFORM on a single droplet.
   - `/platform/` → Godot web export via wrapper (`/var/www/vv/platform/index.html`)
   - `/ws` → Platform relay on `127.0.0.1:8080` (unchanged)
   - `/auction/` → Auction Node server on `127.0.0.1:3100`
+  - `/level0/` → Level 0 Node server on `127.0.0.1:3200`
 - `auction.service` — systemd unit mirroring `platform-relay.service`
 - `hub/index.html` — landing page with tiles for PLATFORM, AUCTION, and LEVEL 0
 - `platform-wrapper/index.html` — iframes Godot's `Platform_WebClaude.html`
