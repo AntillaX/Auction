@@ -1,6 +1,6 @@
 const WIN_THRESHOLD = 644;
 const MIN_OPENING_BID = 50;
-const MIN_BID_INCREMENT = 5;
+const MIN_BID_INCREMENT = 10;
 
 const BOT_BIASES = {
   Allegri: {
@@ -64,7 +64,7 @@ function calculateMaxBid(bot, card, game) {
   let isNeutral = true;
   if (bias) {
     if (bias.mustHave.includes(card.name)) {
-      maxBid *= 1.4;
+      maxBid *= 1.5;
       isNeutral = false;
     } else if (bias.likes.includes(card.name)) {
       maxBid *= 1.15;
@@ -91,7 +91,7 @@ function calculateMaxBid(bot, card, game) {
   }
 
   maxBid = Math.min(maxBid, bot.budget);
-  maxBid = Math.floor(maxBid / 5) * 5;
+  maxBid = Math.floor(maxBid / 10) * 10;
   return Math.max(0, maxBid);
 }
 

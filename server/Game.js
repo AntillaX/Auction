@@ -2,7 +2,7 @@ const BotAI = require('./BotAI');
 
 const WIN_THRESHOLD = 644;
 const MIN_OPENING_BID = 50;
-const MIN_BID_INCREMENT = 5;
+const MIN_BID_INCREMENT = 10;
 const TIMER_DURATION = 10000; // 10 seconds
 const DELAY_CARD_WON = 2500;
 const DELAY_CARD_PASSED = 1500;
@@ -359,7 +359,7 @@ class Game {
     }
 
     if (amount % MIN_BID_INCREMENT !== 0) {
-      return { success: false, error: 'Bid must be in $5 increments' };
+      return { success: false, error: 'Bid must be in $10 increments' };
     }
 
     if (!player.canAfford(amount)) {
