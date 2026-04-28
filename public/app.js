@@ -85,9 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.currentTarget && e.currentTarget.blur) e.currentTarget.blur();
   };
   $('bid-min').addEventListener('click', bidTap('min'));
-  $('bid-plus5').addEventListener('click', bidTap('+5'));
-  $('bid-plus25').addEventListener('click', bidTap('+25'));
-  $('bid-plus50').addEventListener('click', bidTap('+50'));
+  $('bid-step1').addEventListener('click', bidTap('step1'));
+  $('bid-step2').addEventListener('click', bidTap('step2'));
+  $('bid-step3').addEventListener('click', bidTap('step3'));
   $('custom-bid-btn').addEventListener('click', (e) => {
     placeCustomBid();
     if (e.currentTarget && e.currentTarget.blur) e.currentTarget.blur();
@@ -883,7 +883,11 @@ function renderMyInfo() {
   const nameBtn = $('my-lineup-btn');
   const nameEl = $('my-name');
   nameEl.textContent = me.name;
-  nameBtn.classList.remove('hidden');
+  if (gameMode === 'auctionx') {
+    nameBtn.classList.remove('hidden');
+  } else {
+    nameBtn.classList.add('hidden');
+  }
 
   const budgetEl = $('my-budget');
   budgetEl.textContent = `$${me.budget.toLocaleString()}`;
@@ -924,40 +928,42 @@ function updateBidControls() {
   const canBid = isAuction && me && me.budget >= minBid && gameState.highestBidderId !== myPlayerId && !alreadyOwned;
 
   const btnMin = $('bid-min');
-  const btn5 = $('bid-plus5');
-  const btn25 = $('bid-plus25');
-  const btn50 = $('bid-plus50');
+  const btn1 = $('bid-step1');
+  const btn2 = $('bid-step2');
+  const btn3 = $('bid-step3');
 
-  const plus5 = gameState.highestBid > 0 ? gameState.highestBid + 5 : 50;
-  const plus25 = gameState.highestBid > 0 ? gameState.highestBid + 25 : 75;
-  const plus50 = gameState.highestBid > 0 ? gameState.highestBid + 50 : 100;
+  const steps = getBidSteps();
+  const s1 = gameState.highestBid > 0 ? gameState.highestBid + steps[0] : 50;
+  const s2 = gameState.highestBid > 0 ? gameState.highestBid + steps[1] : 50 + steps[1];
+  const s3 = gameState.highestBid > 0 ? gameState.highestBid + steps[2] : 50 + steps[2];
 
   if (isAuction && gameState.highestBidderId === myPlayerId) {
     btnMin.textContent = 'Winning!';
     btnMin.disabled = true;
-    btn5.textContent = `$${plus5}`;
-    btn5.disabled = true;
-    btn25.textContent = `$${plus25}`;
-    btn25.disabled = true;
-    btn50.textContent = `$${plus50}`;
-    btn50.disabled = true;
+    btn1.textContent = `$${s1}`;
+    btn1.disabled = true;
+    btn2.textContent = `$${s2}`;
+    btn2.disabled = true;
+    btn3.textContent = `$${s3}`;
+    btn3.disabled = true;
   } else {
     btnMin.textContent = `$${minBid}`;
     btnMin.disabled = !canBid;
 
-    btn5.textContent = `$${plus5}`;
-    btn5.disabled = !canBid || !me || me.budget < plus5;
+    btn1.textContent = `$${s1}`;
+    btn1.disabled = !canBid || !me || me.budget < s1;
 
-    btn25.textContent = `$${plus25}`;
-    btn25.disabled = !canBid || !me || me.budget < plus25;
+    btn2.textContent = `$${s2}`;
+    btn2.disabled = !canBid || !me || me.budget < s2;
 
-    btn50.textContent = `$${plus50}`;
-    btn50.disabled = !canBid || !me || me.budget < plus50;
+    btn3.textContent = `$${s3}`;
+    btn3.disabled = !canBid || !me || me.budget < s3;
   }
 
   const customInput = $('custom-bid-input');
   const customBtn = $('custom-bid-btn');
   customInput.min = minBid;
+  customInput.step = getBidIncrement();
   customInput.max = me ? me.budget : 0;
   customInput.disabled = !isAuction || !me || me.budget < minBid;
   customBtn.disabled = !isAuction || !me || me.budget < minBid;
@@ -976,18 +982,30 @@ function updateBidControls() {
 }
 
 // ── Bid Actions ──
+function getBidIncrement() {
+  return gameMode === 'auctionx' ? 5 : 10;
+}
+
+function getBidSteps() {
+  return gameMode === 'auctionx'
+    ? [5, 25, 50]
+    : [10, 50, 100];
+}
+
 function placeBidAction(action) {
   if (!gameState) return;
   const minBid = gameState.minimumBid || 50;
+  const steps = getBidSteps();
+  const inc = getBidIncrement();
   let amount;
   switch (action) {
     case 'min': amount = minBid; break;
-    case '+5': amount = gameState.highestBid > 0 ? gameState.highestBid + 5 : 50; break;
-    case '+25': amount = gameState.highestBid > 0 ? gameState.highestBid + 25 : 75; break;
-    case '+50': amount = gameState.highestBid > 0 ? gameState.highestBid + 50 : 100; break;
+    case 'step1': amount = gameState.highestBid > 0 ? gameState.highestBid + steps[0] : 50; break;
+    case 'step2': amount = gameState.highestBid > 0 ? gameState.highestBid + steps[1] : 50 + steps[1]; break;
+    case 'step3': amount = gameState.highestBid > 0 ? gameState.highestBid + steps[2] : 50 + steps[2]; break;
   }
   if (amount) {
-    amount = Math.ceil(amount / 5) * 5;
+    amount = Math.ceil(amount / inc) * inc;
     send({ type: 'place_bid', amount });
   }
 }
@@ -996,7 +1014,8 @@ function placeCustomBid() {
   const input = $('custom-bid-input');
   let amount = parseInt(input.value, 10);
   if (isNaN(amount) || amount <= 0) { showToast('Enter a valid bid amount'); return; }
-  amount = Math.round(amount / 5) * 5;
+  const inc = getBidIncrement();
+  amount = Math.round(amount / inc) * inc;
   if (amount < 50) amount = 50;
   send({ type: 'place_bid', amount });
   input.value = '';
@@ -1297,7 +1316,7 @@ function populateHelpOverlay() {
       <div class="rule-section"><h3>Goal</h3><p>First to <strong>644 points</strong> wins.</p></div>
       <div class="rule-section"><h3>Auctions</h3><ul>
         <li>Cards sold one at a time, in order</li>
-        <li>Open at <strong>$50</strong>, raise in <strong>$5</strong> steps</li>
+        <li>Open at <strong>$50</strong>, raise in <strong>$10</strong> steps</li>
         <li>Each bid resets a <strong>10s</strong> timer</li>
         <li>Highest bid when time runs out wins</li>
       </ul></div>
