@@ -192,7 +192,7 @@
        viewport is wide enough to host the tiles + breathing room. */
     @media (min-width: 720px) {
       body { padding: 2rem; }
-      .hub { max-width: 880px; }
+      .hub { max-width: 1080px; }
       .hub-title { font-size: 1.65rem; margin-bottom: 0.5rem; }
       .hub-subtitle { margin-bottom: 2.25rem; }
       .tiles {
@@ -208,6 +208,11 @@
       }
       .tile-desc { flex: 1 1 auto; margin-bottom: 1rem; }
     }
+
+    /* Subtle slash treatment to match the AC/DC wordmark used inside the
+       game. Greyed-out separator visually links AC and DC without
+       fighting the gold tile-name. */
+    .acdc-slash { color: var(--text-dim); margin: 0 0.05em; }
   </style>
 </head>
 <body>
@@ -226,6 +231,12 @@
         <span class="tile-name">Auction</span>
         <span class="tile-desc">Bid, bluff, and build the strongest squad of football legends. Classic mode or Auction X — build a full 11-player lineup.</span>
         <span class="tile-cta">Play Auction</span>
+      </a>
+
+      <a class="tile" href="/acdc/" data-game="acdc">
+        <span class="tile-name">AC<span class="acdc-slash">/</span>DC</span>
+        <span class="tile-desc">Two-player attack and defend. Pick a number 1–4. Match to block, mismatch to score. First to a 30-point lead wins.</span>
+        <span class="tile-cta">Play AC/DC</span>
       </a>
     </div>
 
