@@ -87,8 +87,11 @@
     }
 
     .tile {
-      display: block;
-      padding: 1rem 1.1rem 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 88px;
+      padding: 1.4rem 1.2rem;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: var(--radius-lg);
@@ -107,39 +110,13 @@
 
     .tile-name {
       display: block;
-      font-size: 1.1rem;
+      font-size: 1.3rem;
       font-weight: 700;
-      letter-spacing: 0.12em;
-      margin-bottom: 0.45rem;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
       color: var(--accent);
+      text-align: center;
     }
-
-    .tile-desc {
-      display: block;
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-      line-height: 1.5;
-      margin-bottom: 0.75rem;
-    }
-
-    .tile-cta {
-      display: block;
-      font-size: 0.7rem;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--accent);
-    }
-
-    .tile-cta::after {
-      content: " \2192";
-      display: inline-block;
-      transition: transform 0.18s ease;
-    }
-
-    .tile:hover .tile-cta::after,
-    .tile:focus-visible .tile-cta::after { transform: translateX(4px); }
 
     /* "Level 0" is intentionally a quieter, smaller link beneath the
        main tiles — it isn't a featured game like Platform or Auction,
@@ -180,10 +157,8 @@
       .hub-title { font-size: 1.5rem; }
       .hub-subtitle { font-size: 0.85rem; margin-bottom: 2rem; }
       .tiles { gap: 1.1rem; }
-      .tile { padding: 1.2rem 1.25rem 1.35rem; }
-      .tile-name { font-size: 1.2rem; }
-      .tile-desc { font-size: 0.85rem; }
-      .tile-cta { font-size: 0.72rem; }
+      .tile { min-height: 100px; }
+      .tile-name { font-size: 1.4rem; }
     }
 
     /* Landscape / wide viewports — lay the game tiles out
@@ -202,11 +177,10 @@
       }
       .tile {
         flex: 1 1 0;
-        display: flex;
-        flex-direction: column;
-        padding: 1.5rem 1.5rem 1.6rem;
+        min-height: 140px;
+        padding: 1.8rem 1.5rem;
       }
-      .tile-desc { flex: 1 1 auto; margin-bottom: 1rem; }
+      .tile-name { font-size: 1.55rem; }
     }
 
     /* Subtle slash treatment to match the AC/DC wordmark used inside the
@@ -223,20 +197,14 @@
     <div class="tiles">
       <a class="tile" href="/platform/" data-game="platform">
         <span class="tile-name">Platform</span>
-        <span class="tile-desc">A 4-player game of reads and bluffs.</span>
-        <span class="tile-cta">Play Platform</span>
       </a>
 
       <a class="tile" href="/auction/" data-game="auction">
         <span class="tile-name">Auction</span>
-        <span class="tile-desc">Bid, bluff, and build the strongest squad of football legends. Classic mode or Auction X — build a full 11-player lineup.</span>
-        <span class="tile-cta">Play Auction</span>
       </a>
 
       <a class="tile" href="/acdc/" data-game="acdc">
         <span class="tile-name">AC<span class="acdc-slash">/</span>DC</span>
-        <span class="tile-desc">Two-player attack and defend. Pick a number 1–4. Match to block, mismatch to score. First to a 30-point lead wins.</span>
-        <span class="tile-cta">Play AC/DC</span>
       </a>
     </div>
 
