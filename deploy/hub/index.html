@@ -6,9 +6,6 @@
   <meta name="theme-color" content="#0a0a0a">
   <title>PLATFORMVV</title>
 
-  <!-- Google Analytics (GA4) — same measurement ID shared across
-       hub / Platform / Auction so we can see cross-game traffic in
-       one property. -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-S648R7WPGJ"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -21,43 +18,31 @@
 
     :root {
       --bg: #0a0a0a;
-      --bg-surface: #141414;
       --text-primary: #e8e0d0;
       --text-secondary: #888;
       --text-dim: #555;
       --accent: #d4a843;
-      --accent-glow: rgba(212, 168, 67, 0.3);
-      --radius: 8px;
       --radius-lg: 12px;
     }
 
-    html, body { height: 100%; }
-
-    /* Explicit background on html so notch / safe-area / overscroll
-       regions don't flash the default white on iOS Safari and some
-       Android browsers. Belt-and-braces: body paints the gradient
-       on top. */
     html { background: #0a0a0a; }
+    html, body { min-height: 100%; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: radial-gradient(ellipse at center, #1a1a1a 0%, #0a0a0a 70%);
       color: var(--text-primary);
-      min-height: 100%;
       min-height: 100dvh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 2rem 1rem;
-      padding-left: max(1rem, env(safe-area-inset-left));
-      padding-right: max(1rem, env(safe-area-inset-right));
+      padding: 2rem 0;
       -webkit-font-smoothing: antialiased;
     }
 
     .hub {
       width: 100%;
-      max-width: 420px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -79,30 +64,48 @@
       text-align: center;
     }
 
-    .tiles {
+    /* Scrollable tile strip on small screens.
+       On mobile: horizontal scroll carousel so the grid grows gracefully
+       as more games are added without pushing content off screen.
+       The 76vw tile width lets users see the edge of the next card. */
+    .tiles-wrap {
       width: 100%;
+      overflow-x: auto;
+      overflow-y: visible;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none; /* Firefox */
+      padding: 0.25rem max(1rem, env(safe-area-inset-left))
+               0.5rem max(1rem, env(safe-area-inset-right));
+    }
+    .tiles-wrap::-webkit-scrollbar { display: none; }
+
+    .tiles {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       gap: 0.9rem;
+      width: max-content; /* allow tiles to exceed viewport width */
     }
 
     .tile {
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 88px;
+      flex-shrink: 0;
+      width: 76vw;
+      max-width: 240px;
+      min-height: 110px;
       padding: 1.4rem 1.2rem;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: var(--radius-lg);
       color: var(--text-primary);
       text-decoration: none;
-      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+      scroll-snap-align: start;
+      transition: border-color 0.18s ease, background 0.18s ease;
     }
 
-    .tile:hover,
-    .tile:focus-visible {
-      transform: translateY(-2px);
+    .tile:hover, .tile:focus-visible {
       border-color: var(--accent);
       background: rgba(255, 255, 255, 0.05);
       outline: none;
@@ -118,9 +121,29 @@
       text-align: center;
     }
 
-    /* "Level 0" is intentionally a quieter, smaller link beneath the
-       main tiles — it isn't a featured game like Platform or Auction,
-       just a corner of the site for casual stuff. */
+    .tile-desc {
+      display: block;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      color: var(--text-secondary);
+      margin-top: 0.4rem;
+      text-align: center;
+    }
+
+    .tile-inner { display: flex; flex-direction: column; align-items: center; }
+
+    /* Scroll-hint fade on the right edge — shows users there's more to scroll */
+    .tiles-wrap::after {
+      content: '';
+      position: absolute;
+      right: 0; top: 0; bottom: 0;
+      width: 2rem;
+      background: linear-gradient(to right, transparent, #0a0a0a 90%);
+      pointer-events: none;
+    }
+    /* Make wrap relative for the pseudo fade */
+    .tiles-wrap { position: relative; }
+
     .aside {
       margin-top: 1.5rem;
       text-align: center;
@@ -137,8 +160,7 @@
       border-radius: 999px;
       transition: color 0.18s ease, border-color 0.18s ease;
     }
-    .aside-link:hover,
-    .aside-link:focus-visible {
+    .aside-link:hover, .aside-link:focus-visible {
       color: var(--accent);
       border-color: rgba(212, 168, 67, 0.4);
       outline: none;
@@ -152,40 +174,44 @@
       text-transform: uppercase;
     }
 
+    /* 2-column grid on medium screens */
     @media (min-width: 480px) {
-      .hub { max-width: 460px; }
       .hub-title { font-size: 1.5rem; }
       .hub-subtitle { font-size: 0.85rem; margin-bottom: 2rem; }
-      .tiles { gap: 1.1rem; }
-      .tile { min-height: 100px; }
-      .tile-name { font-size: 1.4rem; }
     }
 
-    /* Landscape / wide viewports — lay the game tiles out
-       side-by-side so the hub doesn't look like a lonely column
-       stranded in the middle of a wide screen. Kicks in once the
-       viewport is wide enough to host the tiles + breathing room. */
-    @media (min-width: 720px) {
+    /* On wide-enough screens, show all tiles in a row — no scrolling needed.
+       Raise the breakpoint to accommodate 4 tiles comfortably. */
+    @media (min-width: 860px) {
       body { padding: 2rem; }
-      .hub { max-width: 1080px; }
+      .hub { max-width: 1100px; }
       .hub-title { font-size: 1.65rem; margin-bottom: 0.5rem; }
       .hub-subtitle { margin-bottom: 2.25rem; }
+
+      .tiles-wrap {
+        overflow: visible;
+        padding: 0;
+        width: 100%;
+      }
+      /* Hide the scroll-fade on wide screens */
+      .tiles-wrap::after { display: none; }
+
       .tiles {
-        flex-direction: row;
-        align-items: stretch;
+        width: 100%;
         gap: 1.5rem;
       }
+
       .tile {
         flex: 1 1 0;
+        width: auto;
+        max-width: none;
         min-height: 140px;
         padding: 1.8rem 1.5rem;
       }
-      .tile-name { font-size: 1.55rem; }
+
+      .tile-name { font-size: 1.5rem; }
     }
 
-    /* Subtle slash treatment to match the AC/DC wordmark used inside the
-       game. Greyed-out separator visually links AC and DC without
-       fighting the gold tile-name. */
     .acdc-slash { color: var(--text-dim); margin: 0 0.05em; }
   </style>
 </head>
@@ -194,18 +220,36 @@
     <h1 class="hub-title">PLATFORMVV</h1>
     <p class="hub-subtitle">Multiplayer games &middot; pick your table</p>
 
-    <div class="tiles">
-      <a class="tile" href="/platform/" data-game="platform">
-        <span class="tile-name">Platform</span>
-      </a>
+    <div class="tiles-wrap">
+      <div class="tiles">
+        <a class="tile" href="/platform/" data-game="platform">
+          <div class="tile-inner">
+            <span class="tile-name">Platform</span>
+            <span class="tile-desc">2–6 players</span>
+          </div>
+        </a>
 
-      <a class="tile" href="/auction/" data-game="auction">
-        <span class="tile-name">Auction</span>
-      </a>
+        <a class="tile" href="/auction/" data-game="auction">
+          <div class="tile-inner">
+            <span class="tile-name">Auction</span>
+            <span class="tile-desc">2–6 players</span>
+          </div>
+        </a>
 
-      <a class="tile" href="/acdc/" data-game="acdc">
-        <span class="tile-name">AC<span class="acdc-slash">/</span>DC</span>
-      </a>
+        <a class="tile" href="/acdc/" data-game="acdc">
+          <div class="tile-inner">
+            <span class="tile-name">AC<span class="acdc-slash">/</span>DC</span>
+            <span class="tile-desc">2 players</span>
+          </div>
+        </a>
+
+        <a class="tile" href="/doors/" data-game="doors">
+          <div class="tile-inner">
+            <span class="tile-name">Doors</span>
+            <span class="tile-desc">5 players</span>
+          </div>
+        </a>
+      </div>
     </div>
 
     <div class="aside">
@@ -216,16 +260,10 @@
   </main>
 
   <script>
-    // Fire a GA event when a tile is clicked so we can see which
-    // game users pick from the hub. We don't preventDefault — the
-    // beacon transport in gtag makes the event survive the
-    // navigation away.
     document.querySelectorAll('.tile[data-game]').forEach((el) => {
       el.addEventListener('click', () => {
         if (typeof gtag === 'function') {
-          gtag('event', 'hub_tile_click', {
-            game: el.dataset.game,
-          });
+          gtag('event', 'hub_tile_click', { game: el.dataset.game });
         }
       });
     });
