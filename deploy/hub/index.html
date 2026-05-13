@@ -37,12 +37,13 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 2rem 0;
+      padding: 2rem 1rem;
       -webkit-font-smoothing: antialiased;
     }
 
     .hub {
       width: 100%;
+      max-width: 900px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -64,19 +65,14 @@
       text-align: center;
     }
 
-    /* Scrollable tile strip on small screens.
-       On mobile: horizontal scroll carousel so the grid grows gracefully
-       as more games are added without pushing content off screen.
-       The 76vw tile width lets users see the edge of the next card. */
+    /* Horizontal scroll carousel on mobile, row on desktop */
     .tiles-wrap {
       width: 100%;
       overflow-x: auto;
-      overflow-y: visible;
       -webkit-overflow-scrolling: touch;
       scroll-snap-type: x mandatory;
-      scrollbar-width: none; /* Firefox */
-      padding: 0.25rem max(1rem, env(safe-area-inset-left))
-               0.5rem max(1rem, env(safe-area-inset-right));
+      scrollbar-width: none;
+      padding: 0.25rem 1rem 0.5rem;
     }
     .tiles-wrap::-webkit-scrollbar { display: none; }
 
@@ -84,24 +80,23 @@
       display: flex;
       flex-direction: row;
       gap: 0.9rem;
-      width: max-content; /* allow tiles to exceed viewport width */
+      width: max-content;
     }
 
     .tile {
+      flex-shrink: 0;
+      width: 76vw;
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
-      width: 76vw;
-      max-width: 240px;
-      min-height: 110px;
-      padding: 1.4rem 1.2rem;
+      min-height: 100px;
+      padding: 1.4rem 1rem;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: var(--radius-lg);
       color: var(--text-primary);
       text-decoration: none;
-      scroll-snap-align: start;
+      scroll-snap-align: center;
       transition: border-color 0.18s ease, background 0.18s ease;
     }
 
@@ -111,9 +106,11 @@
       outline: none;
     }
 
+    .tile-inner { display: flex; flex-direction: column; align-items: center; }
+
     .tile-name {
       display: block;
-      font-size: 1.3rem;
+      font-size: 1.15rem;
       font-weight: 700;
       letter-spacing: 0.2em;
       text-transform: uppercase;
@@ -123,31 +120,18 @@
 
     .tile-desc {
       display: block;
-      font-size: 0.65rem;
+      font-size: 0.62rem;
       letter-spacing: 0.08em;
       color: var(--text-secondary);
-      margin-top: 0.4rem;
+      margin-top: 0.35rem;
       text-align: center;
     }
-
-    .tile-inner { display: flex; flex-direction: column; align-items: center; }
-
-    /* Scroll-hint fade on the right edge — shows users there's more to scroll */
-    .tiles-wrap::after {
-      content: '';
-      position: absolute;
-      right: 0; top: 0; bottom: 0;
-      width: 2rem;
-      background: linear-gradient(to right, transparent, #0a0a0a 90%);
-      pointer-events: none;
-    }
-    /* Make wrap relative for the pseudo fade */
-    .tiles-wrap { position: relative; }
 
     .aside {
       margin-top: 1.5rem;
       text-align: center;
     }
+
     .aside-link {
       display: inline-block;
       padding: 0.45rem 0.9rem;
@@ -174,41 +158,25 @@
       text-transform: uppercase;
     }
 
-    /* 2-column grid on medium screens */
     @media (min-width: 480px) {
       .hub-title { font-size: 1.5rem; }
       .hub-subtitle { font-size: 0.85rem; margin-bottom: 2rem; }
+      .tile-name { font-size: 1.25rem; }
+      .tile { width: 60vw; }
     }
 
-    /* On wide-enough screens, show all tiles in a row — no scrolling needed.
-       Raise the breakpoint to accommodate 4 tiles comfortably. */
+    @media (min-width: 640px) {
+      .tile { width: 44vw; min-height: 130px; padding: 1.6rem 1.25rem; }
+      .tile-name { font-size: 1.35rem; }
+    }
+
     @media (min-width: 860px) {
       body { padding: 2rem; }
-      .hub { max-width: 1100px; }
       .hub-title { font-size: 1.65rem; margin-bottom: 0.5rem; }
       .hub-subtitle { margin-bottom: 2.25rem; }
-
-      .tiles-wrap {
-        overflow: visible;
-        padding: 0;
-        width: 100%;
-      }
-      /* Hide the scroll-fade on wide screens */
-      .tiles-wrap::after { display: none; }
-
-      .tiles {
-        width: 100%;
-        gap: 1.5rem;
-      }
-
-      .tile {
-        flex: 1 1 0;
-        width: auto;
-        max-width: none;
-        min-height: 140px;
-        padding: 1.8rem 1.5rem;
-      }
-
+      .tiles-wrap { overflow: visible; padding: 0; width: 100%; }
+      .tiles { width: 100%; gap: 1.5rem; }
+      .tile { flex: 1 1 0; width: auto; scroll-snap-align: none; min-height: 140px; padding: 1.8rem 1.5rem; }
       .tile-name { font-size: 1.5rem; }
     }
 
@@ -221,36 +189,36 @@
     <p class="hub-subtitle">Multiplayer games &middot; pick your table</p>
 
     <div class="tiles-wrap">
-      <div class="tiles">
-        <a class="tile" href="/platform/" data-game="platform">
-          <div class="tile-inner">
-            <span class="tile-name">Platform</span>
-            <span class="tile-desc">2–6 players</span>
-          </div>
-        </a>
+    <div class="tiles">
+      <a class="tile" href="/platform/" data-game="platform">
+        <div class="tile-inner">
+          <span class="tile-name">Platform</span>
+          <span class="tile-desc">2–6 players</span>
+        </div>
+      </a>
 
-        <a class="tile" href="/auction/" data-game="auction">
-          <div class="tile-inner">
-            <span class="tile-name">Auction</span>
-            <span class="tile-desc">2–6 players</span>
-          </div>
-        </a>
+      <a class="tile" href="/auction/" data-game="auction">
+        <div class="tile-inner">
+          <span class="tile-name">Auction</span>
+          <span class="tile-desc">2–6 players</span>
+        </div>
+      </a>
 
-        <a class="tile" href="/acdc/" data-game="acdc">
-          <div class="tile-inner">
-            <span class="tile-name">AC<span class="acdc-slash">/</span>DC</span>
-            <span class="tile-desc">2 players</span>
-          </div>
-        </a>
+      <a class="tile" href="/acdc/" data-game="acdc">
+        <div class="tile-inner">
+          <span class="tile-name">AC<span class="acdc-slash">/</span>DC</span>
+          <span class="tile-desc">2 players</span>
+        </div>
+      </a>
 
-        <a class="tile" href="/doors/" data-game="doors">
-          <div class="tile-inner">
-            <span class="tile-name">Doors</span>
-            <span class="tile-desc">5 players</span>
-          </div>
-        </a>
-      </div>
+      <a class="tile" href="/doors/" data-game="doors">
+        <div class="tile-inner">
+          <span class="tile-name">Doors</span>
+          <span class="tile-desc">4–5 players</span>
+        </div>
+      </a>
     </div>
+    </div><!-- /.tiles-wrap -->
 
     <div class="aside">
       <a class="aside-link" href="/level0/" data-game="level0">Level 0</a>
