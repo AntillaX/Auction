@@ -65,15 +65,27 @@
       text-align: center;
     }
 
-    /* 2-column grid on mobile, 4-column on wider screens */
-    .tiles {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.9rem;
+    /* Horizontal scroll carousel on mobile, row on desktop */
+    .tiles-wrap {
       width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      padding: 0.25rem 1rem 0.5rem;
+    }
+    .tiles-wrap::-webkit-scrollbar { display: none; }
+
+    .tiles {
+      display: flex;
+      flex-direction: row;
+      gap: 0.9rem;
+      width: max-content;
     }
 
     .tile {
+      flex-shrink: 0;
+      width: 76vw;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -84,6 +96,7 @@
       border-radius: var(--radius-lg);
       color: var(--text-primary);
       text-decoration: none;
+      scroll-snap-align: center;
       transition: border-color 0.18s ease, background 0.18s ease;
     }
 
@@ -149,17 +162,11 @@
       .hub-title { font-size: 1.5rem; }
       .hub-subtitle { font-size: 0.85rem; margin-bottom: 2rem; }
       .tile-name { font-size: 1.25rem; }
+      .tile { width: 60vw; }
     }
 
     @media (min-width: 640px) {
-      .tiles {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1.25rem;
-      }
-      .tile {
-        min-height: 130px;
-        padding: 1.6rem 1.25rem;
-      }
+      .tile { width: 44vw; min-height: 130px; padding: 1.6rem 1.25rem; }
       .tile-name { font-size: 1.35rem; }
     }
 
@@ -167,8 +174,9 @@
       body { padding: 2rem; }
       .hub-title { font-size: 1.65rem; margin-bottom: 0.5rem; }
       .hub-subtitle { margin-bottom: 2.25rem; }
-      .tiles { gap: 1.5rem; }
-      .tile { min-height: 140px; padding: 1.8rem 1.5rem; }
+      .tiles-wrap { overflow: visible; padding: 0; width: 100%; }
+      .tiles { width: 100%; gap: 1.5rem; }
+      .tile { flex: 1 1 0; width: auto; scroll-snap-align: none; min-height: 140px; padding: 1.8rem 1.5rem; }
       .tile-name { font-size: 1.5rem; }
     }
 
@@ -180,6 +188,7 @@
     <h1 class="hub-title">PLATFORMVV</h1>
     <p class="hub-subtitle">Multiplayer games &middot; pick your table</p>
 
+    <div class="tiles-wrap">
     <div class="tiles">
       <a class="tile" href="/platform/" data-game="platform">
         <div class="tile-inner">
@@ -209,6 +218,7 @@
         </div>
       </a>
     </div>
+    </div><!-- /.tiles-wrap -->
 
     <div class="aside">
       <a class="aside-link" href="/level0/" data-game="level0">Level 0</a>
