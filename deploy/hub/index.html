@@ -100,10 +100,12 @@
       transition: border-color 0.18s ease, background 0.18s ease;
     }
 
-    .tile:hover, .tile:focus-visible {
-      border-color: var(--accent);
-      background: rgba(255, 255, 255, 0.05);
-      outline: none;
+    @media (hover: hover) {
+      .tile:hover, .tile:focus-visible {
+        border-color: var(--accent);
+        background: rgba(255, 255, 255, 0.05);
+        outline: none;
+      }
     }
 
     .tile-inner { display: flex; flex-direction: column; align-items: center; }
@@ -193,14 +195,14 @@
       <a class="tile" href="/platform/" data-game="platform">
         <div class="tile-inner">
           <span class="tile-name">Platform</span>
-          <span class="tile-desc">2–6 players</span>
+          <span class="tile-desc">4 players</span>
         </div>
       </a>
 
       <a class="tile" href="/auction/" data-game="auction">
         <div class="tile-inner">
           <span class="tile-name">Auction</span>
-          <span class="tile-desc">2–6 players</span>
+          <span class="tile-desc">4–5 players</span>
         </div>
       </a>
 
