@@ -15,8 +15,9 @@ Artifacts for deploying AUCTION alongside PLATFORM on a single droplet.
 - `hub/index.html` — landing page with featured tiles for PLATFORM,
   AUCTION, and AC/DC, with a small "Level 0" aside link
 - `platform-wrapper/index.html` — iframes Godot's `Platform_WebClaude.html`
-  and overlays a "Hub" link, so we can add navigation chrome without
-  editing any Godot-exported files on disk
+  so chrome can be layered on without editing any Godot-exported files on
+  disk (currently a thin passthrough; Godot's own in-game UI handles
+  back-to-hub navigation)
 
 ## Layout on the droplet
 
