@@ -3,8 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#0a0a0a">
+  <meta name="theme-color" content="#0c0b0a">
   <title>PLATFORMVV</title>
+  <meta name="description" content="Multiplayer games for you and your friends. Pick your table.">
+  <meta property="og:title" content="PLATFORMVV">
+  <meta property="og:description" content="Multiplayer games for you and your friends. Pick your table.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230c0b0a'/%3E%3Crect x='3.5' y='3.5' width='57' height='57' rx='11' fill='none' stroke='%23d6b06a' stroke-width='2'/%3E%3Cpath d='M13 21l8 22 8-22M35 21l8 22 8-22' fill='none' stroke='%23d6b06a' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500..700&family=Geist:wght@400..600&display=swap">
 
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-S648R7WPGJ"></script>
   <script>
@@ -17,62 +25,119 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0a0a0a;
-      --text-primary: #e8e0d0;
-      --text-secondary: #888;
-      --text-dim: #555;
-      --accent: #d4a843;
-      --radius-lg: 12px;
+      --ink-0: #0c0b0a;
+      --ink-1: #141210;
+      --ink-2: #1b1815;
+      --line: rgba(236, 228, 212, 0.08);
+      --line-strong: rgba(236, 228, 212, 0.16);
+      --text: #ece4d4;
+      --text-2: #a9a091;
+      --text-3: #746d61;
+      --gold: #d6b06a;
+      --gold-hi: #ecd3a0;
+      --gold-lo: #a8843f;
+      --gold-soft: rgba(214, 176, 106, 0.12);
+
+      --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+      --font-ui: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
     }
 
-    html { background: #0a0a0a; }
+    html { background: var(--ink-0); color-scheme: dark; }
     html, body { min-height: 100%; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: radial-gradient(ellipse at center, #1a1a1a 0%, #0a0a0a 70%);
-      color: var(--text-primary);
+      font-family: var(--font-ui);
+      font-variant-numeric: lining-nums;
+      color: var(--text);
+      /* A warm lamp over the table, falling off into the room. */
+      background:
+        radial-gradient(70% 55% at 50% 0%, rgba(214, 176, 106, 0.13), transparent 70%),
+        radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.55) 100%),
+        var(--ink-0);
       min-height: 100dvh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 2rem 1rem;
+      padding: max(2.5rem, env(safe-area-inset-top)) 0 max(2rem, env(safe-area-inset-bottom));
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Fine grain so the black reads as a surface, not a void. */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.05;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
 
     .hub {
+      position: relative;
       width: 100%;
-      max-width: 900px;
+      max-width: 1040px;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
+    /* ── Masthead ───────────────────────────────────────── */
+    .ornament {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.4rem;
+      color: var(--gold);
+    }
+    .ornament::before, .ornament::after {
+      content: '';
+      width: 44px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-lo));
+    }
+    .ornament::after { transform: scaleX(-1); }
+    .ornament svg { width: 9px; height: 9px; }
+
     .hub-title {
-      font-size: 1.35rem;
-      color: var(--accent);
-      letter-spacing: 0.18em;
-      margin-bottom: 0.4rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: clamp(2rem, 8.5vw, 3.4rem);
+      letter-spacing: 0.16em;
+      /* Balance the trailing letter-space so the word sits centred. */
+      padding-left: 0.16em;
+      line-height: 1;
+      color: var(--gold);
+      background: linear-gradient(180deg, var(--gold-hi) 15%, var(--gold) 55%, var(--gold-lo));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
       text-align: center;
     }
 
     .hub-subtitle {
+      margin-top: 1rem;
       font-size: 0.78rem;
-      color: var(--text-secondary);
-      letter-spacing: 0.05em;
-      margin-bottom: 1.75rem;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-2);
       text-align: center;
     }
+    .hub-subtitle .dot { color: var(--gold-lo); margin: 0 0.35em; }
 
+    /* ── Tiles ──────────────────────────────────────────── */
     /* Horizontal scroll carousel on mobile, row on desktop */
     .tiles-wrap {
       width: 100%;
+      margin-top: 2.6rem;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
       scroll-snap-type: x mandatory;
       scrollbar-width: none;
-      padding: 0.25rem 1rem 0.5rem;
+      padding: 0.5rem 0 1.25rem;
     }
     .tiles-wrap::-webkit-scrollbar { display: none; }
 
@@ -81,118 +146,207 @@
       flex-direction: row;
       gap: 0.9rem;
       width: max-content;
+      /* Centre the first and last tile when snapped. */
+      padding: 0 15vw;
     }
 
     .tile {
+      --tint: 214, 176, 106;
+      position: relative;
       flex-shrink: 0;
       width: 70vw;
+      aspect-ratio: 4 / 5;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100px;
-      padding: 1.4rem 1rem;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: var(--radius-lg);
-      color: var(--text-primary);
+      gap: 1.1rem;
+      padding: 1.5rem 1rem;
+      color: var(--text);
       text-decoration: none;
+      border-radius: 18px;
+      background:
+        radial-gradient(90% 60% at 50% 100%, rgba(var(--tint), 0.12), transparent 70%),
+        linear-gradient(180deg, var(--ink-2), var(--ink-1));
+      border: 1px solid var(--line-strong);
+      box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(236, 228, 212, 0.05);
       scroll-snap-align: center;
-      transition: border-color 0.18s ease, background 0.18s ease;
+      transition: transform 0.45s var(--ease), border-color 0.45s var(--ease), box-shadow 0.45s var(--ease);
+      isolation: isolate;
     }
+    /* Inner hairline frame, like the border on a playing card. */
+    .tile::before {
+      content: '';
+      position: absolute;
+      inset: 7px;
+      border-radius: 12px;
+      border: 1px solid rgba(214, 176, 106, 0.2);
+      pointer-events: none;
+      transition: border-color 0.45s var(--ease);
+    }
+    .tile[data-game="platform"] { --tint: 125, 148, 196; }
+    .tile[data-game="acdc"]     { --tint: 196, 98, 78; }
+    .tile[data-game="doors"]    { --tint: 217, 162, 91; }
 
-    @media (hover: hover) {
-      .tile:hover, .tile:focus-visible {
-        border-color: var(--accent);
-        background: rgba(255, 255, 255, 0.05);
-        outline: none;
-      }
+    .emblem {
+      width: 76px;
+      height: 76px;
+      color: var(--gold);
+      transition: color 0.45s var(--ease), transform 0.6s var(--ease);
+    }
+    .emblem svg {
+      width: 100%;
+      height: 100%;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     .tile-inner { display: flex; flex-direction: column; align-items: center; }
 
     .tile-name {
       display: block;
-      font-size: 1.15rem;
-      font-weight: 700;
-      letter-spacing: 0.2em;
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      padding-left: 0.14em;
       text-transform: uppercase;
-      color: var(--accent);
+      color: var(--text);
       text-align: center;
+      line-height: 1.1;
     }
+    .tile-name .slash { color: var(--text-3); font-weight: 500; margin: 0 0.04em; }
 
     .tile-desc {
-      display: block;
-      font-size: 0.62rem;
-      letter-spacing: 0.08em;
-      color: var(--text-secondary);
-      margin-top: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      margin-top: 0.7rem;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-2);
       text-align: center;
     }
+    .tile-desc::before, .tile-desc::after {
+      content: '';
+      width: 14px;
+      height: 1px;
+      background: var(--gold-lo);
+      opacity: 0.7;
+    }
 
+    @media (hover: hover) {
+      .tile:hover, .tile:focus-visible {
+        transform: translateY(-4px);
+        border-color: rgba(214, 176, 106, 0.45);
+        box-shadow: 0 40px 70px -30px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(214, 176, 106, 0.08), inset 0 1px 0 rgba(236, 228, 212, 0.06);
+        outline: none;
+      }
+      .tile:hover::before, .tile:focus-visible::before { border-color: rgba(214, 176, 106, 0.5); }
+      .tile:hover .emblem, .tile:focus-visible .emblem { color: var(--gold-hi); transform: translateY(-2px); }
+    }
+    .tile:focus-visible { outline: 1px solid var(--gold); outline-offset: 4px; }
+
+    /* ── Aside + footer ─────────────────────────────────── */
     .aside {
       margin-top: 1.5rem;
       text-align: center;
     }
 
     .aside-link {
-      display: inline-block;
-      padding: 0.45rem 0.9rem;
-      font-size: 0.7rem;
-      letter-spacing: 0.18em;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.6rem 1.15rem;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
-      color: var(--text-secondary);
+      color: var(--text-2);
       text-decoration: none;
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--line-strong);
       border-radius: 999px;
-      transition: color 0.18s ease, border-color 0.18s ease;
+      background: rgba(236, 228, 212, 0.02);
+      transition: color 0.3s var(--ease), border-color 0.3s var(--ease), background 0.3s var(--ease);
     }
+    .aside-link svg { width: 7px; height: 7px; color: var(--gold-lo); transition: color 0.3s var(--ease); }
     .aside-link:hover, .aside-link:focus-visible {
-      color: var(--accent);
-      border-color: rgba(212, 168, 67, 0.4);
+      color: var(--gold-hi);
+      border-color: rgba(214, 176, 106, 0.45);
+      background: var(--gold-soft);
       outline: none;
     }
+    .aside-link:hover svg, .aside-link:focus-visible svg { color: var(--gold); }
 
     footer {
-      margin-top: 2rem;
+      margin-top: 2.5rem;
       font-size: 0.65rem;
-      color: var(--text-dim);
-      letter-spacing: 0.12em;
+      color: var(--text-3);
+      letter-spacing: 0.24em;
       text-transform: uppercase;
     }
 
+    /* ── Breakpoints ────────────────────────────────────── */
     @media (min-width: 480px) {
-      .hub-title { font-size: 1.5rem; }
-      .hub-subtitle { font-size: 0.85rem; margin-bottom: 2rem; }
-      .tile-name { font-size: 1.25rem; }
-      .tile { width: 60vw; }
+      .tile { width: 56vw; }
+      .tiles { padding: 0 22vw; }
     }
 
     @media (min-width: 640px) {
-      .tile { width: 44vw; min-height: 130px; padding: 1.6rem 1.25rem; }
-      .tile-name { font-size: 1.35rem; }
+      .tile { width: 38vw; }
+      .tiles { padding: 0 31vw; }
     }
 
-    @media (min-width: 860px) {
-      body { padding: 2rem; }
-      .hub-title { font-size: 1.65rem; margin-bottom: 0.5rem; }
-      .hub-subtitle { margin-bottom: 2.25rem; }
-      .tiles-wrap { overflow: visible; padding: 0; width: 100%; }
-      .tiles { width: 100%; gap: 1.5rem; }
-      .tile { flex: 1 1 0; width: auto; scroll-snap-align: none; min-height: 140px; padding: 1.8rem 1.5rem; }
-      .tile-name { font-size: 1.5rem; }
+    @media (min-width: 900px) {
+      body { padding: 3rem 2rem; }
+      .tiles-wrap { overflow: visible; padding: 0.5rem 0 0; }
+      .tiles { width: 100%; padding: 0; gap: 1.25rem; }
+      .tile { flex: 1 1 0; width: auto; scroll-snap-align: none; }
+      .tile-name { font-size: 1.6rem; }
     }
 
-    .acdc-slash { color: var(--text-dim); margin: 0 0.05em; }
+    @media (prefers-reduced-motion: no-preference) {
+      .hub > * { animation: rise 0.9s var(--ease) both; }
+      .hub > :nth-child(2) { animation-delay: 0.05s; }
+      .hub > :nth-child(3) { animation-delay: 0.1s; }
+      .hub > :nth-child(4) { animation-delay: 0.18s; }
+      .hub > :nth-child(5) { animation-delay: 0.26s; }
+      .hub > :nth-child(6) { animation-delay: 0.3s; }
+      @keyframes rise {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: none; }
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; }
+    }
   </style>
 </head>
 <body>
   <main class="hub">
+    <div class="ornament" aria-hidden="true">
+      <svg viewBox="0 0 10 10"><path d="M5 0l5 5-5 5-5-5z" fill="currentColor"/></svg>
+    </div>
     <h1 class="hub-title">PLATFORMVV</h1>
-    <p class="hub-subtitle">Multiplayer games &middot; pick your table</p>
+    <p class="hub-subtitle">Multiplayer games<span class="dot">&middot;</span>pick your table</p>
 
     <div class="tiles-wrap">
     <div class="tiles">
       <a class="tile" href="/platform/" data-game="platform">
+        <span class="emblem" aria-hidden="true">
+          <!-- Staggered platforms rising to a goal -->
+          <svg viewBox="0 0 64 64">
+            <path d="M4 54h22M21 40h22M38 26h22"/>
+            <rect x="10" y="45" width="8" height="8" rx="1.5"/>
+            <path d="M49 9l4 4-4 4-4-4z"/>
+            <path d="M18 43c3-9 9-14 17-14" stroke-dasharray="0.1 3.4"/>
+          </svg>
+        </span>
         <div class="tile-inner">
           <span class="tile-name">Platform</span>
           <span class="tile-desc">4 players</span>
@@ -200,6 +354,18 @@
       </a>
 
       <a class="tile" href="/auction/" data-game="auction">
+        <span class="emblem" aria-hidden="true">
+          <!-- Auctioneer's gavel and block -->
+          <svg viewBox="0 0 64 64">
+            <g transform="rotate(-40 27 23)">
+              <rect x="15" y="17" width="24" height="12" rx="2.5"/>
+              <path d="M20 17v12M34 17v12"/>
+            </g>
+            <path d="M31 28l17 17"/>
+            <rect x="8" y="49" width="28" height="6" rx="2"/>
+            <path d="M12 49v-2.5h20V49"/>
+          </svg>
+        </span>
         <div class="tile-inner">
           <span class="tile-name">Auction</span>
           <span class="tile-desc">4–5 players</span>
@@ -207,13 +373,33 @@
       </a>
 
       <a class="tile" href="/acdc/" data-game="acdc">
+        <span class="emblem" aria-hidden="true">
+          <!-- Crossed swords: a duel -->
+          <svg viewBox="0 0 64 64">
+            <path d="M12 12l29 29M36 45l9-9M41 41l7 7"/>
+            <circle cx="50" cy="50" r="2"/>
+            <path d="M52 12L23 41M28 45l-9-9M23 41l-7 7"/>
+            <circle cx="14" cy="50" r="2"/>
+          </svg>
+        </span>
         <div class="tile-inner">
-          <span class="tile-name">AC<span class="acdc-slash">/</span>DC</span>
+          <span class="tile-name">AC<span class="slash">/</span>DC</span>
           <span class="tile-desc">2 players</span>
         </div>
       </a>
 
       <a class="tile" href="/doors/" data-game="doors">
+        <span class="emblem" aria-hidden="true">
+          <!-- An arched doorway with a keyhole -->
+          <svg viewBox="0 0 64 64">
+            <path d="M18 55V27a14 14 0 0 1 28 0v28"/>
+            <path d="M23 55V28a9 9 0 0 1 18 0v27"/>
+            <path d="M12 55h40"/>
+            <circle cx="36.5" cy="40" r="1.6"/>
+            <path d="M36.5 41.6v3"/>
+            <path d="M32 8.5l2 2-2 2-2-2z"/>
+          </svg>
+        </span>
         <div class="tile-inner">
           <span class="tile-name">Doors</span>
           <span class="tile-desc">4–5 players</span>
@@ -223,7 +409,10 @@
     </div><!-- /.tiles-wrap -->
 
     <div class="aside">
-      <a class="aside-link" href="/level0/" data-game="level0">Level 0</a>
+      <a class="aside-link" href="/level0/" data-game="level0">
+        <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M5 0l5 5-5 5-5-5z" fill="currentColor"/></svg>
+        Level 0
+      </a>
     </div>
 
     <footer>platformvv.com</footer>
