@@ -2,8 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
   <title>PLATFORM</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%238b97ff'/%3E%3Cpath d='M11 20l8 24 8-24M37 20l8 24 8-24' fill='none' stroke='%230b0a10' stroke-width='5.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -31,36 +33,48 @@
 
     .hub-link {
       position: fixed;
-      top: 0.75rem;
-      left: 0.75rem;
+      top: max(0.75rem, env(safe-area-inset-top));
+      left: max(0.75rem, env(safe-area-inset-left));
       z-index: 10;
-      padding: 0.45rem 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.3rem 0.8rem 0.3rem 0.3rem;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-size: 0.72rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: #e8e0d0;
-      background: rgba(10, 10, 10, 0.75);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 8px;
+      color: #f4f1ea;
+      background: rgba(11, 10, 16, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
       text-decoration: none;
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.8);
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
     }
+
+    .hub-link .mark {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #f5b841;
+      display: grid;
+      place-items: center;
+    }
+    .hub-link .mark svg { width: 12px; height: 12px; }
 
     .hub-link:hover,
     .hub-link:focus-visible {
-      color: #d4a843;
-      border-color: #d4a843;
-      background: rgba(10, 10, 10, 0.9);
+      border-color: rgba(245, 184, 65, 0.6);
+      background: rgba(11, 10, 16, 0.88);
       outline: none;
     }
+    .hub-link:active { transform: scale(0.97); }
   </style>
 </head>
 <body>
-  <a class="hub-link" href="/" aria-label="Back to platformvv hub">&larr; Hub</a>
+  <a class="hub-link" href="/" aria-label="Back to platformvv hub"><span class="mark" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="#0b0a10" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg></span>Hub</a>
   <iframe src="Platform_WebClaude.html" allow="cross-origin-isolated; fullscreen; gamepad; autoplay"></iframe>
 </body>
 </html>
