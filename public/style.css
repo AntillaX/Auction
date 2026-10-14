@@ -357,8 +357,10 @@ input:focus {
   border-radius: 999px;
   color: var(--text-primary);
   font-family: inherit;
-  font-size: 0.82rem;
-  font-weight: 500;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   cursor: pointer;
   padding: 0.5rem 0.95rem;
   backdrop-filter: blur(10px);
@@ -388,8 +390,10 @@ input:focus {
   text-decoration: none;
   /* Works for both <a> and <button> uses of .btn-home. */
   font-family: inherit;
-  font-size: 0.82rem;
-  font-weight: 500;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   cursor: pointer;
   transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
   z-index: 10;
