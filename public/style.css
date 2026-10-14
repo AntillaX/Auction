@@ -6,44 +6,45 @@
 
 :root {
   /* platformvv shared palette */
-  --ink-0: #0b0a10;
-  --ink-1: #12111a;
-  --ink-2: #191823;
-  --ink-3: #22202d;
-  --line: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(255, 255, 255, 0.16);
+  --ink-0: #0c0b0a;
+  --ink-1: #141210;
+  --ink-2: #1b1815;
+  --ink-3: #24201c;
+  --line: rgba(236, 228, 212, 0.08);
+  --line-strong: rgba(236, 228, 212, 0.16);
 
   --bg: var(--ink-0);
   --bg-surface: var(--ink-1);
   --bg-card: var(--ink-2);
   --table-felt: #0b1f17;
   --table-felt-light: #12301f;
-  --text-primary: #f4f1ea;
-  --text-secondary: #b3aebf;
-  --text-dim: #7d798b;
-  --accent: #f5b841;
-  --accent-hi: #ffd27a;
-  --accent-soft: rgba(245, 184, 65, 0.12);
-  --accent-glow: rgba(245, 184, 65, 0.32);
-  --accent-ink: #2a1a02;
-  --x-blue: #6ec6ff;
-  --success: #4fe3a6;
-  --warning: #f5b841;
-  --danger: #ff6b5e;
+  --text-primary: #ece4d4;
+  --text-secondary: #a9a091;
+  --text-dim: #746d61;
+  --accent: #d6b06a;
+  --accent-hi: #ecd3a0;
+  --accent-lo: #a8843f;
+  --accent-soft: rgba(214, 176, 106, 0.12);
+  --accent-glow: rgba(214, 176, 106, 0.28);
+  --accent-ink: #1f1607;
+  --x-blue: #7fb2db;
+  --success: #7fc29b;
+  --warning: #d6b06a;
+  --danger: #d9705e;
   --card-border: #8b7355;
-  --bid-highlight: #f5b841;
-  --radius: 12px;
-  --radius-lg: 18px;
+  --bid-highlight: #d6b06a;
+  --radius: 10px;
+  --radius-lg: 14px;
 
-  --font-display: 'Bricolage Grotesque', 'Geist', system-ui, sans-serif;
+  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --font-ui: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 
   /* Ambient page background shared by the non-game screens */
   --page-bg:
-    radial-gradient(90% 55% at 50% -10%, rgba(245, 184, 65, 0.16), transparent 70%),
-    radial-gradient(60% 40% at 100% 0%, rgba(110, 198, 255, 0.07), transparent 70%),
+    radial-gradient(70% 50% at 50% 0%, rgba(214, 176, 106, 0.12), transparent 70%),
+    radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.5) 100%),
     var(--ink-0);
 }
 
@@ -57,6 +58,9 @@ html, body {
 }
 
 body {
+  /* Full-height figures everywhere: the serif faces default to old-style,
+     where 0 reads as o and 1 as I. */
+  font-variant-numeric: lining-nums;
   font-family: var(--font-ui);
   background: var(--bg);
   color: var(--text-primary);
@@ -111,19 +115,17 @@ body {
 }
 
 .game-title {
-  /* Scale title with the viewport so it doesn't dominate small
-     phones or look lost on big screens. */
   font-family: var(--font-display);
-  font-size: clamp(3rem, 14vw, 4.5rem);
-  font-weight: 800;
-  letter-spacing: 0.02em;
+  font-size: clamp(2.5rem, 11vw, 3.6rem);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  padding-left: 0.16em;
   line-height: 1;
-  background: linear-gradient(180deg, var(--accent-hi), var(--accent));
+  background: linear-gradient(180deg, var(--accent-hi) 15%, var(--accent) 55%, var(--accent-lo));
   -webkit-background-clip: text;
   background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 6px 30px rgba(245, 184, 65, 0.25));
-  margin-bottom: 0.6rem;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.9rem;
   text-align: center;
 }
 
@@ -132,17 +134,20 @@ body {
   content: '';
   display: block;
   flex-shrink: 0;
-  width: 84px;
-  height: 84px;
-  margin-bottom: 1.25rem;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 84 84'%3E%3Crect x='14' y='14' width='40' height='56' rx='7' fill='%232e2615' stroke='%23f5b841' stroke-opacity='.55' transform='rotate(-14 34 42)'/%3E%3Crect x='30' y='14' width='40' height='56' rx='7' fill='%232e2615' stroke='%23f5b841' stroke-opacity='.55' transform='rotate(14 50 42)'/%3E%3Crect x='22' y='10' width='40' height='60' rx='8' fill='%23f5b841'/%3E%3Ctext x='42' y='50' text-anchor='middle' font-family='Arial Black,Arial,sans-serif' font-weight='900' font-size='24' fill='%232a1a02'%3E$%3C/text%3E%3C/svg%3E") center / contain no-repeat;
-  filter: drop-shadow(0 14px 28px rgba(245, 184, 65, 0.35));
+  width: 64px;
+  height: 64px;
+  margin-bottom: 1.4rem;
+  /* Auctioneer's gavel, matching the hub tile */
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none' stroke='%23d6b06a' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='rotate(-40 27 23)'%3E%3Crect x='15' y='17' width='24' height='12' rx='2.5'/%3E%3Cpath d='M20 17v12M34 17v12'/%3E%3C/g%3E%3Cpath d='M31 28l17 17'/%3E%3Crect x='8' y='49' width='28' height='6' rx='2'/%3E%3Cpath d='M12 49v-2.5h20V49'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
 .game-subtitle {
   color: var(--text-secondary);
-  font-size: 1rem;
-  margin-bottom: 2.25rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  margin-bottom: 2.5rem;
 }
 
 .lobby-form {
@@ -225,12 +230,14 @@ input:focus {
 .btn {
   padding: 0.75rem 1.5rem;
   border: 1px solid transparent;
-  border-radius: 16px;
+  border-radius: var(--radius);
   font-family: inherit;
-  font-size: 1rem;
+  font-size: 0.82rem;
   font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: transform 0.12s, background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.25s, filter 0.2s;
+  transition: transform 0.12s, background 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.3s, filter 0.25s;
   touch-action: manipulation;
   min-height: 52px;
 }
@@ -246,14 +253,14 @@ input:focus {
 }
 
 .btn-primary {
-  background: linear-gradient(180deg, var(--accent-hi), var(--accent));
+  background: linear-gradient(180deg, var(--accent-hi), var(--accent) 60%, #c39c55);
   color: var(--accent-ink);
-  box-shadow: 0 10px 30px -12px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow: 0 10px 28px -14px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .btn-primary:hover:not(:disabled) {
   filter: brightness(1.05);
-  box-shadow: 0 14px 36px -10px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  box-shadow: 0 14px 32px -12px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 .btn-secondary {
@@ -264,18 +271,20 @@ input:focus {
 
 .btn-secondary:hover:not(:disabled) {
   background: var(--ink-3);
-  border-color: rgba(245, 184, 65, 0.5);
+  border-color: rgba(214, 176, 106, 0.5);
 }
 
 .btn-bid {
   background: linear-gradient(180deg, var(--ink-3), var(--ink-2));
   color: var(--text-primary);
   border: 1px solid var(--line-strong);
-  border-radius: 14px;
+  border-radius: var(--radius);
   padding: 0.6rem 0.5rem;
   font-family: var(--font-mono);
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
   flex: 1;
   min-height: 48px;
   transition: transform 0.12s, background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.2s;
@@ -312,7 +321,9 @@ input:focus {
   flex: 0;
   min-width: 72px;
   font-family: var(--font-ui);
-  background: linear-gradient(180deg, var(--accent-hi), var(--accent));
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, var(--accent-hi), var(--accent) 60%, #c39c55);
   color: var(--accent-ink);
   border-color: transparent;
 }
@@ -357,7 +368,7 @@ input:focus {
 
 .btn-back:hover {
   color: var(--accent-hi);
-  border-color: rgba(245, 184, 65, 0.5);
+  border-color: rgba(214, 176, 106, 0.5);
 }
 
 .btn-home {
@@ -387,17 +398,19 @@ input:focus {
 .btn-home:hover,
 .btn-home:focus-visible {
   color: var(--accent-hi);
-  border-color: rgba(245, 184, 65, 0.5);
+  border-color: rgba(214, 176, 106, 0.5);
   outline: none;
 }
 
 .btn-more-time {
   margin-top: 0.5rem;
-  padding: 0.4rem 1.1rem;
+  padding: 0.45rem 1.1rem;
   font-family: inherit;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.06);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: rgba(12, 11, 10, 0.4);
   color: var(--text-primary);
   border: 1px solid var(--line-strong);
   border-radius: 999px;
@@ -409,7 +422,7 @@ input:focus {
 
 .btn-more-time:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(245, 184, 65, 0.5);
+  border-color: rgba(214, 176, 106, 0.5);
 }
 
 .btn-more-time:disabled {
@@ -434,28 +447,25 @@ input:focus {
 }
 
 .room-title {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  background: var(--accent-soft);
-  border: 1px solid rgba(245, 184, 65, 0.22);
-  padding: 0.3rem 0.75rem;
-  border-radius: 999px;
+  letter-spacing: 0.24em;
   margin-bottom: 1rem;
 }
 
 .room-code {
   font-family: var(--font-mono);
   font-size: clamp(2.25rem, 10vw, 3rem);
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.32em;
   color: var(--accent-hi);
-  text-shadow: 0 0 30px var(--accent-glow);
-  padding: 0.5rem 1.1rem 0.5rem 1.5rem;
+  padding: 0.55rem 1.1rem 0.55rem 1.5rem;
   background: var(--ink-1);
-  border: 1px dashed rgba(245, 184, 65, 0.35);
+  border: 1px solid var(--line-strong);
+  /* inner hairline frame, like the hub tiles */
+  box-shadow: inset 0 0 0 5px var(--ink-1), inset 0 0 0 6px rgba(214, 176, 106, 0.25);
   border-radius: var(--radius-lg);
   margin-bottom: 0.6rem;
   cursor: pointer;
@@ -493,7 +503,7 @@ input:focus {
 }
 
 .player-slot.is-host {
-  border-color: rgba(245, 184, 65, 0.35);
+  border-color: rgba(214, 176, 106, 0.35);
 }
 
 .player-dot {
@@ -516,19 +526,19 @@ input:focus {
 }
 
 .player-slot-badge {
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   font-weight: 600;
-  color: var(--accent-hi);
-  background: var(--accent-soft);
-  padding: 0.22rem 0.55rem;
+  color: var(--accent);
+  border: 1px solid rgba(214, 176, 106, 0.35);
+  padding: 0.2rem 0.5rem;
   border-radius: 999px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
 }
 
 .bot-badge {
   color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--line-strong);
 }
 
 .bot-tag {
@@ -562,7 +572,7 @@ input:focus {
      default `farthest-corner` sizing, wide landscape phones ended
      up with pure-black strips at the left/right edges. */
   background:
-    radial-gradient(60% 40% at 50% 38%, rgba(245, 184, 65, 0.10), transparent 70%),
+    radial-gradient(60% 40% at 50% 38%, rgba(214, 176, 106, 0.10), transparent 70%),
     radial-gradient(ellipse 140% 110% at 50% 45%,
       var(--table-felt-light) 0%,
       var(--table-felt) 55%,
@@ -612,12 +622,12 @@ input:focus {
 
 .result-banner-inner.won {
   border-color: var(--accent);
-  box-shadow: 0 0 40px var(--accent-glow), 0 0 80px rgba(245, 184, 65, 0.15);
+  box-shadow: 0 0 40px var(--accent-glow), 0 0 80px rgba(214, 176, 106, 0.15);
   animation: result-won-glow 0.6s ease-out;
 }
 
 .result-banner-inner.won.result-me {
-  box-shadow: 0 0 50px var(--accent-glow), 0 0 100px rgba(245, 184, 65, 0.22);
+  box-shadow: 0 0 50px var(--accent-glow), 0 0 100px rgba(214, 176, 106, 0.22);
 }
 
 .result-banner-inner.passed {
@@ -626,15 +636,15 @@ input:focus {
 }
 
 @keyframes result-won-glow {
-  0% { box-shadow: 0 0 0 rgba(245, 184, 65, 0); transform: scale(0.95); }
-  50% { box-shadow: 0 0 60px var(--accent-glow), 0 0 120px rgba(245, 184, 65, 0.3); transform: scale(1.02); }
+  0% { box-shadow: 0 0 0 rgba(214, 176, 106, 0); transform: scale(0.95); }
+  50% { box-shadow: 0 0 60px var(--accent-glow), 0 0 120px rgba(214, 176, 106, 0.3); transform: scale(1.02); }
   100% { transform: scale(1); }
 }
 
 .result-title {
   font-family: var(--font-display);
   font-size: 1.4rem;
-  font-weight: 800;
+  font-weight: 600;
   margin-bottom: 0.25rem;
 }
 
@@ -704,7 +714,7 @@ input:focus {
 
 .opponent-card.just-won-card {
   border-color: var(--accent);
-  box-shadow: 0 0 20px var(--accent-glow), 0 0 40px rgba(245, 184, 65, 0.15);
+  box-shadow: 0 0 20px var(--accent-glow), 0 0 40px rgba(214, 176, 106, 0.15);
 }
 
 .opponent-name {
@@ -722,14 +732,14 @@ input:focus {
   font-size: 0.75rem;
   color: var(--success);
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .opponent-score {
   font-family: var(--font-mono);
   font-size: 0.7rem;
   color: var(--accent-hi);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .opponent-cards-won {
@@ -849,10 +859,12 @@ input:focus {
   max-height: 100%;
   max-width: 100%;
   font-size: 1rem;
-  border-radius: 18px;
+  border-radius: 16px;
   box-shadow:
     0 24px 50px -16px rgba(0, 0, 0, 0.8),
     0 0 40px var(--accent-glow),
+    inset 0 0 0 6px rgba(0, 0, 0, 0.0),
+    inset 0 0 0 7px rgba(255, 255, 255, 0.14),
     inset 0 1px 0 rgba(255,255,255,0.12);
   border: 1.5px solid rgba(255, 255, 255, 0.15);
   flex-direction: column;
@@ -872,8 +884,8 @@ input:focus {
 .card-player-name {
   font-family: var(--font-display);
   font-size: 1rem;
-  font-weight: 800;
-  line-height: 1.1;
+  font-weight: 600;
+  line-height: 1.15;
   text-align: center;
   /* Break only at word boundaries so multi-word names stack instead of
      mid-word wrapping. Long single-word names are shrunk via .name-shrink-* */
@@ -1051,11 +1063,11 @@ input:focus {
 
 .bid-amount {
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: 600;
   color: var(--accent-hi);
-  font-size: 1.9rem;
+  font-size: 2rem;
   line-height: 1.1;
-  text-shadow: 0 0 24px var(--accent-glow);
+  font-variant-numeric: lining-nums;
 }
 
 .bid-leader {
@@ -1142,7 +1154,7 @@ input:focus {
   font-size: 0.85rem;
   color: var(--text-secondary);
   margin-top: 0.35rem;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
   font-weight: 600;
   transition: color 0.3s, transform 0.2s;
 }
@@ -1197,7 +1209,7 @@ input:focus {
 
 .btn-icon:hover {
   background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(245, 184, 65, 0.6);
+  border-color: rgba(214, 176, 106, 0.6);
   color: var(--accent-hi);
 }
 
@@ -1243,10 +1255,10 @@ input:focus {
 
 .deck-overlay-title {
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: 600;
   color: var(--text-primary);
   text-align: center;
-  font-size: 1.9rem;
+  font-size: 1.8rem;
   margin-bottom: 1.25rem;
   margin-top: 0.25rem;
 }
@@ -1411,9 +1423,9 @@ input:focus {
 .stat-value {
   font-family: var(--font-display);
   font-size: 1.35rem;
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1.15;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .budget-value {
@@ -1454,7 +1466,7 @@ input:focus {
 }
 
 .my-score-fill.score-glow {
-  box-shadow: 0 0 8px var(--accent-glow), 0 0 16px rgba(245, 184, 65, 0.2);
+  box-shadow: 0 0 8px var(--accent-glow), 0 0 16px rgba(214, 176, 106, 0.2);
   background: linear-gradient(90deg, var(--accent), var(--accent-hi));
 }
 
@@ -1512,14 +1524,13 @@ input:focus {
 
 .winner-title {
   font-family: var(--font-display);
-  font-size: clamp(2.2rem, 10vw, 3rem);
-  font-weight: 800;
-  line-height: 1.05;
-  background: linear-gradient(180deg, var(--accent-hi), var(--accent));
+  font-size: clamp(2rem, 9vw, 2.8rem);
+  font-weight: 600;
+  line-height: 1.1;
+  background: linear-gradient(180deg, var(--accent-hi) 15%, var(--accent) 55%, var(--accent-lo));
   -webkit-background-clip: text;
   background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 6px 30px rgba(245, 184, 65, 0.3));
+  -webkit-text-fill-color: transparent;
   text-align: center;
   position: relative;
   z-index: 1;
@@ -1583,8 +1594,8 @@ input:focus {
 }
 
 .score-row.is-winner {
-  border-color: rgba(245, 184, 65, 0.6);
-  background: linear-gradient(90deg, rgba(245, 184, 65, 0.14), rgba(245, 184, 65, 0.03));
+  border-color: rgba(214, 176, 106, 0.6);
+  background: linear-gradient(90deg, rgba(214, 176, 106, 0.14), rgba(214, 176, 106, 0.03));
   box-shadow: 0 0 30px -10px var(--accent-glow);
 }
 
@@ -1644,16 +1655,16 @@ input:focus {
 .score-points {
   font-family: var(--font-display);
   font-size: 1.15rem;
-  font-weight: 800;
+  font-weight: 600;
   color: var(--accent-hi);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .score-budget {
   font-family: var(--font-mono);
   font-size: 0.75rem;
   color: var(--text-secondary);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 /* ── Confetti ── */
@@ -1714,10 +1725,10 @@ input:focus {
 
 .study-content h2 {
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 0.4rem;
-  font-size: 2rem;
+  font-size: 1.8rem;
 }
 
 .study-content p {
@@ -1757,7 +1768,7 @@ input:focus {
 .ready-countdown {
   color: var(--text-secondary);
   font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .study-deck {
@@ -1815,12 +1826,12 @@ input:focus {
   left: 50%;
   transform: translate(-50%, 10px);
   background: var(--danger);
-  /* JS sets the background to --success or --danger; both are light,
+  /* JS sets the background to --success or --danger; both are mid-tone,
      so dark text keeps it readable. */
-  color: #0b0a10;
+  color: #0c0b0a;
   padding: 0.7rem 1.25rem;
   border-radius: 999px;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 600;
   z-index: 100;
   opacity: 0;
@@ -1944,7 +1955,7 @@ input:focus {
 
 .last-player-card {
   background: var(--ink-2);
-  border: 1px solid rgba(245, 184, 65, 0.35);
+  border: 1px solid rgba(214, 176, 106, 0.35);
   border-radius: 24px;
   padding: 1.75rem 1.5rem;
   max-width: 340px;
@@ -1956,7 +1967,7 @@ input:focus {
 .last-player-title {
   font-family: var(--font-display);
   font-size: 1.4rem;
-  font-weight: 800;
+  font-weight: 600;
   color: var(--accent-hi);
   margin-bottom: 0.5rem;
 }
@@ -1970,11 +1981,11 @@ input:focus {
 .last-player-count {
   font-family: var(--font-display);
   font-size: 3.5rem;
-  font-weight: 800;
+  font-weight: 600;
   color: var(--text-primary);
   line-height: 1;
   margin-bottom: 0.9rem;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .last-player-hint {
@@ -2054,9 +2065,9 @@ input:focus {
 
 .instructions-title {
   font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: 800;
-  line-height: 1.1;
+  font-size: 1.9rem;
+  font-weight: 600;
+  line-height: 1.15;
   text-align: center;
   color: var(--text-primary);
   margin-bottom: 1.5rem;
@@ -2342,8 +2353,9 @@ input:focus {
 
 .mode-title {
   font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: 800;
+  font-size: 1.9rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   color: var(--text-primary);
   margin-bottom: 1.5rem;
 }
@@ -2358,23 +2370,23 @@ input:focus {
 
 .mode-card {
   background:
-    radial-gradient(100% 80% at 100% 0%, rgba(245, 184, 65, 0.12), transparent 60%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
-  border: 1px solid rgba(245, 184, 65, 0.18);
-  border-radius: 24px;
+    radial-gradient(100% 80% at 100% 0%, rgba(214, 176, 106, 0.08), transparent 60%),
+    linear-gradient(180deg, var(--ink-2), var(--ink-1));
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
   padding: 1.4rem 1.4rem 1.2rem;
   text-align: left;
   cursor: pointer;
-  transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s;
+  transition: transform 0.35s var(--ease), border-color 0.35s, box-shadow 0.35s;
   position: relative;
   font-family: inherit;
   color: var(--text-primary);
 }
 
 .mode-card:hover {
-  border-color: rgba(245, 184, 65, 0.6);
-  box-shadow: 0 24px 60px -24px var(--accent-glow);
-  transform: translateY(-3px);
+  border-color: rgba(214, 176, 106, 0.5);
+  box-shadow: 0 24px 50px -28px rgba(0, 0, 0, 0.9);
+  transform: translateY(-2px);
 }
 
 .mode-card:active {
@@ -2383,35 +2395,30 @@ input:focus {
 
 .mode-card-badge {
   display: inline-block;
-  font-size: 0.66rem;
-  font-weight: 700;
+  font-size: 0.64rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--accent-hi);
-  background: var(--accent-soft);
-  padding: 0.22rem 0.6rem;
-  border-radius: 999px;
-  margin-bottom: 0.7rem;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  margin-bottom: 0.6rem;
 }
 
 .mode-card-badge.badge-x {
   color: var(--x-blue);
-  background: rgba(110, 198, 255, 0.12);
 }
 
 .mode-card-title {
   font-family: var(--font-display);
-  font-size: 1.9rem;
-  font-weight: 800;
+  font-size: 1.7rem;
+  font-weight: 600;
   line-height: 1;
-  color: var(--accent-hi);
-  letter-spacing: 0.01em;
-  margin-bottom: 0.55rem;
+  color: var(--text-primary);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.6rem;
 }
 
 .x-accent {
   color: var(--x-blue);
-  text-shadow: 0 0 18px rgba(110, 198, 255, 0.5);
 }
 
 .mode-card-desc {
@@ -2452,19 +2459,19 @@ input:focus {
 
 .mode-card-help:hover {
   color: var(--accent-hi);
-  border-color: rgba(245, 184, 65, 0.5);
+  border-color: rgba(214, 176, 106, 0.5);
 }
 
 .mode-card-x {
   background:
-    radial-gradient(100% 80% at 100% 0%, rgba(110, 198, 255, 0.14), transparent 60%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
-  border-color: rgba(110, 198, 255, 0.2);
+    radial-gradient(100% 80% at 100% 0%, rgba(127, 178, 219, 0.08), transparent 60%),
+    linear-gradient(180deg, var(--ink-2), var(--ink-1));
+  border-color: var(--line-strong);
 }
 
 .mode-card-x:hover {
-  border-color: rgba(110, 198, 255, 0.6);
-  box-shadow: 0 24px 60px -24px rgba(110, 198, 255, 0.35);
+  border-color: rgba(127, 178, 219, 0.5);
+  box-shadow: 0 24px 50px -28px rgba(0, 0, 0, 0.9);
 }
 
 /* ── AuctionX Game Theme ── */
@@ -2516,7 +2523,7 @@ input:focus {
 
 .lineup-overlay-title {
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: 600;
   color: var(--text-primary);
   text-align: center;
   font-size: 1.5rem;
@@ -2598,7 +2605,7 @@ input:focus {
 .my-lineup-btn:hover {
   color: var(--accent-hi);
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(245, 184, 65, 0.4);
+  border-color: rgba(214, 176, 106, 0.4);
 }
 
 .my-name {

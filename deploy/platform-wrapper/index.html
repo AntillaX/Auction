@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#000000">
   <title>PLATFORM</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%238b97ff'/%3E%3Cpath d='M11 20l8 24 8-24M37 20l8 24 8-24' fill='none' stroke='%230b0a10' stroke-width='5.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230c0b0a'/%3E%3Cpath d='M11 20l8 24 8-24M37 20l8 24 8-24' fill='none' stroke='%23d6b06a' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -38,43 +38,36 @@
       z-index: 10;
       display: inline-flex;
       align-items: center;
-      gap: 0.45rem;
-      padding: 0.3rem 0.8rem 0.3rem 0.3rem;
+      gap: 0.5rem;
+      padding: 0.5rem 0.9rem 0.5rem 0.75rem;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-size: 0.8rem;
+      font-size: 0.68rem;
       font-weight: 600;
-      color: #f4f1ea;
-      background: rgba(11, 10, 16, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #ece4d4;
+      background: rgba(12, 11, 10, 0.72);
+      border: 1px solid rgba(214, 176, 106, 0.3);
       border-radius: 999px;
       text-decoration: none;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.8);
-      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+      transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease;
     }
 
-    .hub-link .mark {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: #f5b841;
-      display: grid;
-      place-items: center;
-    }
-    .hub-link .mark svg { width: 12px; height: 12px; }
+    .hub-link svg { width: 10px; height: 10px; color: #d6b06a; }
 
     .hub-link:hover,
     .hub-link:focus-visible {
-      border-color: rgba(245, 184, 65, 0.6);
-      background: rgba(11, 10, 16, 0.88);
+      color: #ecd3a0;
+      border-color: rgba(214, 176, 106, 0.7);
+      background: rgba(12, 11, 10, 0.9);
       outline: none;
     }
-    .hub-link:active { transform: scale(0.97); }
   </style>
 </head>
 <body>
-  <a class="hub-link" href="/" aria-label="Back to platformvv hub"><span class="mark" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="#0b0a10" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg></span>Hub</a>
+  <a class="hub-link" href="/" aria-label="Back to platformvv hub"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 1.5L3 5l3.5 3.5"/></svg>Hub</a>
   <iframe src="Platform_WebClaude.html" allow="cross-origin-isolated; fullscreen; gamepad; autoplay"></iframe>
 </body>
 </html>
