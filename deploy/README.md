@@ -17,9 +17,10 @@ Artifacts for deploying AUCTION alongside PLATFORM on a single droplet.
 - `platform-wrapper/index.html` — iframes Godot's `Platform_WebClaude.html`
   and overlays a "Hub" link, so we can add navigation chrome without
   editing any Godot-exported files on disk
-- `deploy.sh` — one-command refresh: pulls `main`, copies the static
-  files into `/var/www/vv/`, and restarts `auction.service`. See
-  [Updating the droplet](#updating-the-droplet) below.
+- `deploy.sh` — pulls `main`, installs the hub and wrapper into
+  `/var/www/vv/`, and restarts `auction.service`; safe to run on a timer.
+- `auction-autodeploy.service` / `.timer` — run `deploy.sh` every two
+  minutes. See [Auto-deploy](#auto-deploy) below.
 
 ## Layout on the droplet
 
@@ -47,21 +48,69 @@ Artifacts for deploying AUCTION alongside PLATFORM on a single droplet.
 
 All bind to `127.0.0.1` and are proxied through nginx on `:80`.
 
-## Updating the droplet
+## Auto-deploy
 
-After merging changes to `main`, SSH into the droplet and run:
+Once enabled, anything merged to `main` is live within about two
+minutes, without anyone touching the droplet — the same setup as
+Level 0.
+
+A systemd timer runs `deploy/deploy.sh` every two minutes and the
+script decides whether there's anything to do:
+
+- **No new commits** — exits immediately, no restart.
+- **A game is in progress** — defers and tries again next tick. Rooms
+  live in memory, so a restart mid-game would end it. After 45 minutes
+  of waiting it deploys anyway. "In progress" comes from
+  `GET /api/status` on the local port, which reports counts only.
+- **`package-lock.json` changed** — reinstalls dependencies first.
+- **The checkout isn't on `main`** — switches it to `main` (the clone
+  may have been made from GitHub's old default branch).
+
+`GET /auction/api/status` also reports the commit that's running, so
+"is it live yet?" can be answered from a phone browser.
+
+### Enabling it
+
+From the DigitalOcean web console (**Droplets → your droplet →
+Access → Launch Droplet Console**):
 
 ```bash
 cd /opt/auction
-./deploy/deploy.sh
+sudo git fetch origin && sudo git checkout main && sudo git pull --ff-only origin main
+sudo cp deploy/auction-autodeploy.* /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo /opt/auction/deploy/deploy.sh --force      # deploy what's on main now
+sudo systemctl enable --now auction-autodeploy.timer
 ```
 
-That fast-forwards `/opt/auction` to the latest `main`, copies
-`deploy/hub/index.html` → `/var/www/vv/index.html`,
-`deploy/platform-wrapper/index.html` → `/var/www/vv/platform/index.html`,
-and restarts `auction.service`. Nginx static files are served straight
-from disk so no nginx reload is needed for the hub/wrapper updates.
+Check it:
+
+```bash
+systemctl list-timers auction-autodeploy   # next run time
+sudo systemctl start auction-autodeploy    # force a check right now
+journalctl -u auction-autodeploy -n 30     # what it did
+```
+
+Turn it off with `sudo systemctl disable --now auction-autodeploy.timer`;
+deploys go back to being manual with the same script.
+
+## Updating by hand
+
+Always available, whether or not the timer is enabled:
+
+```bash
+sudo /opt/auction/deploy/deploy.sh          # deploy if main has moved
+sudo /opt/auction/deploy/deploy.sh --force  # deploy even if it hasn't
+```
+
+It fast-forwards `/opt/auction` to the latest `main`, reinstalls
+dependencies only if `package-lock.json` changed, installs the hub and Platform wrapper into `/var/www/vv/`, restarts
+`auction.service`, and verifies the service came back up.
+
+Nginx serves the hub and wrapper straight from disk, so no nginx
+reload is needed. If Cloudflare caches the root page, purge `/` after a
+hub change.
 
 The script does **not** install the nginx config (`nginx-vv.conf`) or
-the systemd unit (`auction.service`) — those rarely change and require
-their own reload sequences. Update them by hand when needed.
+the systemd units — those rarely change and need their own reload
+sequences. Update them by hand when needed.
